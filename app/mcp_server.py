@@ -11,6 +11,9 @@ Transports
   stdio            for a local MCP client (e.g. Claude Desktop) launched on the shop
                    PC itself. No network listener and no token.
 
+With TPRINT_REMOTE_ADMIN=1 the same HTTP listener also serves the full shop
+admin on every path except /mcp, for https://print.tfix.in (public_server.py).
+
 Every print, from Claude or from the dashboard, goes through the same durable
 print gate (print_service.submit) as the Android/web admin and auto-print.
 """
@@ -46,6 +49,16 @@ def printing_enabled() -> bool:
     return os.environ.get('TPRINT_MCP_ALLOW_PRINT', '0') == '1'
 
 
+def remote_admin_enabled() -> bool:
+    return os.environ.get('TPRINT_REMOTE_ADMIN', '0') == '1'
+
+
+def admin_url() -> str | None:
+    """https://print.tfix.in/ when the online admin is published, else None."""
+    host = os.environ.get('TPRINT_MCP_PUBLIC_HOST', '').strip()
+    return f'https://{host}/' if host and remote_admin_enabled() else None
+
+
 def summary(job: dict) -> dict:
     return {key: job.get(key) for key in JOB_FIELDS}
 
@@ -74,6 +87,7 @@ def dashboard_snapshot(status: str = 'queued', limit: int = 50) -> dict[str, Any
         'status_filter': status,
         'generated_at': datetime.now().isoformat(timespec='seconds'),
         'printing_enabled': printing_enabled(),
+        'admin_url': admin_url(),
         'counts': counts,
         'jobs': [summary(j) for j in jobs[:limit]],
         'total_matching': len(jobs),
@@ -189,13 +203,16 @@ def print_paid_job(job_id: int, printer_name: str, confirm: bool = False) -> dic
 
 # ---------------------------------------------------------------- HTTP transport
 class BearerGuard:
-    """Reject every HTTP request that does not carry the exact bearer token."""
+    """Reject every request that does not carry the exact bearer token."""
 
     def __init__(self, app, token: str):
         self.app = app
         self.expected = 'Bearer ' + token
 
     async def __call__(self, scope, receive, send):
+        if scope['type'] == 'websocket':
+            await send({'type': 'websocket.close', 'code': 1008})
+            return
         if scope['type'] == 'http':
             headers = dict(scope['headers'])
             provided = headers.get(b'authorization', b'').decode('latin1')
@@ -205,7 +222,12 @@ class BearerGuard:
         await self.app(scope, receive, send)
 
 
-def create_http_app(token: str, public_host: str = ''):
+def create_http_app(token: str, public_host: str = '', remote_admin: bool = False):
+    """The whole 127.0.0.1:8765 listener: /mcp for Claude, plus the online shop
+    admin on every other path when remote_admin is on (see public_server.py)."""
+    from contextlib import asynccontextmanager
+    from .public_server import HostOriginGuard, PublicApp
+
     if len(token) < 32:
         raise RuntimeError('Set TPRINT_MCP_TOKEN to a random secret of at least 32 characters.')
     hosts = ['127.0.0.1', 'localhost', '127.0.0.1:*', 'localhost:*']
@@ -219,7 +241,25 @@ def create_http_app(token: str, public_host: str = ''):
         allowed_origins=['https://' + public_host] if public_host else [])
     starlette_app = mcp.streamable_http_app(stateless_http=True, json_response=True,
                                             transport_security=security)
-    return BearerGuard(starlette_app, token)
+    session_manager = mcp.session_manager
+    admin_app = None
+    if remote_admin:
+        from . import job_watch
+        from .public_server import build_admin_app
+        admin_app = HostOriginGuard(build_admin_app(), public_host)
+
+    @asynccontextmanager
+    async def lifespan():
+        async with session_manager.run():
+            if remote_admin:
+                job_watch.start_job_watch()
+            try:
+                yield
+            finally:
+                if remote_admin:
+                    job_watch.stop_job_watch()
+
+    return PublicApp(BearerGuard(starlette_app, token), admin_app, lifespan)
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -238,8 +278,14 @@ def main(argv: list[str] | None = None) -> None:
 
     import uvicorn
     app = create_http_app(os.environ.get('TPRINT_MCP_TOKEN', ''),
-                          os.environ.get('TPRINT_MCP_PUBLIC_HOST', ''))
-    uvicorn.run(app, host='127.0.0.1', port=args.port)
+                          os.environ.get('TPRINT_MCP_PUBLIC_HOST', ''),
+                          remote_admin=remote_admin_enabled())
+    if remote_admin_enabled():
+        print(f"[tprint] Online admin enabled at {admin_url() or 'http://127.0.0.1:%d/' % args.port}")
+    # cloudflared connects from 127.0.0.1: trust its X-Forwarded-For so the
+    # admin login rate limit sees each visitor's real address.
+    uvicorn.run(app, host='127.0.0.1', port=args.port, proxy_headers=True,
+                forwarded_allow_ips='127.0.0.1')
 
 
 if __name__ == '__main__':

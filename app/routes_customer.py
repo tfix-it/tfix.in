@@ -1,4 +1,5 @@
 from . import print_service
+from .print_service import maybe_auto_print  # noqa: F401  (moved; re-exported for callers)
 """
 Customer-facing API: upload a file, get a live quote, submit it as a print
 job, and track it afterwards. Nothing in this file requires a login —
@@ -186,37 +187,6 @@ async def create_job(
         await hub.broadcast_job(job)
 
     return job
-
-
-def maybe_auto_print(job: dict) -> dict:
-    """If the shop's auto-print rule matches this job, send it straight to
-    the configured printer and mark it as printing. Never raises — a failed
-    auto-print just leaves the job queued for the admin to print manually."""
-    if not job.get('paid') or job.get('status') != 'queued':
-        return job
-    settings = db.get_auto_print_settings()
-    if not settings or not settings["enabled"] or not settings["printer_name"]:
-        return job
-
-    if settings["bw_only"] and job["color"]:
-        return job
-    if settings["max_sheets"] is not None and job["sheets"] > settings["max_sheets"]:
-        return job
-    if settings["max_copies"] is not None and job["copies"] > settings["max_copies"]:
-        return job
-
-    printer_name = settings["printer_name"]
-    printer_row = next(
-        (p for p in db.list_printers() if p["windows_printer_name"] == printer_name),
-        None,
-    )
-    if not printer_row or not printer_row["enabled"]:
-        return job  # configured printer is missing/disabled — leave queued
-
-    try:
-        return print_service.submit(job['id'], printer_name, actor='auto', auto=True)
-    except print_service.PrintBlocked:
-        return db.get_job(job['id'])
 
 
 @router.get("/api/jobs/{job_id}")

@@ -155,3 +155,114 @@ def test_mcp_print_confirmation_and_duplicate(monkeypatch):
 def test_migration_repeat_preserves_data():
     i=job();db.init_db();service.initialize();service.initialize()
     assert db.get_job(i)['cost']==2
+
+
+# ---------------------------------------------------------------- print.tfix.in online admin
+@pytest.fixture
+def online(monkeypatch):
+    from starlette.testclient import TestClient
+    from app import security
+    from app.mcp_server import create_http_app
+    security._login_attempt_buckets.clear()
+    app = create_http_app(TOKEN, 'print.tfix.in', remote_admin=True)
+    with TestClient(app, base_url='https://print.tfix.in') as client:
+        yield client
+
+
+def login(client):
+    r = client.post('/api/admin/login', data={'username': config.ADMIN_USERNAME, 'password': 'test-password'})
+    assert r.status_code == 200, r.text
+
+
+def test_online_admin_off_by_default():
+    with mcp_client() as client:
+        assert client.get('/').status_code == 401
+        assert client.get('/api/admin/jobs').status_code == 401
+
+
+def test_online_admin_publishes_admin_only(online):
+    page = online.get('/')
+    assert page.status_code == 200 and '/api/admin/login' in page.text
+    assert page.headers['cache-control'] == 'no-store'
+    for path in ('/docs', '/openapi.json', '/api/upload', '/api/quote', '/api/jobs/1', '/customer'):
+        assert online.get(path).status_code in (404, 405), path
+    assert online.post('/api/upload').status_code in (404, 405)
+    assert online.get('/api/admin/jobs').status_code == 401
+    assert online.post('/mcp', json=INIT).status_code == 401
+    r = online.post('/mcp', json=INIT, headers={'Authorization': 'Bearer ' + TOKEN,
+                                                'Accept': 'application/json, text/event-stream'})
+    assert r.status_code == 200, r.text
+
+
+def test_online_admin_host_and_origin_checks(online):
+    assert online.get('/', headers={'Host': 'evil.example'}).status_code == 400
+    login(online)
+    i = job(0)
+    bad = online.post(f'/api/admin/jobs/{i}/paid', data={'paid': 'true'},
+                      headers={'Origin': 'https://evil.example'})
+    assert bad.status_code == 403 and db.get_job(i)['paid'] == 0
+    ok = online.post(f'/api/admin/jobs/{i}/paid', data={'paid': 'true'},
+                     headers={'Origin': 'https://print.tfix.in'})
+    assert ok.status_code == 200 and db.get_job(i)['paid'] == 1
+    with db.get_conn() as c:
+        assert c.execute('SELECT actor FROM payment_audit WHERE job_id=?', (i,)).fetchone()[0] == 'staff_manual'
+
+
+def test_online_admin_full_management(online):
+    login(online)
+    i = job(0)
+    assert any(j['id'] == i for j in online.get('/api/admin/jobs').json())
+    assert online.post(f'/api/admin/jobs/{i}/print', data={'printer_name': 'Test'}).status_code == 409
+    online.post(f'/api/admin/jobs/{i}/paid', data={'paid': 'true'})
+    r = online.post(f'/api/admin/jobs/{i}/print', data={'printer_name': 'Test'})
+    assert r.status_code == 200 and r.json()['status'] == 'printing'
+    assert printing.print_pdf.call_count == 1
+    r = online.post('/api/admin/pricing', data={'paper_size': 'A4', 'color': 0, 'singleside_cost': 3,
+                                                 'doubleside_cost': 4, 'min_cost': 10})
+    assert r.status_code == 200, r.text
+    assert any(p['singleside_cost'] == 3 for p in online.get('/api/admin/pricing').json())
+
+
+def test_online_admin_file_downloads(online):
+    assert online.get('/uploads/file.pdf').status_code == 401
+    login(online)
+    r = online.get('/uploads/file.pdf')
+    assert r.status_code == 200 and r.content == b'%PDF-test'
+    assert r.headers['content-type'] == 'application/pdf' and r.headers['x-content-type-options'] == 'nosniff'
+    for sneaky in ('..%2Ftest.db', '%2e%2e%2Ftest.db', '..%5Ctest.db', 'missing.pdf'):
+        assert online.get('/uploads/' + sneaky).status_code == 404, sneaky
+
+
+WS_URL = 'wss://print.tfix.in/ws/admin'
+
+
+def test_online_admin_websocket_requires_session(online):
+    from starlette.websockets import WebSocketDisconnect
+    with pytest.raises(WebSocketDisconnect):
+        with online.websocket_connect(WS_URL) as ws:
+            ws.receive_text()
+    login(online)
+    with pytest.raises(WebSocketDisconnect):
+        with online.websocket_connect(WS_URL, headers={'Origin': 'https://evil.example'}) as ws:
+            ws.receive_text()
+    with online.websocket_connect(WS_URL, headers={'Origin': 'https://print.tfix.in'}):
+        pass
+
+
+def test_job_watch_sees_other_process_changes():
+    from app import job_watch
+    cursor = db.now()
+    i = job(0)
+    assert [j['id'] for j in job_watch.changed_since(cursor)] == [i]
+    cursor = db.get_job(i)['updated_at']
+    assert job_watch.changed_since(cursor) == []
+    service.confirm_payment(i, True)
+    assert [j['id'] for j in job_watch.changed_since(cursor)] == [i]
+
+
+def test_dashboard_admin_link(monkeypatch):
+    from app.mcp_server import dashboard_snapshot
+    assert dashboard_snapshot()['admin_url'] is None
+    monkeypatch.setenv('TPRINT_MCP_PUBLIC_HOST', 'print.tfix.in')
+    monkeypatch.setenv('TPRINT_REMOTE_ADMIN', '1')
+    assert dashboard_snapshot()['admin_url'] == 'https://print.tfix.in/'

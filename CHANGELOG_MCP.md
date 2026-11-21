@@ -1,5 +1,21 @@
 # Changes
 
+## 2.1.0 — Full shop admin online at print.tfix.in
+- app/public_server.py: the connector listener (127.0.0.1:8765) also serves the existing admin page and
+  admin API (routes_admin.py) on every path except /mcp, when TPRINT_REMOTE_ADMIN=1. It adds session-guarded
+  job-file downloads (/uploads/<name>), a Host allow-list, an Origin check on state-changing requests and
+  WebSocket handshakes, and no API docs. The customer site and API are never published.
+- deploy/cloudflared-config.yml: named-tunnel ingress for print.tfix.in. /mcp uses the bearer token; everything
+  else requires a Cloudflare Access login, which cloudflared itself enforces (originRequest.access.required).
+- app/job_watch.py: each process (LAN server, connector) polls the jobs table for changes and broadcasts them,
+  so the LAN admin, the online admin and customer status pages update each other live.
+- uvicorn trusts X-Forwarded-For from cloudflared on 127.0.0.1, so the admin login rate limit is per visitor.
+- maybe_auto_print moved to print_service (re-exported from routes_customer) so the online admin does not load
+  the upload/conversion stack.
+- Claude dashboard: "Full admin" button opens https://print.tfix.in when the online admin is enabled.
+- requirements-mcp.txt: + fastapi 0.165.0, uvicorn 0.54.0, websockets 17.4 (without websockets the live admin
+  updates silently fail to connect).
+
 ## 2.0.0 — TPrint as an MCP App
 - app/mcp_server.py: ported from FastMCP (SDK 1.26) to `mcp.server.mcpserver.MCPServer` (SDK 2.3.0) with the
   MCP Apps extension (`mcp.server.apps.Apps`).

@@ -95,8 +95,7 @@ async def admin_mark_paid(job_id: int, paid: bool = Form(True)):
     except print_service.PrintBlocked as exc:
         raise HTTPException(status_code=409, detail=str(exc))
     if paid:
-        from .routes_customer import maybe_auto_print
-        job = maybe_auto_print(job)
+        job = print_service.maybe_auto_print(job)
     await hub.broadcast_job(job)
     return job
 

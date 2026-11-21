@@ -1,0 +1,31 @@
+# cloudflared config for https://print.tfix.in  (START_HERE.md, section 3)
+# Copy to C:\Users\<you>\.cloudflared\config.yml and replace every <...>.
+#
+# Rule order matters: cloudflared uses the FIRST rule that matches.
+#   1. /mcp      -> Claude's connector. No Cloudflare Access (Claude can't do the
+#                   email login); protected by the TPRINT_MCP_TOKEN bearer token.
+#   2. the rest  -> the online shop admin. cloudflared itself refuses any request
+#                   without a valid Cloudflare Access login for YOUR Access app,
+#                   so the admin is never reachable around Access.
+#   3. anything else (other hostnames) -> 404.
+# Only 127.0.0.1:8765 is published. Never point a rule at the shop server's
+# port 443/8000: that would expose the customer upload site and its files.
+
+tunnel: <TUNNEL-ID>
+credentials-file: C:\Users\<you>\.cloudflared\<TUNNEL-ID>.json
+
+ingress:
+  - hostname: print.tfix.in
+    path: ^/mcp/?$
+    service: http://127.0.0.1:8765
+
+  - hostname: print.tfix.in
+    service: http://127.0.0.1:8765
+    originRequest:
+      access:
+        required: true
+        teamName: <your-team-name>          # from <your-team-name>.cloudflareaccess.com
+        audTag:
+          - <Application Audience (AUD) tag of the "TPrint admin" Access application>
+
+  - service: http_status:404

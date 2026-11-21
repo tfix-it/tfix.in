@@ -1,4 +1,4 @@
-12 tests passed (Linux, Python 3.13, mcp 2.3.0, mocked Windows printer): `python -m pytest`.
+20 tests passed (Linux, Python 3.13, mcp 2.3.0, mocked Windows printer): `python -m pytest`.
 MCP App: tools/list exposes _meta.ui.resourceUri; resources/read serves ui://tprint/dashboard.html as text/html;profile=mcp-app.
 Dashboard driven in headless Chromium through the official host bridge (@modelcontextprotocol/ext-apps 2.0.4 AppBridge)
 against a live HTTP connector: ui/initialize handshake, tool-input/tool-result, size-changed, light/dark theming,
@@ -6,4 +6,9 @@ refresh and tab switching via tools/call, Print > Confirm (print_paid_job), ui/u
 refused with the gate's reason, no console errors, no horizontal overflow at 390px.
 stdio transport: initialize, tools/list, tools/call and resources/read via the SDK stdio client.
 requirements-mcp.txt resolves for win_amd64 on Python 3.11 and 3.12.
-Live Claude connection and physical Windows printing remain to be tested on the shop PC.
+Online admin (print.tfix.in mode) in Chromium against a live listener: login through the real admin page
+(Secure/HttpOnly/SameSite=Lax cookie), a job written by a separate process appeared live in ~2.3 s, Mark paid
+(auto-print fired), session-only PDF download (200 with session, 401 without), customer API and /docs not
+published (404), foreign Host refused (400), cross-site Origin refused (403, tests).
+LAN server starts and stops cleanly with the job watcher.
+Live Claude connection, Cloudflare tunnel/Access and physical Windows printing remain to be tested on the shop PC.

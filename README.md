@@ -1,7 +1,8 @@
 # Shop Print Server
 
-> **Claude connector:** TPrint ships an MCP App: an interactive print-queue dashboard
-> inside Claude. Setup is in [START_HERE.md](START_HERE.md).
+> **Claude connector and online admin:** TPrint ships an MCP App (an interactive print-queue
+> dashboard inside Claude) and can publish the full shop admin at https://print.tfix.in
+> behind Cloudflare Access. Setup is in [START_HERE.md](START_HERE.md).
 
 A local-network web app for a print shop: customers upload files from their
 phone/laptop over WiFi, configure how they want them printed, and get a
@@ -137,6 +138,10 @@ app/
   main.py         — FastAPI app: customer + admin APIs, WebSocket hub, cleanup loop
   mcp_server.py   — Claude connector: MCP App (in-chat dashboard) + tools, see START_HERE.md
   mcp_ui/dashboard.html — the dashboard UI served to Claude as ui://tprint/dashboard.html
+  public_server.py — online admin at print.tfix.in (same admin page/API, guarded)
+  job_watch.py    — live updates across the LAN server and the connector process
+deploy/
+  cloudflared-config.yml — tunnel + Cloudflare Access ingress for print.tfix.in
 static/
   customer/index.html — mobile-first upload/quote/preview/status page
   admin/index.html     — login, live job queue, printer status, auto-print,

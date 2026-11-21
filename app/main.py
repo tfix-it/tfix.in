@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from . import cleanup, config, db, mdns_service, printing, routes_admin, routes_customer
+from . import cleanup, config, db, job_watch, mdns_service, printing, routes_admin, routes_customer
 from .security import HSTSMiddleware, start_http_redirect_server, stop_http_redirect_server
 
 app = FastAPI(title="Shop Print Server")
@@ -48,6 +48,8 @@ def on_startup():
         print(f"[printers] Could not enumerate Windows printers: {e}")
 
     cleanup.start_cleanup_loop()
+    # Live updates for changes made by the separate Claude/print.tfix.in process.
+    job_watch.start_job_watch()
 
 
 @app.on_event("shutdown")
@@ -55,6 +57,7 @@ def on_shutdown():
     mdns_service.stop_mdns()
     stop_http_redirect_server()
     cleanup.stop_cleanup_loop()
+    job_watch.stop_job_watch()
 
 
 # ================= STATIC FRONTENDS =================

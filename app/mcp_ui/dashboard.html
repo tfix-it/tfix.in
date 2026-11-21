@@ -187,6 +187,10 @@
     <h1>TPrint queue</h1>
     <div class="sub" id="updated">Connecting…</div>
   </div>
+  <button class="btn ghost" id="openAdmin" type="button" hidden>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M11 9.5V13H3V5h3.5"/></svg>
+    Full admin
+  </button>
   <button class="btn" id="refresh" type="button" aria-label="Refresh">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>
     Refresh
@@ -353,6 +357,17 @@
     }
   }
 
+  async function openAdmin() {
+    const url = state.snap && state.snap.admin_url;
+    if (!url) return;
+    try {
+      const res = await request('ui/open-link', { url });
+      if (res && res.isError) throw new Error('blocked');
+    } catch (err) {
+      toast('Open ' + url + ' in your browser to manage payments, prices and settings.');
+    }
+  }
+
   function tellModel(text) {
     if (!state.hostCaps.updateModelContext) return;
     request('ui/update-model-context', { content: [{ type: 'text', text }] }).catch(() => {});
@@ -498,6 +513,9 @@
       '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner sets TPRINT_MCP_ALLOW_PRINT=1 on the shop PC and restarts the connector.</div>';
     const when = new Date(s.generated_at);
     $('updated').textContent = 'Updated ' + (Number.isNaN(when.getTime()) ? s.generated_at : when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }));
+    const admin = $('openAdmin');
+    admin.hidden = !s.admin_url;
+    admin.title = s.admin_url ? 'Mark payments, change prices and settings at ' + s.admin_url : '';
     renderStats(s); renderTabs(); renderJobs(); renderPrinters(s); renderPricing(s);
   }
 
@@ -506,6 +524,7 @@
     const el = e.target.closest('button');
     if (!el) return;
     if (el.id === 'refresh') return void refresh();
+    if (el.id === 'openAdmin') return void openAdmin();
     if (el.dataset.tab) return void (el.dataset.tab !== state.status && refresh(el.dataset.tab));
     if (el.dataset.print) { state.confirming = Number(el.dataset.print); renderJobs(); const p = $('printerPick'); if (p) p.focus(); return; }
     if (el.dataset.cancel !== undefined) { state.confirming = null; renderJobs(); return; }

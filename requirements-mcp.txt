@@ -1,4 +1,9 @@
 # Install in a SEPARATE venv (venv-mcp); the original web server pins an older Starlette.
 # mcp 2.x provides mcp.server.mcpserver.MCPServer and the MCP Apps extension (mcp.server.apps).
 mcp==2.3.0
+# The online admin at print.tfix.in reuses the shop's FastAPI admin routes;
+# websockets is needed for its live job updates.
+fastapi==0.165.0
+uvicorn==0.54.0
+websockets==17.4
 pywin32==311; sys_platform == 'win32'
