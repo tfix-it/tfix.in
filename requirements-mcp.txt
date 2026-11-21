@@ -1,0 +1,4 @@
+# Install in a SEPARATE venv (venv-mcp); the original web server pins an older Starlette.
+# mcp 2.x provides mcp.server.mcpserver.MCPServer and the MCP Apps extension (mcp.server.apps).
+mcp==2.3.0
+pywin32==311; sys_platform == 'win32'

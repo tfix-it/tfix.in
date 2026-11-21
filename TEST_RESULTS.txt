@@ -1,0 +1,9 @@
+12 tests passed (Linux, Python 3.13, mcp 2.3.0, mocked Windows printer): `python -m pytest`.
+MCP App: tools/list exposes _meta.ui.resourceUri; resources/read serves ui://tprint/dashboard.html as text/html;profile=mcp-app.
+Dashboard driven in headless Chromium through the official host bridge (@modelcontextprotocol/ext-apps 2.0.4 AppBridge)
+against a live HTTP connector: ui/initialize handshake, tool-input/tool-result, size-changed, light/dark theming,
+refresh and tab switching via tools/call, Print > Confirm (print_paid_job), ui/update-model-context, repeat print
+refused with the gate's reason, no console errors, no horizontal overflow at 390px.
+stdio transport: initialize, tools/list, tools/call and resources/read via the SDK stdio client.
+requirements-mcp.txt resolves for win_amd64 on Python 3.11 and 3.12.
+Live Claude connection and physical Windows printing remain to be tested on the shop PC.

@@ -1,0 +1,13 @@
+# Local runtime data: never commit customer files, the database or TLS keys.
+printshop.db
+printshop.db-*
+uploads/
+cert.pem
+key.pem
+# Python
+venv/
+venv-mcp/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

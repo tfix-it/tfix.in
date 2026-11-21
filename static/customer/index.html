@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Send a print job</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F6F2;
+    --paper-edge:#E4E6DE;
+    --ink:#1B1B17;
+    --ink-soft:#5B5C54;
+    --blue:#2B5FAD;
+    --blue-dark:#1F477F;
+    --stamp:#B23A2E;
+    --ok:#2E7D4F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper-edge);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:0 0 40px;
+  }
+  .ticket{
+    width:100%;
+    max-width:480px;
+    background:var(--paper);
+    min-height:100vh;
+    box-shadow:0 0 0 1px var(--paper-edge);
+    position:relative;
+  }
+  header{
+    padding:28px 24px 20px;
+    border-bottom:2px dashed #C9CBC0;
+  }
+  header .shop{
+    font-size:13px;
+    letter-spacing:.02em;
+    color:var(--ink-soft);
+    margin:0 0 4px;
+  }
+  header h1{
+    font-size:26px;
+    line-height:1.15;
+    margin:0;
+    font-weight:700;
+  }
+  .section{
+    padding:22px 24px;
+    border-bottom:2px dashed #C9CBC0;
+  }
+  .section:last-child{border-bottom:none;}
+  .hidden{ display:none !important; }
+  .section.hidden{display:none;}
+  .label{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+    font-weight:500;
+  }
+  /* --- upload --- */
+  .dropzone{
+    border:2px solid var(--ink);
+    border-radius:2px;
+    padding:28px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .dropzone:active{background:#ECEEE7;}
+  .dropzone .big{
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .dropzone .small{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  input[type=file]{display:none;}
+  .file-chip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    background:#EFF1EA;
+    border-radius:2px;
+    font-size:14px;
+  }
+  .file-chip button{
+    background:none;
+    border:none;
+    color:var(--stamp);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    padding:4px;
+  }
+  .file-meta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  /* --- options --- */
+  .opt-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .toggle{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 14px;
+    border:1.5px solid #D7D9CF;
+    border-radius:2px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    user-select:none;
+  }
+  .toggle input{ accent-color:var(--blue); width:18px; height:18px; }
+  select, input[type=number], input[type=tel]{
+    width:100%;
+    padding:12px 12px;
+    border:1.5px solid #D7D9CF;
+    border-radius:2px;
+    font-size:15px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field{margin-bottom:12px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    font-weight:500;
+  }
+  .sub-input{ margin-top:8px; }
+  .sub-input input[type=number], .sub-input input[type=text]{
+    width:100%;
+  }
+  .field-error{
+    font-size:12px;
+    color:var(--stamp);
+    margin-top:6px;
+    display:none;
+  }
+  /* --- orientation segmented control --- */
+  .segmented{
+    display:grid;
+    grid-template-columns:repeat(var(--seg-count, 2), 1fr);
+    border:1.5px solid #D7D9CF;
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .segmented.seg-2x2{
+    grid-template-columns:1fr 1fr;
+  }
+  .segmented button{
+    padding:12px;
+    border:none;
+    background:#fff;
+    color:var(--ink);
+    font-size:14px;
+    font-weight:500;
+    font-family:inherit;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .segmented button + button{ border-left:1.5px solid #D7D9CF; }
+  .segmented.seg-2x2 button:nth-child(odd){ border-left:none; }
+  .segmented.seg-2x2 button:nth-child(n+3){ border-top:1.5px solid #D7D9CF; }
+  .segmented button.active{ background:var(--blue); color:#fff; font-weight:700; }
+  .orient-icon{
+    display:inline-block;
+    width:14px;
+    height:18px;
+    border:2px solid currentColor;
+    border-radius:1px;
+  }
+  .segmented button[data-orientation="landscape"] .orient-icon{
+    width:18px;
+    height:14px;
+  }
+  /* --- confirm modal --- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(27,27,23,.55);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .modal-overlay.hidden{ display:none; }
+  .modal-box{
+    width:100%;
+    max-width:480px;
+    background:var(--paper);
+    border-radius:12px 12px 0 0;
+    padding:24px 24px 28px;
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .modal-box h2{
+    font-size:18px;
+    margin:0 0 16px;
+  }
+  .modal-row{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 0;
+    border-bottom:1px solid #E4E6DE;
+    font-size:14px;
+  }
+  .modal-row span:first-child{ color:var(--ink-soft); }
+  .modal-row span:last-child{ font-weight:600; text-align:right; }
+  .modal-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:2px solid var(--ink);
+  }
+  .modal-total .amount{
+    font-family:'JetBrains Mono',monospace;
+    font-size:26px;
+    font-weight:700;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .modal-actions .btn{ margin:0; }
+  .btn-secondary{
+    background:#fff;
+    color:var(--ink);
+    border:1.5px solid var(--ink);
+  }
+  /* --- preview --- */
+  .preview-wrap{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+  }
+  .sheet-group{
+    display:flex;
+    gap:14px;
+  }
+  .sheet{
+    flex:0 0 auto;
+    width:150px;
+  }
+  .preview-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin-top:12px;
+  }
+  .preview-nav button{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1.5px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .preview-nav button:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+  .preview-nav .preview-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    min-width:64px;
+    text-align:center;
+  }
+  .sheet-label{
+    font-size:11px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    margin:0 0 6px;
+    text-align:center;
+  }
+  .sheet-face{
+    background:#fff;
+    border:1px solid #D7D9CF;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+    aspect-ratio:210/297;
+    display:grid;
+    gap:1px;
+    padding:2px;
+    overflow:hidden;
+  }
+  .sheet-face.a3{ aspect-ratio:297/420; }
+  .sheet-face.landscape{ aspect-ratio:297/210; }
+  .sheet-face.a3.landscape{ aspect-ratio:420/297; }
+  .sheet-group .sheet:has(.sheet-face.landscape){ width:190px; }
+  .preview-cell{
+    position:relative;
+    overflow:hidden;
+    background:#fdfdfb;
+  }
+  .sheet-face canvas{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#fdfdfb;
+    display:block;
+  }
+  .sheet-face.bw canvas{ filter:grayscale(1); }
+  .preview-empty-cell{ background:#F1F2ED; }
+  .preview-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  .preview-loading{
+    font-size:13px;
+    color:var(--ink-soft);
+    padding:10px 0;
+  }
+  /* --- price --- */
+  .price-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:6px 0;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .price-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-top:10px;
+    padding-top:14px;
+    border-top:2px solid var(--ink);
+  }
+  .price-total .amount{
+    font-family:'JetBrains Mono',monospace;
+    font-size:30px;
+    font-weight:700;
+  }
+  /* --- buttons --- */
+  .btn{
+    display:block;
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:2px;
+    font-size:16px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{ background:var(--blue); color:#fff; }
+  .btn-primary:active{ background:var(--blue-dark); }
+  .btn-primary:disabled{ background:#B7C2D6; cursor:not-allowed; }
+  .helper{ font-size:12px; color:var(--ink-soft); margin-top:8px; text-align:center; }
+  /* --- status screen --- */
+  .status-wrap{ padding:40px 24px; text-align:center; }
+  .job-code{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(24px, 8vw, 40px);
+    font-weight:700;
+    letter-spacing:.01em;
+    margin:8px 0 4px;
+    word-break:break-all;
+  }
+  .status-pill{
+    display:inline-block;
+    padding:8px 18px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:600;
+    margin:18px 0 28px;
+  }
+  .status-queued{ background:#EFE3D0; color:#8A5A16; }
+  .status-printing{ background:#DCE7F7; color:var(--blue-dark); }
+  .status-ready{ background:#DCF0E1; color:var(--ok); }
+  .status-collected{ background:#E7E7E2; color:var(--ink-soft); }
+  .status-detail{ font-size:14px; color:var(--ink-soft); line-height:1.6; }
+  .job-card-top .status-pill{ margin:0; padding:5px 12px; font-size:12px; flex-shrink:0; }
+  .error{
+    background:#FBE7E4;
+    color:#8A2A1D;
+    padding:12px 14px;
+    border-radius:2px;
+    font-size:13px;
+    margin-top:12px;
+    display:none;
+  }
+  .spinner{
+    width:16px;height:16px;
+    border:2px solid #fff;
+    border-top-color:transparent;
+    border-radius:50%;
+    display:inline-block;
+    animation:spin .7s linear infinite;
+    vertical-align:-3px;
+    margin-right:8px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* --- multi-file history (collapsed, already-configured files) --- */
+  #fileHistory.hidden{ display:none; }
+  .entry-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px 16px;
+    background:#EFF1EA;
+    border-radius:2px;
+    margin-bottom:10px;
+    border:1px solid #E1E3DE;
+  }
+  .entry-card:last-child{ margin-bottom:0; }
+  .entry-card-name{ font-weight:600; font-size:14px; margin-bottom:4px; word-break:break-word; }
+  .entry-card-opts{ font-size:12px; color:var(--ink-soft); line-height:1.4; }
+  .entry-card-side{ text-align:right; flex-shrink:0; }
+  .entry-card-cost{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; margin-bottom:6px; }
+  .entry-card-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .entry-edit{
+    background:none; border:none; color:var(--blue); font-size:12px; font-weight:600; cursor:pointer; padding:2px;
+  }
+  .entry-remove{
+    background:none; border:none; color:var(--stamp); font-size:12px; font-weight:600; cursor:pointer; padding:2px;
+  }
+  #addFileBtn{ margin-top:14px; }
+  #addFileBtn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  /* --- multi-job status screen --- */
+  .status-jobs-wrap{ display:grid; gap:12px; text-align:left; margin-top:10px; }
+  .job-card{ border:1px solid var(--paper-edge); border-radius:4px; padding:14px 16px; background:#fff; }
+  .job-card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:10px; }
+  .job-code-small{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; }
+  .job-card-file{ font-size:13px; color:var(--ink-soft); margin-bottom:4px; word-break:break-word; }
+  .job-card-detail{ font-size:12px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="ticket">
+  <header>
+    <p class="shop">TFIX CUSAT · PRINT SERVICE</p>
+    <h1>Self Service</h1>
+  </header>
+
+  <!-- FILES ALREADY ADDED (collapsed, read-only summaries) -->
+  <div class="section hidden" id="fileHistory">
+    <p class="label">Files added</p>
+    <div id="fileHistoryList"></div>
+  </div>
+
+  <!-- STEP 1: upload -->
+  <div class="section" id="step-upload">
+    <p class="label">1. Choose a file</p>
+    <div id="dropzone" class="dropzone">
+      <p class="big">Tap to upload</p>
+      <p class="small">PDF, JPG, PNG, DOCX or PPT/PPTX</p>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.docx,.pptx,.ppt">
+    <div id="fileChip" style="display:none; margin-top:10px;"></div>
+    <div class="error" id="uploadError"></div>
+  </div>
+
+  <!-- STEP 2: options -->
+  <div class="section hidden" id="step-options">
+    <p class="label">2. Print options</p>
+    <div class="opt-grid" style="margin-bottom:12px;">
+      <label class="toggle"><span>Color</span><input type="checkbox" id="optColor"></label>
+      <label class="toggle"><span>Print on both sides</span><input type="checkbox" id="optDouble"></label>
+    </div>
+    <div class="field hidden" id="fieldDuplexEdge">
+      <label>Flip on</label>
+      <div class="segmented" id="optDuplexEdge">
+        <button type="button" data-edge="long" class="active">Long edge</button>
+        <button type="button" data-edge="short">Short edge</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Orientation</label>
+      <div class="segmented" id="optOrientation">
+        <button type="button" data-orientation="portrait" class="active"><span class="orient-icon"></span>Portrait</button>
+        <button type="button" data-orientation="landscape"><span class="orient-icon"></span>Landscape</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="optPaper">Paper size</label>
+      <select id="optPaper">
+        <option value="A4">A4</option>
+        <option value="A3">A3</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="optPPS">Pages per sheet</label>
+      <select id="optPPS">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="4">4</option>
+        <option value="6">6</option>
+        <option value="9">9</option>
+        <option value="16">16</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="optCopies">Copies</label>
+      <input type="number" id="optCopies" value="1" min="1" max="99">
+    </div>
+    <div class="field">
+      <label>Scale</label>
+      <div class="segmented" id="optScale">
+        <button type="button" data-scale="fit" class="active">Fit to printable area</button>
+        <button type="button" data-scale="actual">Actual size</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Pages</label>
+      <div class="segmented seg-2x2" id="optPages" style="--seg-count:2;">
+        <button type="button" data-pages="all" class="active">All</button>
+        <button type="button" data-pages="odd">Odd pages</button>
+        <button type="button" data-pages="even">Even pages</button>
+        <button type="button" data-pages="custom">Custom</button>
+      </div>
+      <div class="sub-input hidden" id="fieldPagesCustom">
+        <input type="text" id="optPagesCustom" placeholder="e.g. 1-5, 8, 11-15">
+        <p class="field-error" id="pagesCustomError">Use page numbers/ranges within 1–<span id="pagesCustomMax">1</span>, e.g. 1-5, 8, 11-15.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2.5: preview -->
+  <div class="section hidden" id="step-preview">
+    <p class="label">Preview</p>
+    <div class="preview-loading hidden" id="previewLoading">Rendering preview…</div>
+    <div class="preview-wrap" id="previewWrap"></div>
+    <div class="preview-nav" id="previewNav">
+      <button id="previewPrev" aria-label="Previous sheet">&larr;</button>
+      <span class="preview-count" id="previewCount">Sheet 1 / 1</span>
+      <button id="previewNext" aria-label="Next sheet">&rarr;</button>
+    </div>
+    <p class="preview-note" id="previewNote"></p>
+  </div>
+
+  <!-- STEP 3: price -->
+  <div class="section hidden" id="step-price">
+    <p class="label">3. Price</p>
+    <div class="price-row"><span id="priceSheets">— sheets</span><span id="pricePages">— pages</span></div>
+    <div class="price-total">
+      <span>Total</span>
+      <span class="amount">₹<span id="priceAmount">0</span></span>
+    </div>
+    <p class="preview-note hidden" id="priceNote"></p>
+    <button type="button" class="btn btn-secondary" id="addFileBtn">+ Add another file</button>
+  </div>
+
+  <!-- Combined total across every file added so far -->
+  <div class="section hidden" id="step-grandtotal">
+    <p class="label">All files</p>
+    <div id="filesSummaryList"></div>
+    <div class="price-total">
+      <span>Grand total</span>
+      <span class="amount">₹<span id="grandTotalAmount">0</span></span>
+    </div>
+  </div>
+
+  <!-- STEP 4: phone + submit -->
+  <div class="section hidden" id="step-submit">
+    <p class="label">4. Your phone number</p>
+    <div class="field">
+      <input type="tel" id="phoneInput" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+    </div>
+    <button class="btn btn-primary" id="submitBtn" disabled>Send to print</button>
+    <p class="helper">Pay at the counter once your job is printed.</p>
+    <div class="error" id="submitError"></div>
+  </div>
+
+  <!-- STATUS screen (replaces everything above once job(s) are created) -->
+  <div class="status-wrap hidden" id="statusScreen">
+    <p class="label" style="text-align:center;" id="statusLabel">YOUR JOB</p>
+    <div id="statusJobsWrap" class="status-jobs-wrap"></div>
+    <p class="status-detail" style="margin-top:18px;">
+      We'll update this page automatically — no need to refresh.<br>
+      Pay at the counter — <strong id="statusAmount">₹0</strong>
+    </p>
+  </div>
+</div>
+
+<!-- CONFIRM SEND MODAL -->
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal-box">
+    <h2 id="cfTitle">Confirm your print job</h2>
+    <div id="cfRows"></div>
+    <div class="modal-row"><span>Phone</span><span id="cfPhone">—</span></div>
+    <div class="modal-total">
+      <span>Grand total</span>
+      <span class="amount">₹<span id="cfAmount">0</span></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cfCancel">Cancel</button>
+      <button class="btn btn-primary" id="cfConfirm">Confirm &amp; send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window['pdfjsLib']) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+const API = ""; // same-origin
+let uploadInfo = null;   // { pdf_filename, original_filename, file_type, pages } — the file currently being configured
+let quoteTimer = null;
+let pdfDoc = null;           // pdf.js document for the current upload
+let pageCanvasCache = {};    // page number -> rendered <canvas>
+let previewToken = 0;        // guards against overlapping renders
+let currentSheetIndex = 0;   // which physical sheet the preview is showing
+let orientation = 'portrait';
+let duplexEdge = 'long';
+let scaleMode = 'fit';          // 'fit' | 'actual'
+let pagesMode = 'all';          // 'all' | 'odd' | 'even' | 'custom'
+let pagesCustomStr = '';        // raw text for custom page ranges
+let currentQuote = { cost: 0, sheets: 0 }; // last /api/quote result for the active file
+
+// Files the customer has already configured and "added" — each one becomes
+// its own print job on submit (the backend is one-file-per-job). Collapsed
+// into summary cards above the active upload section.
+let entries = [];
+
+// After submit: the jobs actually created, kept live via websocket/polling.
+let statusJobs = [];
+let statusSockets = [];
+let statusPollingStarted = false;
+
+const el = id => document.getElementById(id);
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// n-up layouts: pages_per_sheet -> [cols, rows]
+const NUP_LAYOUT = { 1: [1, 1], 2: [2, 1], 4: [2, 2], 6: [3, 2], 9: [3, 3], 16: [4, 4] };
+
+// ---------- upload ----------
+el('dropzone').addEventListener('click', () => el('fileInput').click());
+el('fileInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  el('uploadError').style.display = 'none';
+  el('dropzone').querySelector('.big').textContent = 'Uploading…';
+
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Upload failed');
+    uploadInfo = await res.json();
+
+    el('dropzone').style.display = 'none';
+    const chip = el('fileChip');
+    chip.style.display = 'block';
+    chip.innerHTML = `
+      <div class="file-chip">
+        <div>
+          <div>${uploadInfo.original_filename}</div>
+          <div class="file-meta">${uploadInfo.pages} page${uploadInfo.pages > 1 ? 's' : ''} · ${uploadInfo.file_type.toUpperCase()}</div>
+        </div>
+        <button id="clearFile">Change</button>
+      </div>`;
+    el('clearFile').addEventListener('click', resetUpload);
+
+    el('step-options').classList.remove('hidden');
+    el('step-preview').classList.remove('hidden');
+    el('step-price').classList.remove('hidden');
+
+    currentSheetIndex = 0;
+    pagesMode = 'all';
+    pagesCustomStr = '';
+    el('optPages').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pages === 'all'));
+    el('fieldPagesCustom').classList.add('hidden');
+    el('optPagesCustom').value = '';
+    el('pagesCustomMax').textContent = uploadInfo.pages;
+    loadPdfForPreview();
+    updateQuote();
+  } catch (err) {
+    el('dropzone').querySelector('.big').textContent = 'Tap to upload';
+    el('uploadError').textContent = err.message;
+    el('uploadError').style.display = 'block';
+  }
+});
+
+function resetUpload() {
+  uploadInfo = null;
+  pdfDoc = null;
+  pageCanvasCache = {};
+  pageDimsCache = {};
+  currentSheetIndex = 0;
+  pagesMode = 'all';
+  pagesCustomStr = '';
+  el('optPages').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pages === 'all'));
+  el('fieldPagesCustom').classList.add('hidden');
+  el('optPagesCustom').value = '';
+  el('fileInput').value = '';
+  el('dropzone').style.display = 'block';
+  el('dropzone').querySelector('.big').textContent = 'Tap to upload';
+  el('fileChip').style.display = 'none';
+  el('previewWrap').innerHTML = '';
+  el('previewNote').textContent = '';
+  ['step-options', 'step-preview', 'step-price'].forEach(id => el(id).classList.add('hidden'));
+  currentQuote = { cost: 0, sheets: 0 };
+  checkSubmittable(); // re-derives step-grandtotal / step-submit visibility from `entries`
+}
+
+// ---------- multi-file: history of already-configured files ----------
+function buildCurrentEntry() {
+  const selectedPages = computeSelectedPages();
+  return {
+    key: `e${Date.now()}${Math.random().toString(36).slice(2, 7)}`,
+    original_filename: uploadInfo.original_filename,
+    pdf_filename: uploadInfo.pdf_filename,
+    source_filename: uploadInfo.source_filename || '',
+    file_type: uploadInfo.file_type,
+    total_pages: uploadInfo.pages,      // total pages in the PDF (for re-editing)
+    pages: selectedPages.length,        // pages actually selected to print
+    pages_mode: pagesMode,              // 'all' | 'odd' | 'even' | 'custom' (for re-editing)
+    pages_range: pageListToRangeStr(selectedPages),
+    color: el('optColor').checked,
+    doubleside: el('optDouble').checked,
+    duplex_edge: duplexEdge,
+    pages_per_sheet: parseInt(el('optPPS').value, 10) || 1,
+    copies: parseInt(el('optCopies').value, 10) || 1,
+    paper_size: el('optPaper').value,
+    orientation: orientation,
+    scale_mode: scaleMode,
+    cost: currentQuote.cost,
+    sheets: currentQuote.sheets,
+  };
+}
+
+function entrySummaryLine(e) {
+  return [
+    e.color ? 'Color' : 'B&W',
+    e.doubleside ? `Duplex (${e.duplex_edge} edge)` : 'Simplex',
+    e.orientation === 'landscape' ? 'Landscape' : 'Portrait',
+    e.paper_size,
+    `${e.pages_per_sheet}/sheet`,
+    `×${e.copies}`,
+    e.pages_range ? `Pages ${e.pages_range}` : 'All pages',
+  ].join(' · ');
+}
+
+function renderHistory() {
+  const section = el('fileHistory');
+  if (entries.length === 0) {
+    section.classList.add('hidden');
+    el('fileHistoryList').innerHTML = '';
+    return;
+  }
+  section.classList.remove('hidden');
+  el('fileHistoryList').innerHTML = entries.map(e => `
+    <div class="entry-card">
+      <div class="entry-card-main">
+        <div class="entry-card-name">${escapeHtml(e.original_filename)}</div>
+        <div class="entry-card-opts">${entrySummaryLine(e)}</div>
+      </div>
+      <div class="entry-card-side">
+        <div class="entry-card-cost">₹${e.cost.toFixed(2)}</div>
+        <div class="entry-card-actions">
+          <button type="button" class="entry-edit" data-key="${e.key}">Edit</button>
+          <button type="button" class="entry-remove" data-key="${e.key}">Remove</button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  el('fileHistoryList').querySelectorAll('.entry-edit').forEach(btn => {
+    btn.addEventListener('click', () => editEntry(btn.dataset.key));
+  });
+  el('fileHistoryList').querySelectorAll('.entry-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      entries = entries.filter(e => e.key !== btn.dataset.key);
+      renderHistory();
+      checkSubmittable();
+    });
+  });
+}
+
+// Re-open a previously-added file for editing. Whatever's currently in the
+// active upload slot is preserved: if it's a complete, valid file it's
+// pushed into history first so it isn't lost; if it's incomplete (a file
+// uploaded but with an invalid custom page range, say) the person is asked
+// before it's discarded.
+function editEntry(key) {
+  const idx = entries.findIndex(e => e.key === key);
+  if (idx === -1) return;
+
+  if (uploadInfo && !activeFileValid()) {
+    const proceed = confirm(
+      "The file above hasn't been finished (its page selection looks invalid). " +
+      "Editing this other file will discard those unsaved changes — continue?"
+    );
+    if (!proceed) return;
+  }
+
+  const entry = entries[idx];
+  if (activeFileValid()) {
+    entries.push(buildCurrentEntry());
+  }
+  entries.splice(idx, 1);
+  loadEntryIntoActiveForm(entry);
+}
+
+function loadEntryIntoActiveForm(entry) {
+  resetUpload();
+
+  uploadInfo = {
+    pdf_filename: entry.pdf_filename,
+    original_filename: entry.original_filename,
+    source_filename: entry.source_filename || null,
+    file_type: entry.file_type,
+    pages: entry.total_pages,
+  };
+
+  const chip = el('fileChip');
+  chip.style.display = 'block';
+  chip.innerHTML = `
+    <div class="file-chip">
+      <div>
+        <div>${escapeHtml(uploadInfo.original_filename)}</div>
+        <div class="file-meta">${uploadInfo.pages} page${uploadInfo.pages > 1 ? 's' : ''} · ${uploadInfo.file_type.toUpperCase()}</div>
+      </div>
+      <button id="clearFile">Change</button>
+    </div>`;
+  el('clearFile').addEventListener('click', resetUpload);
+  el('dropzone').style.display = 'none';
+
+  el('optColor').checked = entry.color;
+  el('optDouble').checked = entry.doubleside;
+  el('fieldDuplexEdge').classList.toggle('hidden', !entry.doubleside);
+
+  duplexEdge = entry.duplex_edge;
+  el('optDuplexEdge').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.edge === duplexEdge));
+
+  orientation = entry.orientation;
+  el('optOrientation').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.orientation === orientation));
+
+  el('optPaper').value = entry.paper_size;
+  el('optPPS').value = String(entry.pages_per_sheet);
+  el('optCopies').value = entry.copies;
+
+  scaleMode = entry.scale_mode;
+  el('optScale').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.scale === scaleMode));
+
+  pagesMode = entry.pages_mode || 'all';
+  pagesCustomStr = pagesMode === 'custom' ? entry.pages_range : '';
+  el('optPages').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pages === pagesMode));
+  el('fieldPagesCustom').classList.toggle('hidden', pagesMode !== 'custom');
+  el('optPagesCustom').value = pagesCustomStr;
+  el('pagesCustomMax').textContent = uploadInfo.pages;
+
+  currentSheetIndex = 0;
+  el('step-options').classList.remove('hidden');
+  el('step-preview').classList.remove('hidden');
+  el('step-price').classList.remove('hidden');
+
+  loadPdfForPreview();
+  updateQuote();
+  renderHistory();
+  checkSubmittable();
+
+  el('step-options').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function activeFileValid() {
+  return !!(uploadInfo && pagesSelectionValid() && computeSelectedPages().length > 0);
+}
+
+function collectSubmissionEntries() {
+  const list = [...entries];
+  if (activeFileValid()) list.push(buildCurrentEntry());
+  return list;
+}
+
+function updateGrandTotal() {
+  const list = collectSubmissionEntries();
+  const section = el('step-grandtotal');
+  // Only worth showing once there's more than one file in play — a single
+  // file already has its own price section.
+  if (entries.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  el('filesSummaryList').innerHTML = list.map(e => `
+    <div class="price-row"><span>${escapeHtml(e.original_filename)}</span><span>₹${e.cost.toFixed(2)}</span></div>
+  `).join('');
+  const total = list.reduce((s, e) => s + Number(e.cost), 0);
+  el('grandTotalAmount').textContent = total.toFixed(2);
+}
+
+el('addFileBtn').addEventListener('click', () => {
+  if (!activeFileValid()) return;
+  entries.push(buildCurrentEntry());
+  renderHistory();
+  resetUpload();
+  el('step-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ---------- options -> live quote + preview ----------
+['optColor', 'optDouble', 'optPaper', 'optPPS', 'optCopies'].forEach(id => {
+  el(id).addEventListener('input', () => {
+    clearTimeout(quoteTimer);
+    quoteTimer = setTimeout(() => {
+      updateQuote();
+      currentSheetIndex = 0; // options changed the sheet layout, so start over
+      renderPreview();
+    }, 250);
+  });
+});
+
+el('previewPrev').addEventListener('click', () => {
+  if (currentSheetIndex > 0) { currentSheetIndex--; renderPreview(); }
+});
+el('previewNext').addEventListener('click', () => {
+  currentSheetIndex++; renderPreview(); // clamped inside renderPreview
+});
+
+el('optOrientation').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-orientation]');
+  if (!btn) return;
+  orientation = btn.dataset.orientation;
+  el('optOrientation').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+  currentSheetIndex = 0;
+  renderPreview();
+});
+
+el('optDuplexEdge').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-edge]');
+  if (!btn) return;
+  duplexEdge = btn.dataset.edge;
+  el('optDuplexEdge').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+});
+
+el('optDouble').addEventListener('change', () => {
+  el('fieldDuplexEdge').classList.toggle('hidden', !el('optDouble').checked);
+});
+
+el('optScale').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-scale]');
+  if (!btn) return;
+  scaleMode = btn.dataset.scale;
+  el('optScale').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+  currentSheetIndex = 0;
+  updateQuote();
+  renderPreview();
+  checkSubmittable();
+});
+
+el('optPages').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-pages]');
+  if (!btn) return;
+  pagesMode = btn.dataset.pages;
+  el('optPages').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+  el('fieldPagesCustom').classList.toggle('hidden', pagesMode !== 'custom');
+  if (pagesMode === 'custom' && uploadInfo) el('pagesCustomMax').textContent = uploadInfo.pages;
+  currentSheetIndex = 0;
+  updateQuote();
+  renderPreview();
+});
+
+el('optPagesCustom').addEventListener('input', () => {
+  pagesCustomStr = el('optPagesCustom').value;
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(() => {
+    currentSheetIndex = 0;
+    updateQuote();
+    renderPreview();
+  }, 350);
+});
+
+// ---------- page selection helpers ----------
+function parsePageRangeStr(str, totalPages) {
+  if (!str || !str.trim()) return { valid: false, pages: [] };
+  const parts = str.split(',').map(s => s.trim()).filter(Boolean);
+  const pages = new Set();
+  for (const part of parts) {
+    const rangeMatch = part.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (rangeMatch) {
+      let a = parseInt(rangeMatch[1], 10), b = parseInt(rangeMatch[2], 10);
+      if (a > b) [a, b] = [b, a];
+      if (a < 1 || b > totalPages) return { valid: false, pages: [] };
+      for (let p = a; p <= b; p++) pages.add(p);
+    } else if (/^\d+$/.test(part)) {
+      const p = parseInt(part, 10);
+      if (p < 1 || p > totalPages) return { valid: false, pages: [] };
+      pages.add(p);
+    } else {
+      return { valid: false, pages: [] };
+    }
+  }
+  if (pages.size === 0) return { valid: false, pages: [] };
+  return { valid: true, pages: Array.from(pages).sort((a, b) => a - b) };
+}
+
+function computeSelectedPages() {
+  if (!uploadInfo) return [];
+  const total = uploadInfo.pages;
+  const all = Array.from({ length: total }, (_, i) => i + 1);
+  if (pagesMode === 'all') return all;
+  if (pagesMode === 'odd') return all.filter(p => p % 2 === 1);
+  if (pagesMode === 'even') return all.filter(p => p % 2 === 0);
+  if (pagesMode === 'custom') return parsePageRangeStr(pagesCustomStr, total).pages;
+  return all;
+}
+
+function pageListToRangeStr(pages) {
+  if (!pages.length) return '';
+  const ranges = [];
+  let start = pages[0], prev = pages[0];
+  for (let i = 1; i < pages.length; i++) {
+    if (pages[i] === prev + 1) { prev = pages[i]; continue; }
+    ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+    start = prev = pages[i];
+  }
+  ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+  return ranges.join(',');
+}
+
+function pagesSelectionValid() {
+  if (pagesMode !== 'custom') return true;
+  return parsePageRangeStr(pagesCustomStr, uploadInfo ? uploadInfo.pages : 0).valid;
+}
+
+async function updateQuote() {
+  if (!uploadInfo) return;
+
+  // validate the pages-custom sub-field first
+  const pagesOk = pagesSelectionValid();
+  el('pagesCustomError').style.display = (pagesMode === 'custom' && !pagesOk) ? 'block' : 'none';
+
+  const selectedPages = computeSelectedPages();
+  if (!pagesOk || selectedPages.length === 0) {
+    el('priceAmount').textContent = '—';
+    el('priceSheets').textContent = '— sheets';
+    el('pricePages').textContent = '— pages';
+    el('submitBtn').dataset.cost = '';
+    el('priceNote').classList.add('hidden');
+    currentQuote = { cost: 0, sheets: 0 };
+    checkSubmittable();
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('pages', selectedPages.length);
+  fd.append('color', el('optColor').checked);
+  fd.append('doubleside', el('optDouble').checked);
+  fd.append('pages_per_sheet', el('optPPS').value);
+  fd.append('copies', el('optCopies').value || 1);
+  fd.append('paper_size', el('optPaper').value);
+  const phone = el('phoneInput').value.trim();
+  if (/^\d{10}$/.test(phone)) {
+    fd.append('phone', phone);
+    fd.append('files_ahead_today', entries.length);
+  }
+
+  const res = await fetch(`${API}/api/quote`, { method: 'POST', body: fd });
+  if (!res.ok) return;
+  const q = await res.json();
+  el('priceAmount').textContent = q.cost.toFixed(2);
+  el('priceSheets').textContent = `${q.sheets} sheet${q.sheets > 1 ? 's' : ''}`;
+  el('pricePages').textContent = `${selectedPages.length} page${selectedPages.length > 1 ? 's' : ''} × ${el('optCopies').value || 1} cop${(el('optCopies').value || 1) > 1 ? 'ies' : 'y'}`;
+  el('submitBtn').dataset.cost = q.cost;
+  currentQuote = { cost: q.cost, sheets: q.sheets };
+  const note = el('priceNote');
+  if (q.min_cost_applied === false) {
+    note.textContent = "No minimum charge — you've already got another job today.";
+    note.classList.remove('hidden');
+  } else {
+    note.classList.add('hidden');
+  }
+  checkSubmittable();
+}
+
+// ---------- print-output preview ----------
+async function loadPdfForPreview() {
+  if (!uploadInfo || !window['pdfjsLib']) { renderPreview(); return; }
+  pageCanvasCache = {};
+  pageDimsCache = {};
+  el('previewLoading').classList.remove('hidden');
+  try {
+    pdfDoc = await pdfjsLib.getDocument(`${API}/uploads/${uploadInfo.pdf_filename}`).promise;
+  } catch (err) {
+    pdfDoc = null;
+  }
+  el('previewLoading').classList.add('hidden');
+  renderPreview();
+}
+
+let pageDimsCache = {};      // page number -> {width, height} in PDF points (native size)
+
+// Standard paper sizes in PDF points (72pt = 1in), portrait orientation.
+const PAPER_PTS = {
+  a4: { w: 595, h: 842 },
+  a3: { w: 842, h: 1190 },
+};
+
+async function getPageCanvas(pageNum) {
+  if (pageCanvasCache[pageNum]) return pageCanvasCache[pageNum];
+  if (!pdfDoc || pageNum > pdfDoc.numPages) return null;
+  const page = await pdfDoc.getPage(pageNum);
+  const viewport = page.getViewport({ scale: 1 });
+  pageDimsCache[pageNum] = { width: viewport.width, height: viewport.height };
+  const scale = 260 / Math.max(viewport.width, viewport.height);
+  const scaledViewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = scaledViewport.width;
+  canvas.height = scaledViewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+  pageCanvasCache[pageNum] = canvas;
+  return canvas;
+}
+
+async function getPageDims(pageNum) {
+  if (pageDimsCache[pageNum]) return pageDimsCache[pageNum];
+  if (!pdfDoc || pageNum > pdfDoc.numPages) return null;
+  const page = await pdfDoc.getPage(pageNum);
+  const viewport = page.getViewport({ scale: 1 });
+  const dims = { width: viewport.width, height: viewport.height };
+  pageDimsCache[pageNum] = dims;
+  return dims;
+}
+
+async function renderPreview() {
+  if (!uploadInfo) return;
+  const wrap = el('previewWrap');
+  const token = ++previewToken;
+
+  if (!window['pdfjsLib']) {
+    wrap.innerHTML = '';
+    el('previewNote').textContent = 'Live preview unavailable in this browser — your options above still apply to the print.';
+    return;
+  }
+
+  const color = el('optColor').checked;
+  const doubleside = el('optDouble').checked;
+  const paper = el('optPaper').value.toLowerCase();
+  const pps = parseInt(el('optPPS').value, 10) || 1;
+  const [cols, rows] = NUP_LAYOUT[pps] || [1, 1];
+
+  const selectedPages = computeSelectedPages(); // actual PDF page numbers, in print order
+  if (pagesMode === 'custom' && !pagesSelectionValid()) {
+    wrap.innerHTML = '';
+    el('previewCount').textContent = 'Sheet — / —';
+    el('previewPrev').disabled = true;
+    el('previewNext').disabled = true;
+    el('previewNote').textContent = 'Enter a valid page range to see a preview.';
+    return;
+  }
+
+  const selectedCount = selectedPages.length;
+  const faceCount = Math.max(Math.ceil(selectedCount / pps), 1); // n-up faces needed for one copy
+  const physicalSheets = doubleside ? Math.ceil(faceCount / 2) : faceCount;
+
+  // physical size (in PDF points) of one paper sheet, and of one n-up cell on it
+  const basePaperPts = PAPER_PTS[paper] || PAPER_PTS.a4;
+  const paperPts = orientation === 'landscape'
+    ? { w: basePaperPts.h, h: basePaperPts.w }
+    : { w: basePaperPts.w, h: basePaperPts.h };
+  const cellPts = { w: paperPts.w / cols, h: paperPts.h / rows };
+
+  // clamp the sheet we're showing in case options changed the sheet count
+  if (currentSheetIndex >= physicalSheets) currentSheetIndex = physicalSheets - 1;
+  if (currentSheetIndex < 0) currentSheetIndex = 0;
+  const s = currentSheetIndex;
+
+  wrap.innerHTML = '';
+
+  function buildFace(faceIdx) {
+    const face = document.createElement('div');
+    face.className = `sheet-face ${paper} ${orientation === 'landscape' ? 'landscape' : ''} ${color ? '' : 'bw'}`;
+    face.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    face.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+    const startIdx = faceIdx * pps; // index into selectedPages, 0-based
+    for (let cell = 0; cell < pps; cell++) {
+      const idx = startIdx + cell;
+      const cellDiv = document.createElement('div');
+      if (faceIdx >= faceCount || idx >= selectedCount) {
+        cellDiv.className = 'preview-empty-cell';
+        face.appendChild(cellDiv);
+        continue;
+      }
+      cellDiv.className = 'preview-cell';
+      face.appendChild(cellDiv);
+      const pageNum = selectedPages[idx];
+      getPageCanvas(pageNum).then(canvas => {
+        if (token !== previewToken || !canvas) return;
+
+        if (scaleMode === 'actual') {
+          getPageDims(pageNum).then(dims => {
+            if (token !== previewToken || !dims) return;
+            // Scale to the page's true physical size relative to this
+            // cell's physical size — no stretching to fill the cell.
+            const wPct = Math.min((dims.width / cellPts.w) * 100, 500);
+            const hPct = Math.min((dims.height / cellPts.h) * 100, 500);
+            canvas.style.width = `${wPct}%`;
+            canvas.style.height = `${hPct}%`;
+            canvas.style.objectFit = 'fill';
+            canvas.style.position = 'absolute';
+            canvas.style.top = '50%';
+            canvas.style.left = '50%';
+            canvas.style.transform = 'translate(-50%, -50%)';
+            cellDiv.appendChild(canvas);
+          });
+        } else {
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+          canvas.style.objectFit = 'contain';
+          canvas.style.position = '';
+          canvas.style.transform = '';
+          cellDiv.appendChild(canvas);
+        }
+      });
+    }
+    return face;
+  }
+
+  function buildSheet(faceIdx, label) {
+    const sheetDiv = document.createElement('div');
+    sheetDiv.className = 'sheet';
+    const l = document.createElement('p');
+    l.className = 'sheet-label';
+    l.textContent = label;
+    sheetDiv.appendChild(l);
+    sheetDiv.appendChild(buildFace(faceIdx));
+    return sheetDiv;
+  }
+
+  const group = document.createElement('div');
+  group.className = 'sheet-group';
+
+  if (doubleside) {
+    const frontFace = s * 2;
+    const backFace = s * 2 + 1;
+    group.appendChild(buildSheet(frontFace, `Sheet ${s + 1} · Front`));
+    if (backFace < faceCount) {
+      group.appendChild(buildSheet(backFace, `Sheet ${s + 1} · Back`));
+    }
+  } else {
+    group.appendChild(buildSheet(s, `Sheet ${s + 1}`));
+  }
+
+  wrap.appendChild(group);
+
+  el('previewCount').textContent = `Sheet ${s + 1} / ${physicalSheets}`;
+  el('previewPrev').disabled = s <= 0;
+  el('previewNext').disabled = s >= physicalSheets - 1;
+
+  const sheetsNote = doubleside
+    ? `${physicalSheets} sheet${physicalSheets > 1 ? 's' : ''} total, printed both sides`
+    : `${physicalSheets} sheet${physicalSheets > 1 ? 's' : ''} total`;
+  const pagesNote = pagesMode === 'all' ? `all ${selectedCount} pages`
+    : pagesMode === 'odd' ? `odd pages only (${selectedCount})`
+    : pagesMode === 'even' ? `even pages only (${selectedCount})`
+    : `pages ${pageListToRangeStr(selectedPages)} (${selectedCount})`;
+  const scaleNote = scaleMode === 'actual' ? 'actual size' : 'fit to printable area';
+  el('previewNote').textContent =
+    `Preview of copy 1, ${paper.toUpperCase()} — ${sheetsNote}. Printing ${pagesNote}, ${scaleNote}. Layout only; actual print may vary slightly.`;
+}
+
+// ---------- phone + submit ----------
+let phoneQuoteTimer = null;
+el('phoneInput').addEventListener('input', () => {
+  checkSubmittable();
+  clearTimeout(phoneQuoteTimer);
+  phoneQuoteTimer = setTimeout(refreshEntryPricingForPhone, 400);
+});
+
+function checkSubmittable() {
+  updateGrandTotal();
+  const hasAddBtn = el('addFileBtn');
+  if (hasAddBtn) hasAddBtn.disabled = !activeFileValid();
+
+  const hasAny = entries.length > 0 || activeFileValid();
+  el('step-submit').classList.toggle('hidden', !hasAny);
+
+  const phoneOk = /^\d{10}$/.test(el('phoneInput').value.trim());
+  el('submitBtn').disabled = !(hasAny && phoneOk);
+}
+
+// Re-quote every already-queued file now that a phone number is known, so
+// a 2nd/3rd file in this batch (or a phone with jobs earlier today) shows
+// its waived minimum charge before the customer even opens the confirm
+// sheet — rather than only finding out from the final job cost.
+async function fetchQuoteFor(entry, phone, filesAhead) {
+  const fd = new FormData();
+  fd.append('pages', entry.pages);
+  fd.append('color', entry.color);
+  fd.append('doubleside', entry.doubleside);
+  fd.append('pages_per_sheet', entry.pages_per_sheet);
+  fd.append('copies', entry.copies);
+  fd.append('paper_size', entry.paper_size);
+  fd.append('phone', phone);
+  fd.append('files_ahead_today', filesAhead);
+  try {
+    const res = await fetch(`${API}/api/quote`, { method: 'POST', body: fd });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function refreshEntryPricingForPhone() {
+  const phone = el('phoneInput').value.trim();
+  if (!/^\d{10}$/.test(phone)) return;
+
+  for (let i = 0; i < entries.length; i++) {
+    const q = await fetchQuoteFor(entries[i], phone, i);
+    if (q) { entries[i].cost = q.cost; entries[i].sheets = q.sheets; }
+  }
+  renderHistory();
+  if (uploadInfo) await updateQuote(); // active file's own quote already sends phone + entries.length
+  updateGrandTotal();
+}
+
+el('submitBtn').addEventListener('click', async () => {
+  await refreshEntryPricingForPhone();
+  openConfirmModal();
+});
+
+function openConfirmModal() {
+  const list = collectSubmissionEntries();
+  if (list.length === 0) return;
+
+  el('cfTitle').textContent = list.length > 1
+    ? `Confirm ${list.length} print jobs`
+    : 'Confirm your print job';
+
+  el('cfRows').innerHTML = list.map(e => `
+    <div class="modal-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <strong style="font-weight:600;">${escapeHtml(e.original_filename)}</strong>
+        <span>₹${e.cost.toFixed(2)}</span>
+      </div>
+      <div style="font-size:12px; color:var(--ink-soft);">${entrySummaryLine(e)} · ${e.pages} page${e.pages > 1 ? 's' : ''}</div>
+    </div>`).join('');
+
+  const total = list.reduce((s, e) => s + Number(e.cost), 0);
+  el('cfPhone').textContent = el('phoneInput').value.trim();
+  el('cfAmount').textContent = total.toFixed(2);
+  el('confirmModal').classList.remove('hidden');
+}
+
+el('cfCancel').addEventListener('click', () => {
+  el('confirmModal').classList.add('hidden');
+});
+
+el('cfConfirm').addEventListener('click', async () => {
+  el('confirmModal').classList.add('hidden');
+  await submitJob();
+});
+
+async function submitJob() {
+  const jobsToSubmit = collectSubmissionEntries();
+  if (jobsToSubmit.length === 0) return;
+
+  el('submitBtn').disabled = true;
+  el('submitBtn').innerHTML = '<span class="spinner"></span>Sending…';
+  el('submitError').style.display = 'none';
+
+  const phone = el('phoneInput').value.trim();
+  const createdJobs = [];
+  try {
+    for (const entry of jobsToSubmit) {
+      const fd = new FormData();
+      fd.append('phone', phone);
+      fd.append('pdf_filename', entry.pdf_filename);
+      fd.append('source_filename', entry.source_filename || '');
+      fd.append('original_filename', entry.original_filename);
+      fd.append('file_type', entry.file_type);
+      fd.append('pages', entry.pages);
+      fd.append('pages_range', entry.pages_range);
+      fd.append('color', entry.color);
+      fd.append('doubleside', entry.doubleside);
+      fd.append('duplex_edge', entry.duplex_edge);
+      fd.append('pages_per_sheet', entry.pages_per_sheet);
+      fd.append('copies', entry.copies);
+      fd.append('paper_size', entry.paper_size);
+      fd.append('orientation', entry.orientation);
+      fd.append('scale_mode', entry.scale_mode);
+      fd.append('scale_value', '');
+
+      const res = await fetch(`${API}/api/jobs`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error((await res.json()).detail || `Could not submit ${entry.original_filename}`);
+      createdJobs.push(await res.json());
+    }
+    showStatusScreen(createdJobs);
+    connectStatusSockets(createdJobs);
+  } catch (err) {
+    el('submitBtn').disabled = false;
+    el('submitBtn').textContent = 'Send to print';
+    const sentNote = createdJobs.length
+      ? ` (${createdJobs.length} of ${jobsToSubmit.length} file${jobsToSubmit.length > 1 ? 's' : ''} already went through — don't resend those.)`
+      : '';
+    el('submitError').textContent = err.message + sentNote;
+    el('submitError').style.display = 'block';
+  }
+}
+
+// ---------- status screen ----------
+function showStatusScreen(jobs) {
+  ['fileHistory', 'step-upload', 'step-options', 'step-preview', 'step-price', 'step-grandtotal', 'step-submit']
+    .forEach(id => el(id).classList.add('hidden'));
+  statusJobs = jobs;
+  el('statusScreen').classList.remove('hidden');
+  renderStatusScreen();
+}
+
+const STATUS_TEXT = {
+  queued:    { label: 'Queued',    detail: 'Waiting in line.' },
+  printing:  { label: 'Printing',  detail: 'On the printer right now.' },
+  ready:     { label: 'Ready',     detail: 'Ready for pickup.' },
+  collected: { label: 'Collected', detail: 'Marked as collected. Thanks!' },
+};
+
+function jobCardHTML(job) {
+  const info = STATUS_TEXT[job.status] || STATUS_TEXT.queued;
+  return `
+    <div class="job-card" id="job-card-${job.id}">
+      <div class="job-card-top">
+        <span class="job-code-small">#${job.phone}-${job.daily_seq}</span>
+        <span class="status-pill status-${job.status}">${info.label}</span>
+      </div>
+      <div class="job-card-file">${escapeHtml(job.original_filename)}</div>
+      <div class="job-card-detail">${info.detail}</div>
+    </div>`;
+}
+
+function renderStatusScreen() {
+  el('statusLabel').textContent = statusJobs.length > 1 ? 'YOUR JOBS' : 'YOUR JOB';
+  el('statusJobsWrap').innerHTML = statusJobs.map(jobCardHTML).join('');
+  const total = statusJobs.reduce((s, j) => s + Number(j.cost), 0);
+  el('statusAmount').textContent = `₹${total.toFixed(2)}`;
+}
+
+function connectStatusSockets(jobs) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  jobs.forEach(job => {
+    const sock = new WebSocket(`${proto}://${location.host}/ws/customer/${job.id}`);
+    sock.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'job_update') {
+        const idx = statusJobs.findIndex(j => j.id === msg.job.id);
+        if (idx >= 0) { statusJobs[idx] = msg.job; renderStatusScreen(); }
+      }
+    };
+    statusSockets.push(sock);
+  });
+
+  // Poll as a fallback in case a socket drops on flaky shop WiFi.
+  if (!statusPollingStarted) {
+    statusPollingStarted = true;
+    setInterval(async () => {
+      if (statusJobs.length === 0) return;
+      let changed = false;
+      for (const job of statusJobs) {
+        try {
+          const res = await fetch(`${API}/api/jobs/${job.id}`);
+          if (res.ok) {
+            const updated = await res.json();
+            const idx = statusJobs.findIndex(j => j.id === updated.id);
+            if (idx >= 0) { statusJobs[idx] = updated; changed = true; }
+          }
+        } catch (e) { /* ignore */ }
+      }
+      if (changed) renderStatusScreen();
+    }, 8000);
+  }
+}
+</script>
+</body>
+</html>
