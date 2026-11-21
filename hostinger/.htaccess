@@ -1,0 +1,31 @@
+# TPrint on Hostinger (LiteSpeed/Apache). Upload the contents of this folder to
+# public_html/TPRINT (the folder Hostinger made for print.tfix.in).
+Options -Indexes
+DirectoryIndex index.html
+
+# Pass the Authorization header to PHP (print agent and Claude connector use it).
+CGIPassAuth On
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Private code is never served directly.
+RewriteRule ^lib(/|$) - [F,L]
+
+# API and Claude connector go to the PHP router.
+RewriteRule ^api/ api/index.php [L,QSA]
+RewriteRule ^mcp/?$ api/index.php [L,QSA]
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<FilesMatch "\.(ini|sample\.php|md)$">
+  Require all denied
+</FilesMatch>

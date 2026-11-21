@@ -510,7 +510,7 @@
   function render() {
     const s = state.snap;
     $('notice').innerHTML = s.printing_enabled ? '' :
-      '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner sets TPRINT_MCP_ALLOW_PRINT=1 on the shop PC and restarts the connector.</div>';
+      '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner has to turn on remote printing in the TPrint server settings (see the setup guide).</div>';
     const when = new Date(s.generated_at);
     $('updated').textContent = 'Updated ' + (Number.isNaN(when.getTime()) ? s.generated_at : when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }));
     const admin = $('openAdmin');

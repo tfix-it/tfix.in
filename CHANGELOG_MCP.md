@@ -1,5 +1,28 @@
 # Changes
 
+## 3.0.0 — Hostinger only: print.tfix.in + print agent + UPI QR
+- hostinger/: the whole online side in PHP 8.2+ and MySQL for Hostinger shared hosting. It has the customer
+  order site, the full admin at /admin/ (same API paths as the LAN admin), and the Claude connector at /mcp (same
+  six tools and MCP App dashboard). The schema is created automatically. Private config and uploaded files live
+  outside public_html.
+- UPI payment QR after submitting an order: exact total, `TPrint #<job>` note, a "Pay with a UPI app" deep
+  link, and automatic switch to "Payment received". The UPI ID and payee name are set in the admin's System settings.
+- agent/print_agent.py: the shop PC polls print.tfix.in over HTTPS (no inbound connections), reports
+  printers, claims and prints dispatched jobs with SumatraPDF (never retrying an uncertain print) and
+  converts Word/PowerPoint with LibreOffice.
+- Print gate kept: payment confirmed by staff, queued, enabled printer, file present, one dispatch per job ever;
+  the agent's claim is atomic; pending dispatches can be cancelled. The gate refuses while the shop PC is offline.
+- Hardening for the public internet:
+  - pages counted on the server (pure-PHP PDF parser, verified against PyMuPDF)
+  - customers see their orders only through private tokens
+  - admin page escapes customer-supplied text (stored-XSS fix) and file names are sanitised
+  - Origin checks on state-changing requests
+  - DB-backed rate limits
+  - one-time setup code instead of a default password
+- Fixed: on the customer status screen, the phone/submit section could reappear after sending.
+- Tests: tests/hostinger runs the PHP site under `php -S` against MariaDB: API, pricing parity with app/pricing.py,
+  agent and connector (40 tests).
+
 ## 2.1.0 — Full shop admin online at print.tfix.in
 - app/public_server.py: the connector listener (127.0.0.1:8765) also serves the existing admin page and
   admin API (routes_admin.py) on every path except /mcp, when TPRINT_REMOTE_ADMIN=1. It adds session-guarded

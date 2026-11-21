@@ -1,4 +1,7 @@
-# TPrint + Claude MCP — installation guide
+# TPrint + Claude MCP — installation guide (shop-WiFi / Cloudflare version)
+
+> **Using Hostinger only?** Follow [HOSTINGER.md](HOSTINGER.md) instead. It replaces the Cloudflare tunnel,
+> the Python web server and the Python connector with the site at print.tfix.in plus a print agent.
 
 TPrint's connector is an **MCP App**: besides plain tools, it gives Claude an interactive
 print-queue dashboard that appears right inside the chat (job queue, payment state, printer

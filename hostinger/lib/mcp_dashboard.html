@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TPrint dashboard</title>
+<!--
+  MCP App view for TPrint. Rendered by the host (Claude) in a sandboxed iframe and
+  served by app/mcp_server.py as ui://tprint/dashboard.html.
+  Speaks the MCP Apps postMessage protocol (JSON-RPC 2.0, protocol 2026-01-26)
+  directly, so it needs no bundler, CDN or external requests.
+-->
+<style>
+  :root {
+    color-scheme: light;
+    --bg: var(--color-background-primary, #ffffff);
+    --bg-2: var(--color-background-secondary, #f6f5f2);
+    --bg-3: var(--color-background-tertiary, #eeece7);
+    --fg: var(--color-text-primary, #1d1c1a);
+    --fg-2: var(--color-text-secondary, #5e5b55);
+    --fg-3: var(--color-text-tertiary, #8b8780);
+    --line: var(--color-border-primary, #e3e0da);
+    --line-2: var(--color-border-secondary, #d4d0c8);
+    --ok: var(--color-text-success, #1f7a43);
+    --ok-bg: var(--color-background-success, #e5f4ea);
+    --warn: var(--color-text-warning, #8a5a00);
+    --warn-bg: var(--color-background-warning, #fdf1d8);
+    --bad: var(--color-text-danger, #b3261e);
+    --bad-bg: var(--color-background-danger, #fbe7e5);
+    --info: var(--color-text-info, #1f5fa8);
+    --info-bg: var(--color-background-info, #e6eefa);
+    --accent: var(--color-background-inverse, #1d1c1a);
+    --accent-fg: var(--color-text-inverse, #ffffff);
+    --ring: var(--color-ring-primary, #1f5fa8);
+    --r-sm: var(--border-radius-sm, 6px);
+    --r-md: var(--border-radius-md, 10px);
+    --r-full: var(--border-radius-full, 999px);
+    --font: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    --mono: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+    --t-xs: var(--font-text-xs-size, 12px);
+    --t-sm: var(--font-text-sm-size, 13px);
+    --t-md: var(--font-text-md-size, 14px);
+    --w-med: var(--font-weight-medium, 500);
+    --w-semi: var(--font-weight-semibold, 600);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: var(--color-background-primary, #1f1e1c); --bg-2: var(--color-background-secondary, #282724);
+      --bg-3: var(--color-background-tertiary, #33312d); --fg: var(--color-text-primary, #f2f0eb);
+      --fg-2: var(--color-text-secondary, #bdb8ae); --fg-3: var(--color-text-tertiary, #8f8a80);
+      --line: var(--color-border-primary, #3a3834); --line-2: var(--color-border-secondary, #4a4742);
+      --ok: var(--color-text-success, #7bd69b); --ok-bg: var(--color-background-success, #1d3326);
+      --warn: var(--color-text-warning, #f0c062); --warn-bg: var(--color-background-warning, #3a2e14);
+      --bad: var(--color-text-danger, #f2938c); --bad-bg: var(--color-background-danger, #3d1f1c);
+      --info: var(--color-text-info, #8fb8ef); --info-bg: var(--color-background-info, #1c2a3d);
+      --accent: var(--color-background-inverse, #f2f0eb); --accent-fg: var(--color-text-inverse, #1d1c1a);
+      --ring: var(--color-ring-primary, #8fb8ef);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: var(--color-background-primary, #1f1e1c); --bg-2: var(--color-background-secondary, #282724);
+    --bg-3: var(--color-background-tertiary, #33312d); --fg: var(--color-text-primary, #f2f0eb);
+    --fg-2: var(--color-text-secondary, #bdb8ae); --fg-3: var(--color-text-tertiary, #8f8a80);
+    --line: var(--color-border-primary, #3a3834); --line-2: var(--color-border-secondary, #4a4742);
+    --ok: var(--color-text-success, #7bd69b); --ok-bg: var(--color-background-success, #1d3326);
+    --warn: var(--color-text-warning, #f0c062); --warn-bg: var(--color-background-warning, #3a2e14);
+    --bad: var(--color-text-danger, #f2938c); --bad-bg: var(--color-background-danger, #3d1f1c);
+    --info: var(--color-text-info, #8fb8ef); --info-bg: var(--color-background-info, #1c2a3d);
+    --accent: var(--color-background-inverse, #f2f0eb); --accent-fg: var(--color-text-inverse, #1d1c1a);
+    --ring: var(--color-ring-primary, #8fb8ef);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); }
+  body { font: var(--t-md)/1.45 var(--font); padding: 16px; -webkit-font-smoothing: antialiased; }
+  button, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  header h1 { font-size: 16px; font-weight: var(--w-semi); margin: 0; letter-spacing: -0.01em; }
+  header .sub { color: var(--fg-3); font-size: var(--t-xs); }
+  header .grow { flex: 1; min-width: 0; }
+
+  .btn { border: 1px solid var(--line-2); background: var(--bg); border-radius: var(--r-sm);
+         padding: 6px 12px; font-size: var(--t-sm); font-weight: var(--w-med); cursor: pointer;
+         display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn:hover:not(:disabled) { background: var(--bg-2); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.primary:hover:not(:disabled) { opacity: .88; background: var(--accent); }
+  .btn.ghost { border-color: transparent; color: var(--fg-2); }
+  .btn svg { width: 14px; height: 14px; }
+  .spin svg { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .notice { border-radius: var(--r-md); padding: 10px 12px; font-size: var(--t-sm); margin-bottom: 14px;
+            background: var(--bg-2); color: var(--fg-2); }
+  .notice b { color: var(--fg); font-weight: var(--w-semi); }
+  .notice.bad { background: var(--bad-bg); color: var(--bad); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .stat { background: var(--bg-2); border-radius: var(--r-md); padding: 10px 12px; }
+  .stat .v { font-size: 22px; font-weight: var(--w-semi); line-height: 1.1; }
+  .stat .k { font-size: var(--t-xs); color: var(--fg-2); margin-top: 2px; }
+  .stat.warn .v { color: var(--warn); }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
+          overflow-x: auto; scrollbar-width: none; }
+  .tab { border: 0; background: none; padding: 8px 10px; font-size: var(--t-sm); color: var(--fg-2);
+         cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); font-weight: var(--w-med); }
+  .tab .c { color: var(--fg-3); margin-left: 4px; }
+
+  .jobs { list-style: none; margin: 0; padding: 0; }
+  .job { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 2px;
+         border-bottom: 1px solid var(--line); align-items: center; }
+  .job:last-child { border-bottom: 0; }
+  .job .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .job .id { font-weight: var(--w-semi); }
+  .job .cost { font-weight: var(--w-semi); }
+  .job .meta { color: var(--fg-2); font-size: var(--t-sm); grid-column: 1; }
+  .job .act { grid-row: 1 / span 2; grid-column: 2; display: flex; align-items: center; gap: 6px; }
+  .job .hint { color: var(--fg-3); font-size: var(--t-xs); text-align: right; max-width: 140px; }
+  .confirm { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+             background: var(--bg-2); border-radius: var(--r-md); padding: 10px; margin-top: 6px; }
+  .confirm span { font-size: var(--t-sm); color: var(--fg-2); flex: 1 1 180px; }
+  .confirm select { border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--bg);
+                    padding: 5px 8px; font-size: var(--t-sm); max-width: 100%; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-xs);
+           font-weight: var(--w-med); padding: 1px 8px; border-radius: var(--r-full); line-height: 18px; }
+  .b-paid { background: var(--ok-bg); color: var(--ok); }
+  .b-unpaid { background: var(--warn-bg); color: var(--warn); }
+  .b-status { background: var(--bg-3); color: var(--fg-2); }
+  .b-printing { background: var(--info-bg); color: var(--info); }
+  .b-gone { background: var(--bad-bg); color: var(--bad); }
+
+  .empty { text-align: center; color: var(--fg-3); padding: 28px 0; font-size: var(--t-sm); }
+  .more { color: var(--fg-3); font-size: var(--t-xs); padding-top: 8px; }
+
+  section.side { margin-top: 18px; }
+  h2 { font-size: var(--t-xs); font-weight: var(--w-semi); color: var(--fg-2); text-transform: uppercase;
+       letter-spacing: .04em; margin: 0 0 8px; }
+  .printers { display: flex; flex-wrap: wrap; gap: 6px; }
+  .printer { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line);
+             border-radius: var(--r-full); padding: 4px 10px; font-size: var(--t-sm); }
+  .printer .s { color: var(--fg-3); }
+  .printer.off { opacity: .55; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fg-3); flex: none; }
+  .dot.ready { background: var(--ok); } .dot.busy { background: var(--info); }
+  .dot.offline, .dot.error, .dot.paper_out { background: var(--bad); }
+
+  details { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 10px; }
+  summary { cursor: pointer; font-size: var(--t-sm); color: var(--fg-2); list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; display: inline-block; width: 14px; transition: transform .15s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: var(--t-sm); }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: var(--w-med); color: var(--fg-2); font-size: var(--t-xs); }
+  .auto { font-size: var(--t-sm); color: var(--fg-2); margin-top: 10px; }
+
+  .toast { position: fixed; left: 16px; right: 16px; bottom: 16px; margin: 0 auto; max-width: 460px;
+           padding: 10px 14px; border-radius: var(--r-md); font-size: var(--t-sm);
+           background: var(--accent); color: var(--accent-fg); box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,.18));
+           opacity: 0; transform: translateY(8px); transition: opacity .18s, transform .18s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast.bad { background: var(--bad); color: #fff; }
+
+  @media (max-width: 520px) {
+    body { padding: 12px; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .job { grid-template-columns: 1fr; }
+    .job .act { grid-row: auto; grid-column: 1; justify-content: flex-start; }
+    .job .hint { text-align: left; max-width: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="grow">
+    <h1>TPrint queue</h1>
+    <div class="sub" id="updated">Connecting…</div>
+  </div>
+  <button class="btn ghost" id="openAdmin" type="button" hidden>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M11 9.5V13H3V5h3.5"/></svg>
+    Full admin
+  </button>
+  <button class="btn" id="refresh" type="button" aria-label="Refresh">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>
+    Refresh
+  </button>
+</header>
+<div id="notice"></div>
+<div class="stats" id="stats"></div>
+<div class="tabs" role="tablist" id="tabs"></div>
+<ul class="jobs" id="jobs"><li class="empty">Loading the queue…</li></ul>
+<div class="more" id="more"></div>
+<section class="side">
+  <h2>Printers</h2>
+  <div class="printers" id="printers"></div>
+</section>
+<details id="pricingBox">
+  <summary>Pricing &amp; auto-print</summary>
+  <div id="pricing"></div>
+</details>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const PROTOCOL_VERSION = '2026-01-26';
+  const TABS = [['queued', 'Queued'], ['printing', 'Printing'], ['ready', 'Ready'], ['collected', 'Collected'], ['all', 'All']];
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = (n) => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+  const state = { snap: null, status: 'queued', loading: false, confirming: null, busyJob: null, hostCaps: {} };
+
+  // ------------------------------------------------------------ MCP Apps bridge
+  // JSON-RPC 2.0 over window.postMessage with the host (window.parent).
+  let nextId = 1;
+  const pending = new Map();
+  const post = (msg) => window.parent.postMessage({ jsonrpc: '2.0', ...msg }, '*');
+  const notify = (method, params) => post({ method, params: params || {} });
+  function request(method, params, timeoutMs = 60000) {
+    const id = nextId++;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timed out')); }, timeoutMs);
+      pending.set(id, { resolve: (v) => { clearTimeout(timer); resolve(v); }, reject: (e) => { clearTimeout(timer); reject(e); } });
+      post({ id, method, params: params || {} });
+    });
+  }
+  const callTool = (name, args) => request('tools/call', { name, arguments: args || {} });
+
+  window.addEventListener('message', (event) => {
+    if (event.source !== window.parent) return;
+    const msg = event.data;
+    if (!msg || msg.jsonrpc !== '2.0') return;
+    if (msg.method === undefined && msg.id !== undefined) {           // response to our request
+      const p = pending.get(msg.id);
+      if (!p) return;
+      pending.delete(msg.id);
+      if (msg.error) p.reject(new Error(msg.error.message || 'Host error')); else p.resolve(msg.result);
+      return;
+    }
+    const params = msg.params || {};
+    let result = {};
+    switch (msg.method) {
+      case 'ui/notifications/tool-input':
+        if (params.arguments && TABS.some(([k]) => k === params.arguments.status)) state.status = params.arguments.status;
+        break;
+      case 'ui/notifications/tool-result':
+        applyToolResult(params);
+        break;
+      case 'ui/notifications/tool-cancelled':
+        if (!state.snap) showNotice('The dashboard request was cancelled.', true);
+        break;
+      case 'ui/notifications/host-context-changed':
+        applyHostContext(params);
+        break;
+      case 'ui/resource-teardown':
+      case 'ping':
+        break;
+      default:
+        if (msg.id !== undefined) { post({ id: msg.id, error: { code: -32601, message: 'Method not found' } }); return; }
+    }
+    if (msg.id !== undefined) post({ id: msg.id, result });
+  });
+
+  function applyHostContext(ctx) {
+    if (!ctx) return;
+    const root = document.documentElement;
+    if (ctx.theme === 'light' || ctx.theme === 'dark') root.dataset.theme = ctx.theme;
+    const vars = ctx.styles && ctx.styles.variables;
+    if (vars) for (const [k, v] of Object.entries(vars)) if (v && k.startsWith('--')) root.style.setProperty(k, v);
+    const fonts = ctx.styles && ctx.styles.css && ctx.styles.css.fonts;
+    if (fonts && !document.getElementById('host-fonts')) {
+      const s = document.createElement('style'); s.id = 'host-fonts'; s.textContent = fonts; document.head.appendChild(s);
+    }
+    const inset = ctx.safeAreaInsets;
+    if (inset) document.body.style.padding = `${16 + inset.top}px ${16 + inset.right}px ${16 + inset.bottom}px ${16 + inset.left}px`;
+  }
+
+  function setupAutoResize() {
+    let queued = false, lastW = 0, lastH = 0;
+    const measure = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const el = document.documentElement, prev = el.style.height;
+        el.style.height = 'max-content';
+        const h = Math.ceil(el.getBoundingClientRect().height);
+        el.style.height = prev;
+        const w = Math.ceil(window.innerWidth);
+        if (w !== lastW || h !== lastH) { lastW = w; lastH = h; notify('ui/notifications/size-changed', { width: w, height: h }); }
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.documentElement); ro.observe(document.body);
+  }
+
+  // ------------------------------------------------------------ data flow
+  function toolText(result) {
+    return ((result && result.content) || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n');
+  }
+
+  function applyToolResult(result) {
+    if (!result) return;
+    if (result.isError) { showNotice(toolText(result) || 'The server returned an error.', true); return; }
+    const snap = result.structuredContent;
+    if (!snap || !Array.isArray(snap.jobs)) { showNotice('This result has no dashboard data.', true); return; }
+    state.snap = snap;
+    state.status = snap.status_filter || state.status;
+    render();
+  }
+
+  async function refresh(status) {
+    if (state.loading) return;
+    state.loading = true;
+    if (status) state.status = status;
+    state.confirming = null;
+    renderLoading();
+    try {
+      applyToolResult(await callTool('open_print_dashboard', { status: state.status, limit: 50 }));
+    } catch (err) {
+      toast('Could not refresh: ' + err.message, true);
+    } finally {
+      state.loading = false;
+      renderLoading();
+      renderTabs();
+    }
+  }
+
+  async function printJob(jobId, printer) {
+    state.busyJob = jobId;
+    renderJobs();
+    try {
+      const res = await callTool('print_paid_job', { job_id: jobId, printer_name: printer, confirm: true });
+      if (res && res.isError) throw new Error(toolText(res) || 'Print was refused.');
+      toast(`Job ${jobId} sent to ${printer}. Check the printer for the physical output.`);
+      tellModel(`The shop owner used the TPrint dashboard to send job ${jobId} to printer "${printer}". ` +
+                'SumatraPDF accepted it; physical output is not verified.');
+    } catch (err) {
+      toast(`Job ${jobId}: ${err.message}`, true);
+    } finally {
+      state.busyJob = null;
+      state.confirming = null;
+      await refresh();
+    }
+  }
+
+  async function openAdmin() {
+    const url = state.snap && state.snap.admin_url;
+    if (!url) return;
+    try {
+      const res = await request('ui/open-link', { url });
+      if (res && res.isError) throw new Error('blocked');
+    } catch (err) {
+      toast('Open ' + url + ' in your browser to manage payments, prices and settings.');
+    }
+  }
+
+  function tellModel(text) {
+    if (!state.hostCaps.updateModelContext) return;
+    request('ui/update-model-context', { content: [{ type: 'text', text }] }).catch(() => {});
+  }
+
+  // ------------------------------------------------------------ rendering
+  function showNotice(text, bad) {
+    $('notice').innerHTML = `<div class="notice${bad ? ' bad' : ''}">${esc(text)}</div>`;
+    if (bad) $('updated').textContent = 'Not loaded';
+  }
+
+  let toastTimer;
+  function toast(text, bad) {
+    const t = $('toast');
+    t.textContent = text; t.className = 'toast show' + (bad ? ' bad' : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = 'toast' + (bad ? ' bad' : ''); }, bad ? 6000 : 3500);
+  }
+
+  function ago(iso) {
+    if (!iso) return '';
+    const t = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + 'Z');   // DB stores naive UTC
+    if (Number.isNaN(t)) return '';
+    const m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return m + ' min ago';
+    if (m < 60 * 24) return Math.round(m / 60) + ' h ago';
+    return new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  }
+
+  function renderLoading() {
+    const b = $('refresh');
+    b.disabled = state.loading;
+    b.classList.toggle('spin', state.loading);
+  }
+
+  function renderTabs() {
+    const counts = (state.snap && state.snap.counts) || {};
+    $('tabs').innerHTML = TABS.map(([key, label]) => {
+      const c = key === 'all' ? '' : `<span class="c num">${counts[key] ?? 0}</span>`;
+      return `<button class="tab" role="tab" type="button" data-tab="${key}" aria-selected="${key === state.status}">${label}${c}</button>`;
+    }).join('');
+  }
+
+  function renderStats(s) {
+    const c = s.counts || {};
+    const items = [
+      ['Queued', c.queued ?? 0, ''],
+      ['Awaiting payment', c.awaiting_payment ?? 0, (c.awaiting_payment ?? 0) > 0 ? 'warn' : ''],
+      ['Printing', c.printing ?? 0, ''],
+      ['Ready to collect', c.ready ?? 0, ''],
+    ];
+    $('stats').innerHTML = items.map(([k, v, cls]) => `<div class="stat ${cls}"><div class="v num">${v}</div><div class="k">${k}</div></div>`).join('');
+  }
+
+  function enabledPrinters() {
+    return ((state.snap && state.snap.printers) || []).filter((p) => p.enabled);
+  }
+
+  function jobAction(j) {
+    if (state.busyJob === j.id) return `<button class="btn spin" type="button" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/></svg>Sending…</button>`;
+    if (j.status !== 'queued') return '';
+    if (j.files_deleted) return `<span class="hint">File removed by cleanup</span>`;
+    if (!j.paid) return `<span class="hint">Staff must confirm payment first</span>`;
+    if (!state.snap.printing_enabled) return `<span class="hint">Remote printing is off</span>`;
+    if (!enabledPrinters().length) return `<span class="hint">No enabled printer</span>`;
+    if (state.confirming === j.id) return '';
+    return `<button class="btn primary" type="button" data-print="${j.id}">Print…</button>`;
+  }
+
+  function confirmRow(j) {
+    const printers = enabledPrinters();
+    const auto = state.snap.auto_print || {};
+    const opts = printers.map((p) => {
+      const sel = p.windows_printer_name === auto.printer_name ? ' selected' : '';
+      return `<option value="${esc(p.windows_printer_name)}"${sel}>${esc(p.windows_printer_name)} (${esc(p.status)})</option>`;
+    }).join('');
+    return `<div class="confirm">
+      <span>Print job <b class="num">${j.id}</b> · ${j.sheets} sheet${j.sheets === 1 ? '' : 's'} × ${j.copies} · ${money(j.cost)} on</span>
+      <select id="printerPick" aria-label="Printer">${opts}</select>
+      <button class="btn primary" type="button" data-go="${j.id}">Confirm print</button>
+      <button class="btn ghost" type="button" data-cancel>Cancel</button>
+    </div>`;
+  }
+
+  function renderJobs() {
+    const s = state.snap;
+    if (!s) return;
+    if (!s.jobs.length) {
+      const label = (TABS.find(([k]) => k === s.status_filter) || [, 'matching'])[1].toLowerCase();
+      $('jobs').innerHTML = `<li class="empty">No ${s.status_filter === 'all' ? '' : esc(label) + ' '}jobs right now.</li>`;
+      $('more').textContent = '';
+      return;
+    }
+    $('jobs').innerHTML = s.jobs.map((j) => {
+      const statusBadge = j.status === 'queued' ? '' :
+        `<span class="badge ${j.status === 'printing' ? 'b-printing' : 'b-status'}">${esc(j.status)}</span>`;
+      const paid = j.paid ? '<span class="badge b-paid">Paid</span>' : '<span class="badge b-unpaid">Unpaid</span>';
+      const gone = j.files_deleted ? '<span class="badge b-gone">File deleted</span>' : '';
+      const meta = [
+        `${j.sheets} sheet${j.sheets === 1 ? '' : 's'} × ${j.copies}`,
+        j.color ? 'Colour' : 'B&W',
+        esc(j.paper_size),
+        j.doubleside ? 'Double-sided' : 'Single-sided',
+        j.pages_per_sheet > 1 ? `${j.pages_per_sheet}-up` : '',
+        `${j.pages} page${j.pages === 1 ? '' : 's'}`,
+        ago(j.created_at),
+      ].filter(Boolean).join(' · ');
+      return `<li class="job">
+        <div class="top"><span class="id num">Job ${j.id}</span><span class="cost num">${money(j.cost)}</span>${paid}${statusBadge}${gone}</div>
+        <div class="meta num">${meta}</div>
+        <div class="act">${jobAction(j)}</div>
+        ${state.confirming === j.id ? confirmRow(j) : ''}
+      </li>`;
+    }).join('');
+    $('more').textContent = s.total_matching > s.jobs.length ? `Showing ${s.jobs.length} of ${s.total_matching}.` : '';
+  }
+
+  function renderPrinters(s) {
+    const list = s.printers || [];
+    $('printers').innerHTML = list.length ? list.map((p) =>
+      `<span class="printer${p.enabled ? '' : ' off'}"><span class="dot ${esc(p.status)}"></span>${esc(p.windows_printer_name)}<span class="s">${esc(String(p.status).replace('_', ' '))}${p.enabled ? '' : ' · disabled'}</span></span>`
+    ).join('') : '<span class="hint">No printers registered. Start the shop server to detect Windows printers.</span>';
+  }
+
+  function renderPricing(s) {
+    const rows = (s.pricing || []).map((p) => `<tr><td>${esc(p.paper_size)} ${p.color ? 'Colour' : 'B&W'}</td>
+      <td class="num">${money(p.singleside_cost)}</td><td class="num">${money(p.doubleside_cost)}</td><td class="num">${money(p.min_cost)}</td></tr>`).join('');
+    const a = s.auto_print || {};
+    const rules = a.enabled ? [
+      `on, to ${esc(a.printer_name || '(no printer)')}`,
+      a.bw_only ? 'B&W only' : 'colour allowed',
+      a.max_sheets != null ? `≤ ${a.max_sheets} sheets` : '',
+      a.max_copies != null ? `≤ ${a.max_copies} copies` : '',
+    ].filter(Boolean).join(' · ') : 'off';
+    $('pricing').innerHTML = `<table><thead><tr><th>Paper</th><th>Per side</th><th>Double-sided</th><th>Minimum</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="4">No pricing configured.</td></tr>'}</tbody></table>
+      <div class="auto">Auto-print (paid jobs only): ${rules}</div>`;
+  }
+
+  function render() {
+    const s = state.snap;
+    $('notice').innerHTML = s.printing_enabled ? '' :
+      '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner has to turn on remote printing in the TPrint server settings (see the setup guide).</div>';
+    const when = new Date(s.generated_at);
+    $('updated').textContent = 'Updated ' + (Number.isNaN(when.getTime()) ? s.generated_at : when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }));
+    const admin = $('openAdmin');
+    admin.hidden = !s.admin_url;
+    admin.title = s.admin_url ? 'Mark payments, change prices and settings at ' + s.admin_url : '';
+    renderStats(s); renderTabs(); renderJobs(); renderPrinters(s); renderPricing(s);
+  }
+
+  // ------------------------------------------------------------ events
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('button');
+    if (!el) return;
+    if (el.id === 'refresh') return void refresh();
+    if (el.id === 'openAdmin') return void openAdmin();
+    if (el.dataset.tab) return void (el.dataset.tab !== state.status && refresh(el.dataset.tab));
+    if (el.dataset.print) { state.confirming = Number(el.dataset.print); renderJobs(); const p = $('printerPick'); if (p) p.focus(); return; }
+    if (el.dataset.cancel !== undefined) { state.confirming = null; renderJobs(); return; }
+    if (el.dataset.go) { const p = $('printerPick'); if (p && p.value) printJob(Number(el.dataset.go), p.value); }
+  });
+
+  renderTabs();
+  renderLoading();
+
+  // ------------------------------------------------------------ handshake
+  (async () => {
+    if (window.parent === window) {
+      showNotice('This view runs inside Claude. Ask Claude to open the TPrint dashboard.', false);
+      return;
+    }
+    try {
+      const init = await request('ui/initialize', {
+        appInfo: { name: 'TPrint Dashboard', version: '2.0.0' },
+        appCapabilities: { availableDisplayModes: ['inline'] },
+        protocolVersion: PROTOCOL_VERSION,
+      }, 15000);
+      state.hostCaps = (init && init.hostCapabilities) || {};
+      applyHostContext(init && init.hostContext);
+      notify('ui/notifications/initialized');
+      setupAutoResize();
+      // If the host doesn't push the tool result within a few seconds, fetch it ourselves.
+      setTimeout(() => { if (!state.snap && !state.loading) refresh(); }, 4000);
+    } catch (err) {
+      showNotice('Could not connect to Claude: ' + err.message, true);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

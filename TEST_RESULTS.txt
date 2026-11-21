@@ -1,14 +1,15 @@
-20 tests passed (Linux, Python 3.13, mcp 2.3.0, mocked Windows printer): `python -m pytest`.
-MCP App: tools/list exposes _meta.ui.resourceUri; resources/read serves ui://tprint/dashboard.html as text/html;profile=mcp-app.
-Dashboard driven in headless Chromium through the official host bridge (@modelcontextprotocol/ext-apps 2.0.4 AppBridge)
-against a live HTTP connector: ui/initialize handshake, tool-input/tool-result, size-changed, light/dark theming,
-refresh and tab switching via tools/call, Print > Confirm (print_paid_job), ui/update-model-context, repeat print
-refused with the gate's reason, no console errors, no horizontal overflow at 390px.
-stdio transport: initialize, tools/list, tools/call and resources/read via the SDK stdio client.
-requirements-mcp.txt resolves for win_amd64 on Python 3.11 and 3.12.
-Online admin (print.tfix.in mode) in Chromium against a live listener: login through the real admin page
-(Secure/HttpOnly/SameSite=Lax cookie), a job written by a separate process appeared live in ~2.3 s, Mark paid
-(auto-print fired), session-only PDF download (200 with session, 401 without), customer API and /docs not
-published (404), foreign Host refused (400), cross-site Origin refused (403, tests).
-LAN server starts and stops cleanly with the job watcher.
-Live Claude connection, Cloudflare tunnel/Access and physical Windows printing remain to be tested on the shop PC.
+Hostinger version (print.tfix.in), 2026-11-21: 60 tests passed (`python -m pytest`), PHP 8.3 + MariaDB 10.11.
+- PHP API: uploads (PDF/JPG/PNG/Word via agent), server-side page counting, pricing identical to app/pricing.py
+  across 480 combinations, jobs, token-only customer access, admin setup/login/rate limits/origin checks,
+  print gate + agent dispatch/claim/cancel/uncertain, auto-print, cleanup, private folders blocked.
+- PHP page counter agrees with PyMuPDF on plain, object-stream, 250-page, incremental-update and image PDFs,
+  and rejects encrypted/invalid files.
+- Print agent (fake printer/LibreOffice) against the real PHP site: prints once with job options, uncertain
+  failures not retried, download failures re-queued, conversions, wrong key rejected.
+- Claude connector (/mcp): auth, protocol versions, discovery, ui:// dashboard resource, no phone/filename leaks,
+  printing through the gate.
+- Browser, end to end (Chromium): owner first-time setup → UPI settings → customer on a phone uploads and orders
+  → UPI QR decodes (jsQR) to exactly the "Pay with a UPI app" link for the right amount → hostile file name does not
+  execute in admin → Mark paid → Print → real agent process prints → customer page shows "Payment received" and
+  Printing, survives refresh. Claude dashboard rendered through the official MCP Apps host bridge against /mcp.
+Not tested here: the live Hostinger account, a real UPI app payment, a physical Windows printer, LibreOffice.

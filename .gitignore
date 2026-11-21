@@ -11,3 +11,7 @@ venv-mcp/
 __pycache__/
 *.pyc
 .pytest_cache/
+# Hostinger private settings and customer files (never commit)
+tprint-config.php
+tprint-storage/
+node_modules/

@@ -1,8 +1,9 @@
 # Shop Print Server
 
-> **Claude connector and online admin:** TPrint ships an MCP App (an interactive print-queue
-> dashboard inside Claude) and can publish the full shop admin at https://print.tfix.in
-> behind Cloudflare Access. Setup is in [START_HERE.md](START_HERE.md).
+> **TPrint now runs at https://print.tfix.in on Hostinger** (PHP + MySQL), with UPI QR payment,
+> a print agent on the shop PC and the Claude connector: see **[HOSTINGER.md](HOSTINGER.md)**.
+> The Python server described below is the original shop-WiFi version; the print agent reuses its
+> `app/printing.py`. START_HERE.md covers the older Cloudflare-tunnel setup.
 
 A local-network web app for a print shop: customers upload files from their
 phone/laptop over WiFi, configure how they want them printed, and get a
