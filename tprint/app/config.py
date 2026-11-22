@@ -86,3 +86,11 @@ DEFAULT_RATE_LIMIT_MAX_REQUESTS = 10    # per IP, shared across upload+submit
 # jobs is just an implementation detail) — 6 hours is frequent enough for a
 # single shop without adding noticeable load.
 CLEANUP_INTERVAL_SEC = 6 * 60 * 60
+
+# --- Online orders (print.tfix.in) ---
+# When both are set, the server fetches orders placed on the website (even
+# while the shop was closed) and adds them to the queue as unpaid jobs.
+# Outbound HTTPS only — nothing on this PC is exposed to the internet.
+CLOUD_URL = os.environ.get("PRINTSHOP_CLOUD_URL", "")  # e.g. https://print.tfix.in/api/shop.php
+CLOUD_TOKEN = os.environ.get("PRINTSHOP_CLOUD_TOKEN", "")
+CLOUD_SYNC_INTERVAL_SEC = int(os.environ.get("PRINTSHOP_CLOUD_SYNC_INTERVAL_SEC", 60))

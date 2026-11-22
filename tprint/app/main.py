@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from . import cleanup, config, db, mdns_service, printing, routes_admin, routes_customer
+from . import cleanup, cloud_sync, config, db, mdns_service, printing, routes_admin, routes_customer
 from .security import HSTSMiddleware, start_http_redirect_server, stop_http_redirect_server
 
 app = FastAPI(title="Shop Print Server")
@@ -29,6 +29,7 @@ def on_startup():
     db.init_db()
     from .print_service import initialize
     initialize()
+    cloud_sync.initialize()
     if config.ENABLE_HTTP_REDIRECT:
         try:
             start_http_redirect_server()
@@ -48,6 +49,7 @@ def on_startup():
         print(f"[printers] Could not enumerate Windows printers: {e}")
 
     cleanup.start_cleanup_loop()
+    cloud_sync.start()
 
 
 @app.on_event("shutdown")
@@ -55,6 +57,7 @@ def on_shutdown():
     mdns_service.stop_mdns()
     stop_http_redirect_server()
     cleanup.stop_cleanup_loop()
+    cloud_sync.stop()
 
 
 # ================= STATIC FRONTENDS =================

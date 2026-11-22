@@ -21,3 +21,12 @@
   walking job IDs can't reveal customers or link to their documents. The
   customer status page keeps showing the details it already had.
 - New tests: tests/test_customer_api.py (29 tests pass in total).
+
+# Online orders (print.tfix.in)
+- app/cloud_sync.py: fetches orders placed on print.tfix.in (even while the shop
+  was closed), converts/prices each file like an in-shop upload, adds it as an
+  unpaid queued job, acknowledges the website, and pushes job status back so
+  the customer can follow the order. Idempotent; network errors retry next cycle.
+- app/config.py: PRINTSHOP_CLOUD_URL / PRINTSHOP_CLOUD_TOKEN / ..._SYNC_INTERVAL_SEC.
+- app/main.py: starts/stops the sync loop (off unless configured).
+- tests/test_cloud_sync.py: end-to-end with the real PHP inbox (php -S + SQLite).

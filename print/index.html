@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>T FIX CUSAT Print</title>
-<meta name="description" content="Printing, Xerox, lamination and binding at T FIX CUSAT, South Pipeline Road, Kalamassery. Order on WhatsApp and collect at the shop.">
+<meta name="description" content="Printing, Xerox, lamination and binding at T FIX CUSAT, South Pipeline Road, Kalamassery. Upload your files online any time and collect your prints at the shop.">
 <meta name="theme-color" content="#14161F">
 <meta property="og:title" content="T FIX CUSAT Print — Send. Print. Collect.">
-<meta property="og:description" content="Printing, Xerox, lamination and binding near CUSAT. Order on WhatsApp.">
+<meta property="og:description" content="Printing, Xerox, lamination and binding near CUSAT. Upload your files online any time.">
 <meta property="og:url" content="https://print.tfix.in/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
 /* ------------------------------------------------------------------
    Brand system — one signature device used everywhere:
    the CMY "offset" (cyan / magenta / yellow slightly out of register),
-   one mantra (Send. Print. Collect.), one action (Order on WhatsApp).
+   one mantra (Send. Print. Collect.), one action (Upload files).
 ------------------------------------------------------------------- */
 :root{
   --ink:#14161F;
@@ -48,6 +48,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{scroll-behavior:smooth}
 body{
   margin:0; background:var(--paper); color:var(--ink);
@@ -159,6 +160,71 @@ textarea{min-height:84px; resize:vertical}
 .attach svg{width:20px; height:20px; flex:none; margin-top:2px}
 .summary .btn{width:100%}
 
+/* Online order */
+.closed-note{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin:0 0 18px;
+  background:color-mix(in srgb,var(--cyan) 12%,var(--card)); border:1px solid color-mix(in srgb,var(--cyan) 40%,var(--line)); font-size:15px}
+.closed-note b{flex:none; width:10px; height:10px; margin-top:7px; border-radius:50%; background:var(--cyan)}
+input[type=tel]{width:100%; min-height:48px; padding:10px 14px; border-radius:12px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink); font:inherit; font-size:16px}
+.drop{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:120px;
+  padding:18px; border:2px dashed var(--line); border-radius:16px; background:var(--paper); cursor:pointer; text-align:center}
+.drop:hover,.drop.over{border-color:var(--magenta)}
+.drop:has(input:focus-visible){outline:3px solid var(--cyan); outline-offset:2px}
+.drop svg{width:30px; height:30px; color:var(--magenta)}
+.drop b{font-size:17px}
+.drop small{color:var(--muted); font-size:13px}
+.drop input{position:absolute; inset:0; opacity:0; cursor:pointer}
+.files{display:grid; gap:12px; margin-top:12px}
+.file{border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--paper)}
+.file-head{display:flex; gap:10px; align-items:center; margin-bottom:12px}
+.file-icon{flex:none; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; font-size:11px; font-weight:700;
+  color:#fff; background:var(--ink); text-transform:uppercase}
+.file-icon.pdf{background:var(--magenta)} .file-icon.img{background:var(--cyan)} .file-icon.doc{background:#3b5bdb}
+.file-name{flex:1; min-width:0}
+.file-name b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.file-name small{color:var(--muted)}
+.file-x{flex:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink);
+  font-size:20px; line-height:1; cursor:pointer}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:12px 14px}
+.opt-lbl{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px}
+.opts .seg{gap:6px}
+.opts .seg label{min-height:40px; padding:0 12px; font-size:14px; background:var(--card)}
+.opts .stepper{background:var(--card)}
+.opts .stepper input,.opts .stepper button{min-height:40px}
+.opts select,.opts input[type=text]{min-height:40px; background:var(--card); font-size:15px; padding:8px 12px}
+.range-input{margin-top:6px}
+.field-err{color:var(--bad); font-size:13px; margin:4px 0 0}
+.form-error{color:var(--bad); font-weight:600; font-size:14px; margin:0 0 12px}
+.progress{height:6px; border-radius:6px; background:var(--line); overflow:hidden; margin-top:10px}
+.progress i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow)); transition:width .2s}
+.btn[disabled]{opacity:.65; cursor:progress}
+.summary .btn{width:100%}
+.summary .btn + .btn{margin-top:10px}
+.lines li.unk span:last-child{color:var(--muted); font-size:13px}
+/* My orders */
+.orders{display:grid; gap:14px}
+.ocard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
+.ocard.new{border-color:var(--magenta); box-shadow:0 0 0 3px color-mix(in srgb,var(--magenta) 25%,transparent),var(--shadow)}
+.osent{margin:0 0 12px; font-weight:600}
+.ohead{display:flex; justify-content:space-between; gap:8px 16px; align-items:flex-start; flex-wrap:wrap}
+.ocode{font-size:24px; font-weight:700; letter-spacing:.06em; font-variant-numeric:tabular-nums}
+.ocode small{display:block; font-size:12px; letter-spacing:0; font-weight:500; color:var(--muted)}
+.oamt{text-align:right; font-size:22px; font-weight:700}
+.oamt small{display:block; font-size:12px; font-weight:500; color:var(--muted)}
+.ostatus{margin:12px 0 2px; font-size:18px; font-weight:700}
+.odetail{margin:0; color:var(--muted)}
+.track{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:14px 0 6px}
+.track span{height:6px; border-radius:6px; background:var(--line)}
+.track span.on{background:var(--magenta)}
+.track-labels{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; font-size:11px; color:var(--muted)}
+.ofiles{list-style:none; padding:0; margin:12px 0 0; font-size:14px}
+.ofiles li{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-top:1px dashed var(--line)}
+.ofiles li span:first-child{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ofiles .err{color:var(--bad); white-space:normal}
+.oactions{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+.oactions .btn{min-height:40px; font-size:14px; padding:0 14px}
+@media (max-width:520px){ .opts{grid-template-columns:1fr} .oamt{text-align:left} }
+
 /* Prices */
 .prices{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px}
 .price{display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
@@ -237,9 +303,9 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
       <span class="offset" data-i18n="m2" data-text="Print.">Print.</span>
       <span class="offset" data-i18n="m3" data-text="Collect.">Collect.</span>
     </h1>
-    <p class="lead" data-i18n="lead">Printing, Xerox, lamination and binding next to CUSAT. Send your file on WhatsApp, we print it, you collect it at the shop.</p>
+    <p class="lead" data-i18n="lead">Printing, Xerox and binding next to CUSAT. Upload your files any time — even at night — and collect your prints at the shop.</p>
     <div class="cta">
-      <a class="btn btn-ink" href="#order" data-i18n="ctaOrder">Start an order</a>
+      <a class="btn btn-ink" href="#order" data-i18n="ctaOrder">Upload files</a>
       <a class="btn btn-wa" data-wa-plain href="#" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
         <span data-i18n="ctaWa">WhatsApp us</span>
@@ -252,82 +318,43 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
       <p class="eyebrow" data-i18n="howEyebrow">How it works</p>
       <h2 data-i18n="howTitle">Three steps. That's it.</h2>
       <div class="steps">
-        <div class="step"><div class="n">1</div><h3 data-i18n="s1t">Send</h3><p data-i18n="s1p">Choose your options below and tap “Order on WhatsApp”. Attach your PDF, photo or document in the chat.</p></div>
-        <div class="step"><div class="n">2</div><h3 data-i18n="s2t">Print</h3><p data-i18n="s2p">We confirm the price on WhatsApp and print your order.</p></div>
-        <div class="step"><div class="n">3</div><h3 data-i18n="s3t">Collect</h3><p data-i18n="s3p">Pick it up at the shop on South Pipeline Road, near CUSAT. Pay at the counter.</p></div>
+        <div class="step"><div class="n">1</div><h3 data-i18n="s1t">Upload</h3><p data-i18n="s1p">Upload your files and choose print options. Any time — even when we're closed.</p></div>
+        <div class="step"><div class="n">2</div><h3 data-i18n="s2t">Pay</h3><p data-i18n="s2p">We check your files and confirm the price. Pay at the shop (cash or UPI) — we print once payment is confirmed.</p></div>
+        <div class="step"><div class="n">3</div><h3 data-i18n="s3t">Collect</h3><p data-i18n="s3p">Pick up your prints at the shop on South Pipeline Road, near CUSAT.</p></div>
       </div>
     </div>
   </section>
 
   <section id="order">
     <div class="wrap">
-      <p class="eyebrow" data-i18n="orderEyebrow">Order</p>
-      <h2 data-i18n="orderTitle">Build your print order</h2>
+      <p class="eyebrow" data-i18n="orderEyebrow">Order online</p>
+      <h2 data-i18n="orderTitle">Upload your files</h2>
+      <p class="closed-note" id="closedNote" hidden><b aria-hidden="true"></b><span></span></p>
       <div class="order">
-        <form class="card" id="orderForm" autocomplete="on" onsubmit="return false">
-          <div class="field">
-            <span class="lbl" data-i18n="fColour">Print type</span>
-            <div class="seg">
-              <label><input type="radio" name="colour" value="bw" checked><span data-i18n="bw">Black &amp; white</span></label>
-              <label><input type="radio" name="colour" value="colour"><span data-i18n="colour">Colour</span></label>
-            </div>
-          </div>
-          <div class="row2">
-            <div class="field">
-              <span class="lbl" data-i18n="fSize">Paper size</span>
-              <div class="seg">
-                <label><input type="radio" name="size" value="A4" checked><span>A4</span></label>
-                <label><input type="radio" name="size" value="A3"><span>A3</span></label>
-              </div>
-            </div>
-            <div class="field">
-              <span class="lbl" data-i18n="fSides">Sides</span>
-              <div class="seg">
-                <label><input type="radio" name="sides" value="single" checked><span data-i18n="single">Single</span></label>
-                <label><input type="radio" name="sides" value="double"><span data-i18n="double">Both sides</span></label>
-              </div>
-            </div>
-          </div>
-          <div class="row2">
-            <div class="field">
-              <label for="pages" data-i18n="fPages">Pages in file</label>
-              <div class="stepper">
-                <button type="button" data-step="pages" data-d="-1" aria-label="Fewer pages">−</button>
-                <input id="pages" name="pages" type="number" inputmode="numeric" min="1" max="2000" value="1">
-                <button type="button" data-step="pages" data-d="1" aria-label="More pages">+</button>
-              </div>
-            </div>
-            <div class="field">
-              <label for="copies" data-i18n="fCopies">Copies</label>
-              <div class="stepper">
-                <button type="button" data-step="copies" data-d="-1" aria-label="Fewer copies">−</button>
-                <input id="copies" name="copies" type="number" inputmode="numeric" min="1" max="500" value="1">
-                <button type="button" data-step="copies" data-d="1" aria-label="More copies">+</button>
-              </div>
-            </div>
-          </div>
-          <div class="field">
-            <label for="finish" data-i18n="fFinish">Finishing</label>
-            <select id="finish" name="finish">
-              <option value="none" data-i18n="fnNone">None</option>
-              <option value="staple" data-i18n="fnStaple">Staple</option>
-              <option value="spiral" data-i18n="fnSpiral">Spiral binding</option>
-              <option value="lamination" data-i18n="fnLam">Lamination</option>
-            </select>
-          </div>
+        <form class="card" id="orderForm" autocomplete="on" novalidate onsubmit="return false">
           <div class="row2">
             <div class="field">
               <label for="name" data-i18n="fName">Your name</label>
-              <input id="name" name="name" type="text" autocomplete="name" maxlength="60">
+              <input id="name" name="name" type="text" autocomplete="name" maxlength="60" required>
             </div>
             <div class="field">
-              <label for="pickup" data-i18n="fPickup">Pickup time</label>
-              <input id="pickup" name="pickup" type="time">
+              <label for="phone" data-i18n="fPhone">Mobile number</label>
+              <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" data-i18n-ph="phonePh" placeholder="10-digit mobile" required>
             </div>
+          </div>
+          <div class="field">
+            <span class="lbl" data-i18n="fFiles">Files</span>
+            <label class="drop" id="drop">
+              <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.pptx,.ppt,application/pdf,image/jpeg,image/png">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+              <b data-i18n="dropTitle">Tap to add files</b>
+              <small data-i18n="dropSub">PDF, JPG, PNG, Word or PowerPoint · up to 10 files, 25 MB each</small>
+            </label>
+            <div class="files" id="fileList"></div>
           </div>
           <div class="field" style="margin-bottom:0">
             <label for="notes" data-i18n="fNotes">Notes (optional)</label>
-            <textarea id="notes" name="notes" maxlength="400" data-i18n-ph="notesPh" placeholder="e.g. print pages 3–10 only, colour cover page"></textarea>
+            <textarea id="notes" name="notes" maxlength="400" data-i18n-ph="notesPh" placeholder="e.g. spiral binding, colour cover page"></textarea>
           </div>
         </form>
 
@@ -335,24 +362,32 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
           <h3 data-i18n="sumTitle">Your order</h3>
           <ul class="lines" id="lines"></ul>
           <div class="total"><span data-i18n="estTotal">Estimated total</span><strong id="total">₹0</strong></div>
-          <p class="note" data-i18n="estNote">Final price is confirmed on WhatsApp before printing.</p>
+          <p class="note" data-i18n="estNote">Estimate. The shop confirms the final price when it receives your order.</p>
           <div class="attach">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
-            <span data-i18n="attachTip">After WhatsApp opens, tap the 📎 clip and attach your file before sending.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>
+            <span data-i18n="payNote">Pay at the shop (cash or UPI). We start printing once your payment is confirmed.</span>
           </div>
-          <a class="btn btn-wa" id="sendOrder" href="#" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
-            <span data-i18n="sendOrder">Order on WhatsApp</span>
-          </a>
+          <p class="form-error" id="formError" role="alert" hidden></p>
+          <button class="btn btn-ink" id="submitBtn" type="button" data-i18n="send">Send order</button>
+          <div class="progress" id="progress" hidden><i></i></div>
+          <a class="btn btn-ghost" data-wa-plain href="#" target="_blank" rel="noopener" data-i18n="askWa">Questions? WhatsApp us</a>
         </aside>
       </div>
+    </div>
+  </section>
+
+  <section id="myorders" hidden>
+    <div class="wrap">
+      <p class="eyebrow" data-i18n="myEyebrow">Your orders</p>
+      <h2 data-i18n="myTitle">Track your order</h2>
+      <div class="orders" id="orderCards"></div>
     </div>
   </section>
 
   <section id="prices">
     <div class="wrap">
       <p class="eyebrow" data-i18n="priceEyebrow">Prices</p>
-      <h2 data-i18n="priceTitle">Simple, fixed prices</h2>
+      <h2 data-i18n="priceTitle">Printing prices</h2>
       <div class="prices" id="priceList"></div>
       <p class="note" id="priceNote" style="margin-top:14px"></p>
     </div>
@@ -397,8 +432,8 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
 </footer>
 
 <div class="fab">
-  <a class="btn btn-wa" href="#order" aria-label="Order on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
+  <a class="btn btn-wa" href="#order" aria-label="Order online">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
     <span data-i18n="fab">Order</span>
   </a>
 </div>
@@ -415,6 +450,9 @@ const SHOP = {
   hours: { 0:["09:30","21:30"], 1:["08:30","21:30"], 2:["08:30","21:30"], 3:["08:30","21:30"],
            4:["08:30","21:30"], 5:["08:30","21:30"], 6:["08:30","21:30"] }
 };
+const API = "api/";                    // online order inbox (PHP) on this site
+const MAX_FILES = 10, MAX_FILE_MB = 25, MAX_ORDER_MB = 60;
+const ALLOWED_EXT = ["pdf", "jpg", "jpeg", "png", "docx", "pptx", "ppt"];
 
 // Prices (₹) — same as the T Print shop system (app/config.py DEFAULT_PRICING).
 // single = one sheet printed on one side, double = one sheet printed on both sides,
@@ -435,18 +473,19 @@ const PRICE_LIST = [
   { en: "Passport photos",   ml: "പാസ്പോർട്ട് ഫോട്ടോ", sub: "", price: null }
 ];
 
-// Same calculation as the T Print system (app/pricing.py, 1 page per sheet).
-function tprintCost(pages, type, double, copies, size) {
+// Same calculation as the T Print system (app/pricing.py print_cost).
+function tprintCost(pages, type, double, copies, size, pps = 1, applyMin = true) {
   const r = RATES[size][type];
+  const printPages = Math.ceil(pages / pps);
   let sheets, odd = 0, cost;
-  if (double) { odd = pages % 2; sheets = Math.floor(pages / 2); cost = sheets * r.double + odd * r.single; }
-  else { sheets = pages; cost = sheets * r.single; }
+  if (double) { odd = printPages % 2; sheets = Math.floor(printPages / 2); cost = sheets * r.double + odd * r.single; }
+  else { sheets = printPages; cost = sheets * r.single; }
   cost *= copies;
   const totalSheets = (sheets + odd) * copies;
   let total = cost, minApplied = false;
-  if (type === "bw") {
+  if (type === "bw" && applyMin) {
     const min = RATES[size].bw.min;
-    total = (pages > 1 && double) ? cost - r.double + min : cost - r.single + min;
+    total = (printPages > 1 && double) ? cost - r.double + min : cost - r.single + min;
     minApplied = true;
   }
   return { total, cost, totalSheets, minApplied };
@@ -458,55 +497,93 @@ function tprintCost(pages, type, double, copies, size) {
 const T = {
   en: {
     m1:"Send.", m2:"Print.", m3:"Collect.", mantra:"Send. Print. Collect.",
-    lead:"Printing, Xerox, lamination and binding next to CUSAT. Send your file on WhatsApp, we print it, you collect it at the shop.",
-    ctaOrder:"Start an order", ctaWa:"WhatsApp us",
+    lead:"Printing, Xerox and binding next to CUSAT. Upload your files any time — even at night — and collect your prints at the shop.",
+    ctaOrder:"Upload files", ctaWa:"WhatsApp us",
     howEyebrow:"How it works", howTitle:"Three steps. That's it.",
-    s1t:"Send", s1p:"Choose your options below and tap “Order on WhatsApp”. Attach your PDF, photo or document in the chat.",
-    s2t:"Print", s2p:"We confirm the price on WhatsApp and print your order.",
-    s3t:"Collect", s3p:"Pick it up at the shop on South Pipeline Road, near CUSAT. Pay at the counter.",
-    orderEyebrow:"Order", orderTitle:"Build your print order",
-    fColour:"Print type", bw:"Black & white", colour:"Colour", fSize:"Paper size", fSides:"Sides",
-    single:"Single", double:"Both sides", fPages:"Pages in file", fCopies:"Copies", fFinish:"Finishing",
-    fnNone:"None", fnStaple:"Staple", fnSpiral:"Spiral binding", fnLam:"Lamination",
-    fName:"Your name", fPickup:"Pickup time", fNotes:"Notes (optional)",
-    notesPh:"e.g. print pages 3–10 only, colour cover page",
-    sumTitle:"Your order", estTotal:"Estimated total", estNote:"Includes the minimum charge for a first B&W order of the day. Final price is confirmed on WhatsApp before printing.",
-    attachTip:"After WhatsApp opens, tap the 📎 clip and attach your file before sending.",
-    sendOrder:"Order on WhatsApp", fab:"Order",
-    priceEyebrow:"Prices", priceTitle:"Printing prices", ask:"Ask us",
-    oneSide:"one side", bothSides:"both sides",
+    s1t:"Upload", s1p:"Upload your files and choose print options. Any time — even when we're closed.",
+    s2t:"Pay", s2p:"We check your files and confirm the price. Pay at the shop (cash or UPI) — we print once payment is confirmed.",
+    s3t:"Collect", s3p:"Pick up your prints at the shop on South Pipeline Road, near CUSAT.",
+    orderEyebrow:"Order online", orderTitle:"Upload your files",
+    closedNote:"We're closed right now. Send your order anyway — it will be waiting for us when we open ({when}).",
+    fName:"Your name", fPhone:"Mobile number", phonePh:"10-digit mobile",
+    fFiles:"Files", dropTitle:"Tap to add files", dropSub:"PDF, JPG, PNG, Word or PowerPoint · up to 10 files, 25 MB each",
+    fNotes:"Notes (optional)", notesPh:"e.g. spiral binding, colour cover page",
+    pagesN:"{n} pages", page1:"1 page", pagesCounting:"Counting pages…", pagesAtShop:"Pages counted at the shop",
+    optType:"Print", bw:"B&W", colour:"Colour", optSize:"Paper", optSides:"Sides", single:"One side", double:"Both sides",
+    optCopies:"Copies", optPages:"Pages", pagesAll:"All pages", pagesCustom:"Choose pages", rangePh:"e.g. 1-5, 8",
+    rangeErr:"Use pages within 1–{n}, e.g. 1-5, 8", rangeErrU:"Use page numbers like 1-5, 8", optPps:"Pages per sheet", remove:"Remove",
+    sumTitle:"Your order", estTotal:"Estimated total", noFiles:"Add files to see the price",
+    estNote:"Estimate. The shop confirms the final price when it receives your order (B&W minimum charge applies to your first order of the day).",
+    atShop:"priced at shop", lnMin:"B&W minimum charge",
+    payNote:"Pay at the shop (cash or UPI). We start printing once your payment is confirmed.",
+    send:"Send order", sending:"Sending… {p}%", askWa:"Questions? WhatsApp us",
+    errName:"Please enter your name.", errPhone:"Please enter a valid 10-digit mobile number.",
+    errFiles:"Please add at least one file.", errRange:"Please fix the page selection.",
+    errTooBig:"“{f}” is larger than 25 MB.", errTooMany:"You can send up to 10 files in one order.",
+    errType:"“{f}” is not supported. Use PDF, JPG, PNG, DOCX or PPTX.", errTotal:"Files are too large together (max 60 MB).",
+    errNet:"Could not send your order. Check your connection and try again.",
+    priceEyebrow:"Prices", priceTitle:"Printing prices", ask:"Ask us", oneSide:"one side", bothSides:"both sides",
     priceNote:"Prices per sheet. B&W minimum charge {a4} (A4) / {a3} (A3) on your first order of the day — waived from your second order.",
-    lnMin:"B&W minimum charge", finishAsk:"on WhatsApp",
+    myEyebrow:"Your orders", myTitle:"Track your order",
+    st_pending:"Waiting for shop", st_pending_d:"Your order is saved. The shop will pick it up when it opens.",
+    st_received:"Price confirmed", st_received_d:"Please pay {amt} at the shop. We print after payment is confirmed.",
+    st_paid:"Paid — in the print queue", st_paid_d:"We'll print your order shortly.",
+    st_printing:"Printing", st_printing_d:"Your order is on the printer.",
+    st_ready:"Ready for pickup", st_ready_d:"Collect it at the shop.",
+    st_collected:"Collected", st_collected_d:"Thank you!",
+    st_cancelled:"Cancelled", st_cancelled_d:"Contact the shop for details.",
+    tr1:"Sent", tr2:"Confirmed", tr3:"Paid", tr4:"Printing", tr5:"Ready",
+    estimate:"Estimate", total:"Total", copyLink:"Copy link", copied:"Copied", hide:"Hide",
+    orderSent:"Order sent! Keep this code — and copy the link to check your order on another phone.",
+    fileProblem:"Problem", orderCode:"Order code", loadErr:"Couldn't load the latest status.",
     visitEyebrow:"Visit", visitTitle:"Collect at the shop", directions:"Directions", call:"Call",
     hoursTitle:"Opening hours", monSat:"Monday – Saturday", sun:"Sunday",
-    open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow",
-    lnPrint:"Printing", lnFinish:"Finishing", lnSheets:"sheets", lnPages:"pages", lnCopies:"copies"
+    open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow", fab:"Order"
   },
   ml: {
     m1:"അയയ്ക്കൂ.", m2:"പ്രിന്റ്.", m3:"കൈപ്പറ്റൂ.", mantra:"അയയ്ക്കൂ. പ്രിന്റ്. കൈപ്പറ്റൂ.",
-    lead:"CUSAT-ന് തൊട്ടടുത്ത് പ്രിന്റിംഗ്, സെറോക്സ്, ലാമിനേഷൻ, ബൈൻഡിംഗ്. ഫയൽ WhatsApp-ൽ അയയ്ക്കൂ, ഞങ്ങൾ പ്രിന്റ് ചെയ്യും, കടയിൽ വന്ന് വാങ്ങാം.",
-    ctaOrder:"ഓർഡർ തുടങ്ങൂ", ctaWa:"WhatsApp ചെയ്യൂ",
+    lead:"CUSAT-ന് തൊട്ടടുത്ത് പ്രിന്റിംഗ്, സെറോക്സ്, ബൈൻഡിംഗ്. ഏത് സമയത്തും — രാത്രിയിലും — ഫയലുകൾ അപ്‌ലോഡ് ചെയ്യൂ, കടയിൽ വന്ന് പ്രിന്റുകൾ വാങ്ങൂ.",
+    ctaOrder:"ഫയൽ അപ്‌ലോഡ്", ctaWa:"WhatsApp ചെയ്യൂ",
     howEyebrow:"എങ്ങനെ", howTitle:"മൂന്ന് ഘട്ടങ്ങൾ മാത്രം.",
-    s1t:"അയയ്ക്കൂ", s1p:"താഴെ ഓപ്ഷനുകൾ തിരഞ്ഞെടുത്ത് “WhatsApp-ൽ ഓർഡർ ചെയ്യൂ” അമർത്തൂ. ചാറ്റിൽ PDF, ഫോട്ടോ അല്ലെങ്കിൽ ഡോക്യുമെന്റ് അറ്റാച്ച് ചെയ്യൂ.",
-    s2t:"പ്രിന്റ്", s2p:"WhatsApp-ൽ തുക ഉറപ്പിച്ച ശേഷം ഞങ്ങൾ പ്രിന്റ് ചെയ്യും.",
-    s3t:"കൈപ്പറ്റൂ", s3p:"CUSAT-ന് സമീപം സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡിലെ കടയിൽ നിന്ന് വാങ്ങാം. പണം കൗണ്ടറിൽ നൽകാം.",
-    orderEyebrow:"ഓർഡർ", orderTitle:"നിങ്ങളുടെ പ്രിന്റ് ഓർഡർ",
-    fColour:"പ്രിന്റ് തരം", bw:"ബ്ലാക്ക് & വൈറ്റ്", colour:"കളർ", fSize:"പേപ്പർ വലുപ്പം", fSides:"വശങ്ങൾ",
-    single:"ഒരു വശം", double:"ഇരുവശവും", fPages:"ഫയലിലെ പേജുകൾ", fCopies:"കോപ്പികൾ", fFinish:"ഫിനിഷിംഗ്",
-    fnNone:"ഒന്നുമില്ല", fnStaple:"സ്റ്റാപ്പിൾ", fnSpiral:"സ്പൈറൽ ബൈൻഡിംഗ്", fnLam:"ലാമിനേഷൻ",
-    fName:"നിങ്ങളുടെ പേര്", fPickup:"വാങ്ങാൻ വരുന്ന സമയം", fNotes:"കുറിപ്പ് (ആവശ്യമെങ്കിൽ)",
-    notesPh:"ഉദാ: 3–10 പേജുകൾ മാത്രം, കവർ പേജ് കളറിൽ",
-    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", estNote:"ദിവസത്തെ ആദ്യ B&W ഓർഡറിന്റെ മിനിമം ചാർജ് ഉൾപ്പെടെ. പ്രിന്റ് ചെയ്യുന്നതിന് മുൻപ് അന്തിമ തുക WhatsApp-ൽ ഉറപ്പിക്കും.",
-    attachTip:"WhatsApp തുറന്ന ശേഷം 📎 അമർത്തി ഫയൽ അറ്റാച്ച് ചെയ്ത് അയയ്ക്കൂ.",
-    sendOrder:"WhatsApp-ൽ ഓർഡർ ചെയ്യൂ", fab:"ഓർഡർ",
-    priceEyebrow:"നിരക്കുകൾ", priceTitle:"ലളിതമായ നിരക്കുകൾ", ask:"ചോദിക്കൂ",
-    oneSide:"ഒരു വശം", bothSides:"ഇരുവശവും",
+    s1t:"അപ്‌ലോഡ്", s1p:"ഫയലുകൾ അപ്‌ലോഡ് ചെയ്ത് പ്രിന്റ് ഓപ്ഷനുകൾ തിരഞ്ഞെടുക്കൂ. കട അടച്ചിരിക്കുമ്പോഴും ചെയ്യാം.",
+    s2t:"പണമടയ്ക്കൂ", s2p:"ഫയലുകൾ പരിശോധിച്ച് തുക ഉറപ്പിക്കും. കടയിൽ പണം നൽകൂ (ക്യാഷ് / UPI) — പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.",
+    s3t:"കൈപ്പറ്റൂ", s3p:"CUSAT-ന് സമീപം സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡിലെ കടയിൽ നിന്ന് പ്രിന്റുകൾ വാങ്ങാം.",
+    orderEyebrow:"ഓൺലൈൻ ഓർഡർ", orderTitle:"ഫയലുകൾ അപ്‌ലോഡ് ചെയ്യൂ",
+    closedNote:"ഇപ്പോൾ കട അടച്ചിരിക്കുന്നു. എങ്കിലും ഓർഡർ അയയ്ക്കാം — കട തുറക്കുമ്പോൾ ({when}) ഞങ്ങൾ എടുക്കും.",
+    fName:"നിങ്ങളുടെ പേര്", fPhone:"മൊബൈൽ നമ്പർ", phonePh:"10 അക്ക മൊബൈൽ നമ്പർ",
+    fFiles:"ഫയലുകൾ", dropTitle:"ഫയലുകൾ ചേർക്കാൻ ടാപ്പ് ചെയ്യൂ", dropSub:"PDF, JPG, PNG, Word, PowerPoint · 10 ഫയലുകൾ വരെ, ഓരോന്നും 25 MB വരെ",
+    fNotes:"കുറിപ്പ് (ആവശ്യമെങ്കിൽ)", notesPh:"ഉദാ: സ്പൈറൽ ബൈൻഡിംഗ്, കവർ പേജ് കളറിൽ",
+    pagesN:"{n} പേജ്", page1:"1 പേജ്", pagesCounting:"പേജുകൾ എണ്ണുന്നു…", pagesAtShop:"പേജുകൾ കടയിൽ എണ്ണും",
+    optType:"പ്രിന്റ്", bw:"B&W", colour:"കളർ", optSize:"പേപ്പർ", optSides:"വശങ്ങൾ", single:"ഒരു വശം", double:"ഇരുവശവും",
+    optCopies:"കോപ്പികൾ", optPages:"പേജുകൾ", pagesAll:"എല്ലാ പേജും", pagesCustom:"പേജുകൾ തിരഞ്ഞെടുക്കൂ", rangePh:"ഉദാ: 1-5, 8",
+    rangeErr:"1–{n} നുള്ളിലെ പേജുകൾ നൽകൂ, ഉദാ: 1-5, 8", rangeErrU:"ഉദാ: 1-5, 8 എന്ന രീതിയിൽ നൽകൂ", optPps:"ഒരു ഷീറ്റിൽ പേജുകൾ", remove:"നീക്കം ചെയ്യൂ",
+    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", noFiles:"തുക കാണാൻ ഫയലുകൾ ചേർക്കൂ",
+    estNote:"ഇത് ഏകദേശ തുകയാണ്. ഓർഡർ ലഭിക്കുമ്പോൾ കട അന്തിമ തുക ഉറപ്പിക്കും (ദിവസത്തെ ആദ്യ ഓർഡറിന് B&W മിനിമം ചാർജ് ബാധകം).",
+    atShop:"തുക കടയിൽ", lnMin:"B&W മിനിമം ചാർജ്",
+    payNote:"കടയിൽ പണം നൽകൂ (ക്യാഷ് / UPI). പണം ലഭിച്ചതായി ഉറപ്പിച്ച ശേഷം പ്രിന്റ് തുടങ്ങും.",
+    send:"ഓർഡർ അയയ്ക്കൂ", sending:"അയയ്ക്കുന്നു… {p}%", askWa:"സംശയങ്ങൾ? WhatsApp ചെയ്യൂ",
+    errName:"പേര് നൽകൂ.", errPhone:"ശരിയായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകൂ.",
+    errFiles:"കുറഞ്ഞത് ഒരു ഫയൽ ചേർക്കൂ.", errRange:"പേജ് തിരഞ്ഞെടുപ്പ് ശരിയാക്കൂ.",
+    errTooBig:"“{f}” 25 MB-യിൽ കൂടുതലാണ്.", errTooMany:"ഒരു ഓർഡറിൽ 10 ഫയലുകൾ വരെ മാത്രം.",
+    errType:"“{f}” പിന്തുണയ്ക്കുന്നില്ല. PDF, JPG, PNG, DOCX, PPTX ഉപയോഗിക്കൂ.", errTotal:"ഫയലുകൾ മൊത്തം വളരെ വലുതാണ് (പരമാവധി 60 MB).",
+    errNet:"ഓർഡർ അയയ്ക്കാനായില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.",
+    priceEyebrow:"നിരക്കുകൾ", priceTitle:"പ്രിന്റിംഗ് നിരക്കുകൾ", ask:"ചോദിക്കൂ", oneSide:"ഒരു വശം", bothSides:"ഇരുവശവും",
     priceNote:"നിരക്ക് ഓരോ ഷീറ്റിനും. ബ്ലാക്ക് & വൈറ്റിന് ദിവസത്തെ ആദ്യ ഓർഡറിൽ മിനിമം ചാർജ് {a4} (A4) / {a3} (A3) — രണ്ടാമത്തെ ഓർഡർ മുതൽ ഇല്ല.",
-    lnMin:"ബ്ലാക്ക് & വൈറ്റ് മിനിമം ചാർജ്", finishAsk:"WhatsApp-ൽ",
+    myEyebrow:"നിങ്ങളുടെ ഓർഡറുകൾ", myTitle:"ഓർഡർ നില",
+    st_pending:"കടയ്ക്കായി കാത്തിരിക്കുന്നു", st_pending_d:"ഓർഡർ സേവ് ചെയ്തു. കട തുറക്കുമ്പോൾ എടുക്കും.",
+    st_received:"തുക ഉറപ്പിച്ചു", st_received_d:"കടയിൽ {amt} നൽകൂ. പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.",
+    st_paid:"പണം ലഭിച്ചു — പ്രിന്റ് ക്യൂവിൽ", st_paid_d:"ഉടൻ പ്രിന്റ് ചെയ്യും.",
+    st_printing:"പ്രിന്റ് ചെയ്യുന്നു", st_printing_d:"നിങ്ങളുടെ ഓർഡർ പ്രിന്ററിലാണ്.",
+    st_ready:"വാങ്ങാൻ തയ്യാർ", st_ready_d:"കടയിൽ വന്ന് വാങ്ങൂ.",
+    st_collected:"കൈപ്പറ്റി", st_collected_d:"നന്ദി!",
+    st_cancelled:"റദ്ദാക്കി", st_cancelled_d:"വിവരങ്ങൾക്ക് കടയുമായി ബന്ധപ്പെടൂ.",
+    tr1:"അയച്ചു", tr2:"ഉറപ്പിച്ചു", tr3:"പണം", tr4:"പ്രിന്റ്", tr5:"തയ്യാർ",
+    estimate:"ഏകദേശം", total:"ആകെ", copyLink:"ലിങ്ക് കോപ്പി", copied:"കോപ്പി ചെയ്തു", hide:"മറയ്ക്കൂ",
+    orderSent:"ഓർഡർ അയച്ചു! ഈ കോഡ് സൂക്ഷിക്കൂ — മറ്റൊരു ഫോണിൽ നില അറിയാൻ ലിങ്ക് കോപ്പി ചെയ്യൂ.",
+    fileProblem:"പ്രശ്നം", orderCode:"ഓർഡർ കോഡ്", loadErr:"പുതിയ നില ലഭ്യമായില്ല.",
     visitEyebrow:"സന്ദർശിക്കൂ", visitTitle:"കടയിൽ നിന്ന് വാങ്ങൂ", directions:"വഴി കാണാം", call:"വിളിക്കൂ",
     hoursTitle:"പ്രവർത്തന സമയം", monSat:"തിങ്കൾ – ശനി", sun:"ഞായർ",
-    open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ",
-    lnPrint:"പ്രിന്റിംഗ്", lnFinish:"ഫിനിഷിംഗ്", lnSheets:"ഷീറ്റ്", lnPages:"പേജ്", lnCopies:"കോപ്പി"
+    open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ", fab:"ഓർഡർ"
   }
 };
 
@@ -517,49 +594,50 @@ try { const s = localStorage.getItem("tfix-print-lang"); if (s === "ml" || s ===
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
-const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
+const t = (k, vars) => {
+  let s = (T[lang] && T[lang][k]) || T.en[k] || k;
+  if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace("{" + a + "}", b);
+  return s;
+};
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => c != null && n.append(c));
+  return n;
+};
 
 function applyLang() {
   document.documentElement.lang = lang;
-  $$("[data-i18n]").forEach(el => {
-    const v = t(el.dataset.i18n);
-    el.textContent = v;
-    if (el.classList.contains("offset")) el.dataset.text = v;
+  $$("[data-i18n]").forEach(n => {
+    const v = t(n.dataset.i18n);
+    n.textContent = v;
+    if (n.classList.contains("offset")) n.dataset.text = v;
   });
-  $$("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  $$("[data-i18n-ph]").forEach(n => n.placeholder = t(n.dataset.i18nPh));
   $$(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
-  renderPrices(); updateStatus(); calc();
+  renderPrices(); updateStatus(); renderFiles(); renderOrders();
 }
 
 function renderPrices() {
   $("#priceList").innerHTML = "";
   PRICE_LIST.forEach(p => {
-    const el = document.createElement("div");
-    el.className = "price";
-    const name = document.createElement("span");
-    name.className = "name";
-    name.textContent = lang === "ml" ? p.ml : p.en;
-    if (p.sub) { const s = document.createElement("span"); s.className = "sub"; s.textContent = p.sub; name.appendChild(s); }
-    const amt = document.createElement("span");
+    const name = el("span", { class: "name", text: lang === "ml" ? p.ml : p.en },
+      p.sub ? el("span", { class: "sub", text: p.sub }) : null);
+    let amt;
     if (p.type) {
       const r = RATES[p.size][p.type];
-      amt.className = "amt";
-      amt.innerHTML = "";
-      [[r.single, "oneSide"], [r.double, "bothSides"]].forEach(([v, k]) => {
-        const line = document.createElement("span");
-        line.className = "amt-line";
-        line.textContent = rupee(v) + " " + t(k);
-        amt.appendChild(line);
-      });
-    } else {
-      amt.className = "amt ask";
-      amt.textContent = t("ask");
-    }
-    el.append(name, amt);
-    $("#priceList").appendChild(el);
+      amt = el("span", { class: "amt" },
+        el("span", { class: "amt-line", text: rupee(r.single) + " " + t("oneSide") }),
+        el("span", { class: "amt-line", text: rupee(r.double) + " " + t("bothSides") }));
+    } else amt = el("span", { class: "amt ask", text: t("ask") });
+    $("#priceList").append(el("div", { class: "price" }, name, amt));
   });
-  $("#priceNote").textContent = t("priceNote")
-    .replace("{a4}", rupee(RATES.A4.bw.min)).replace("{a3}", rupee(RATES.A3.bw.min));
+  $("#priceNote").textContent = t("priceNote", { a4: rupee(RATES.A4.bw.min), a3: rupee(RATES.A3.bw.min) });
 }
 
 /* --- Open / closed, in India time --- */
@@ -576,77 +654,335 @@ const fmt12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ?
 function updateStatus() {
   const { day, mins } = nowIST();
   const [o, c] = SHOP.hours[day];
-  let open = mins >= toMins(o) && mins < toMins(c), text;
+  const open = mins >= toMins(o) && mins < toMins(c);
+  let text, when = "";
   if (open) text = t("open") + " " + fmt12(c);
   else {
     const before = mins < toMins(o);
     const nd = before ? day : (day + 1) % 7;
-    text = t("closed") + " " + (before ? t("today") : t("tomorrow")) + " " + fmt12(SHOP.hours[nd][0]);
+    when = (before ? t("today") : t("tomorrow")) + " " + fmt12(SHOP.hours[nd][0]);
+    text = t("closed") + " " + when;
   }
-  $$("[data-status]").forEach(el => { el.classList.toggle("open", open); el.classList.toggle("closed", !open); });
-  $$("[data-status-text]").forEach(el => el.textContent = text);
+  $$("[data-status]").forEach(n => { n.classList.toggle("open", open); n.classList.toggle("closed", !open); });
+  $$("[data-status-text]").forEach(n => n.textContent = text);
   $$(".hours tr").forEach(tr => tr.classList.toggle("today", tr.dataset.days.split(",").includes(String(day))));
+  const note = $("#closedNote");
+  note.hidden = open;
+  if (!open) $("span", note).textContent = t("closedNote", { when });
 }
 
-/* --- Calculator --- */
-const val = name => { const el = $(`[name="${name}"]:checked`) || $(`[name="${name}"]`); return el ? el.value : ""; };
-const num = (id, min, max) => { const n = Math.floor(+$("#" + id).value); return Math.min(max, Math.max(min, isFinite(n) ? n : min)); };
+/* ==================================================================
+   Online order: files + options
+   ================================================================== */
+let files = [];          // { id, file, name, ext, kind, pages (null = unknown), counting, opts }
+let nextId = 1;
 
-function calc() {
-  const colour = val("colour"), size = val("size"), sides = val("sides"), finish = val("finish");
-  const pages = num("pages", 1, 2000), copies = num("copies", 1, 500);
-  const q = tprintCost(pages, colour, sides === "double", copies, size);
-  const total = q.total;
+const extOf = name => (name.split(".").pop() || "").toLowerCase();
+const kindOf = ext => ext === "pdf" ? "pdf" : (ext === "jpg" || ext === "jpeg" || ext === "png") ? "img" : "doc";
 
-  const lines = [
-    [t("lnPrint"), `${pages} ${t("lnPages")} × ${copies} ${t("lnCopies")}`, rupee(q.cost)],
-  ];
-  if (q.minApplied) lines.push([t("lnMin"), "", (q.total >= q.cost ? "+" : "−") + rupee(Math.abs(q.total - q.cost))]);
-  if (finish !== "none") lines.push([t("lnFinish") + " · " + $("#finish").selectedOptions[0].textContent, "", t("finishAsk")]);
-  lines.push([t("lnSheets"), "", String(q.totalSheets)]);
+// Parse "1-5, 8" -> sorted page list (null if invalid). total = null when unknown.
+function parseRange(str, total) {
+  const s = (str || "").replace(/\s+/g, "");
+  if (!/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(s)) return null;
+  const set = new Set();
+  for (const part of s.split(",")) {
+    const [a, b = a] = part.split("-").map(Number);
+    if (a < 1 || a > b || (total != null && b > total) || b - a > 5000) return null;
+    for (let p = a; p <= b; p++) set.add(p);
+  }
+  return [...set].sort((x, y) => x - y);
+}
 
-  const ul = $("#lines"); ul.innerHTML = "";
-  lines.forEach(([a, b, c]) => {
-    const li = document.createElement("li");
-    const l = document.createElement("span"); l.textContent = b ? `${a} (${b})` : a;
-    const r = document.createElement("span"); r.textContent = c;
-    li.append(l, r); ul.appendChild(li);
+function selectedPages(f) {
+  if (f.opts.pagesMode === "all") return f.pages;
+  const list = parseRange(f.opts.range, f.pages);
+  return list ? list.length : null;
+}
+
+let pdfjsReady = null;
+function loadPdfJs() {
+  if (!pdfjsReady) pdfjsReady = new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      res(window.pdfjsLib);
+    };
+    s.onerror = rej;
+    document.head.append(s);
   });
-  $("#total").textContent = rupee(total);
-
-  // WhatsApp message (kept in English so staff can read every order the same way)
-  const name = $("#name").value.trim(), pickup = $("#pickup").value, notes = $("#notes").value.trim();
-  const msg = [
-    "*New print order — print.tfix.in*",
-    `Type: ${colour === "bw" ? "Black & white" : "Colour"}`,
-    `Size: ${size}`,
-    `Sides: ${sides === "double" ? "Both sides" : "Single side"}`,
-    `Pages: ${pages}`,
-    `Copies: ${copies}`,
-    `Finishing: ${{ none: "None", staple: "Staple", spiral: "Spiral binding", lamination: "Lamination" }[finish]}${finish !== "none" ? " (price to confirm)" : ""}`,
-    name ? `Name: ${name}` : null,
-    pickup ? `Pickup: ${fmt12(pickup)}` : null,
-    notes ? `Notes: ${notes}` : null,
-    `Estimated print total: ${rupee(total)}${q.minApplied ? " (incl. B&W minimum charge)" : ""}`,
-    "",
-    "📎 File attached below."
-  ].filter(x => x != null).join("\n");
-  $("#sendOrder").href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent(msg)}`;
+  return pdfjsReady;
 }
+
+async function countPages(f) {
+  if (f.kind === "img") { f.pages = 1; return; }
+  if (f.kind !== "pdf") { f.pages = null; return; }
+  f.counting = true; renderFiles();
+  try {
+    const lib = await loadPdfJs();
+    const doc = await lib.getDocument({ data: await f.file.arrayBuffer() }).promise;
+    f.pages = doc.numPages;
+    doc.destroy();
+  } catch (e) { f.pages = null; }
+  f.counting = false; renderFiles();
+}
+
+function addFiles(list) {
+  hideError();
+  for (const file of list) {
+    const ext = extOf(file.name);
+    if (!ALLOWED_EXT.includes(ext)) { showError(t("errType", { f: file.name })); continue; }
+    if (file.size > MAX_FILE_MB * 1048576) { showError(t("errTooBig", { f: file.name })); continue; }
+    if (files.length >= MAX_FILES) { showError(t("errTooMany")); break; }
+    const f = { id: nextId++, file, name: file.name, ext, kind: kindOf(ext), pages: null, counting: false,
+      opts: { color: false, doubleside: false, paper_size: "A4", copies: 1, pagesMode: "all", range: "", pps: 1 } };
+    files.push(f);
+    countPages(f);
+  }
+  renderFiles();
+}
+
+function seg(name, options, current, onPick) {
+  return el("div", { class: "seg", role: "radiogroup" }, options.map(([value, label]) => {
+    const input = el("input", { type: "radio", name, value });
+    input.checked = value === current;
+    input.addEventListener("change", () => onPick(value));
+    return el("label", {}, input, el("span", { text: label }));
+  }));
+}
+
+function fileCard(f) {
+  const id = f.id, o = f.opts;
+  const meta = f.counting ? t("pagesCounting") : f.pages == null ? t("pagesAtShop")
+    : f.pages === 1 ? t("page1") : t("pagesN", { n: f.pages });
+  const update = fn => { fn(); renderSummary(); };
+
+  const copies = el("input", { type: "number", inputmode: "numeric", min: "1", max: "500", value: String(o.copies), "aria-label": t("optCopies") });
+  copies.addEventListener("input", () => update(() => { o.copies = Math.max(1, Math.min(500, Math.floor(+copies.value) || 1)); }));
+  const step = d => () => { o.copies = Math.max(1, Math.min(500, o.copies + d)); copies.value = o.copies; renderSummary(); };
+
+  const range = el("input", { type: "text", class: "range-input", inputmode: "numeric", value: o.range, placeholder: t("rangePh"), "aria-label": t("pagesCustom") });
+  const rangeErr = el("p", { class: "field-err", hidden: "" });
+  const checkRange = () => {
+    const bad = o.pagesMode === "custom" && !parseRange(o.range, f.pages);
+    rangeErr.hidden = !bad || !o.range;
+    rangeErr.textContent = f.pages ? t("rangeErr", { n: f.pages }) : t("rangeErrU");
+  };
+  range.hidden = o.pagesMode !== "custom";
+  range.addEventListener("input", () => update(() => { o.range = range.value; checkRange(); }));
+  const pagesSel = el("select", { "aria-label": t("optPages") },
+    el("option", { value: "all", text: t("pagesAll") }), el("option", { value: "custom", text: t("pagesCustom") }));
+  pagesSel.value = o.pagesMode;
+  pagesSel.addEventListener("change", () => update(() => {
+    o.pagesMode = pagesSel.value; range.hidden = o.pagesMode !== "custom"; checkRange();
+    if (!range.hidden) range.focus();
+  }));
+  checkRange();
+
+  const pps = el("select", { "aria-label": t("optPps") }, [1, 2, 4].map(n => el("option", { value: String(n), text: String(n) })));
+  pps.value = String(o.pps);
+  pps.addEventListener("change", () => update(() => { o.pps = +pps.value; }));
+
+  return el("div", { class: "file" },
+    el("div", { class: "file-head" },
+      el("span", { class: "file-icon " + f.kind, text: f.ext }),
+      el("span", { class: "file-name" }, el("b", { text: f.name }), el("small", { text: meta })),
+      el("button", { type: "button", class: "file-x", "aria-label": t("remove") + " " + f.name, text: "×",
+        onclick: () => { files = files.filter(x => x.id !== id); renderFiles(); } })),
+    el("div", { class: "opts" },
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optType") }),
+        seg("c" + id, [["bw", t("bw")], ["colour", t("colour")]], o.color ? "colour" : "bw", v => update(() => { o.color = v === "colour"; }))),
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optSides") }),
+        seg("s" + id, [["single", t("single")], ["double", t("double")]], o.doubleside ? "double" : "single", v => update(() => { o.doubleside = v === "double"; }))),
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optSize") }),
+        seg("z" + id, [["A4", "A4"], ["A3", "A3"]], o.paper_size, v => update(() => { o.paper_size = v; }))),
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optCopies") }),
+        el("div", { class: "stepper" },
+          el("button", { type: "button", "aria-label": "−", text: "−", onclick: step(-1) }), copies,
+          el("button", { type: "button", "aria-label": "+", text: "+", onclick: step(1) }))),
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optPages") }), pagesSel, range, rangeErr),
+      el("div", {}, el("span", { class: "opt-lbl", text: t("optPps") }), pps)));
+}
+
+function renderFiles() {
+  const list = $("#fileList");
+  list.replaceChildren(...files.map(fileCard));
+  renderSummary();
+}
+
+function estimate() {
+  let total = 0, unknown = 0;
+  const lines = files.map((f, i) => {
+    const pages = selectedPages(f);
+    if (pages == null) { unknown++; return { f, cost: null }; }
+    const q = tprintCost(pages, f.opts.color ? "colour" : "bw", f.opts.doubleside, f.opts.copies, f.opts.paper_size, f.opts.pps, i === 0);
+    total += q.total;
+    return { f, cost: q.total, pages };
+  });
+  return { total, unknown, lines };
+}
+
+function renderSummary() {
+  const { total, unknown, lines } = estimate();
+  const ul = $("#lines");
+  ul.replaceChildren();
+  if (!files.length) ul.append(el("li", { class: "unk" }, el("span", { text: t("noFiles") }), el("span", { text: "" })));
+  lines.forEach(({ f, cost, pages }) => {
+    const desc = `${f.name}${pages ? ` · ${pages}p × ${f.opts.copies}` : ""}`;
+    ul.append(el("li", { class: cost == null ? "unk" : "" }, el("span", { text: desc }),
+      el("span", { text: cost == null ? t("atShop") : rupee(cost) })));
+  });
+  $("#total").textContent = rupee(total) + (unknown ? " +" : "");
+}
+
+function showError(msg) { const e = $("#formError"); e.textContent = msg; e.hidden = false; }
+function hideError() { $("#formError").hidden = true; }
+
+function validPhone(raw) {
+  let d = raw.replace(/\D+/g, "");
+  if (d.length === 12 && d.startsWith("91")) d = d.slice(2);
+  else if (d.length === 11 && d.startsWith("0")) d = d.slice(1);
+  return /^[6-9]\d{9}$/.test(d) ? d : null;
+}
+
+function submitOrder() {
+  hideError();
+  const name = $("#name").value.trim();
+  const phone = validPhone($("#phone").value);
+  if (!name) { showError(t("errName")); $("#name").focus(); return; }
+  if (!phone) { showError(t("errPhone")); $("#phone").focus(); return; }
+  if (!files.length) { showError(t("errFiles")); return; }
+  if (files.some(f => f.opts.pagesMode === "custom" && !parseRange(f.opts.range, f.pages))) { showError(t("errRange")); return; }
+  if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError(t("errTotal")); return; }
+
+  const { total, unknown } = estimate();
+  const fd = new FormData();
+  fd.append("name", name);
+  fd.append("phone", phone);
+  fd.append("notes", $("#notes").value.trim());
+  if (!unknown) fd.append("est_total", String(total));
+  fd.append("options", JSON.stringify(files.map(f => ({
+    color: f.opts.color, doubleside: f.opts.doubleside, duplex_edge: "long", paper_size: f.opts.paper_size,
+    orientation: "portrait", pages_per_sheet: f.opts.pps, copies: f.opts.copies,
+    pages_range: f.opts.pagesMode === "custom" ? f.opts.range.replace(/\s+/g, "") : "",
+    est_pages: f.pages,
+  }))));
+  files.forEach(f => fd.append("files[]", f.file, f.name));
+
+  const btn = $("#submitBtn"), bar = $("#progress");
+  btn.disabled = true; bar.hidden = false; $("i", bar).style.width = "0";
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", API + "order.php");
+  xhr.upload.onprogress = e => {
+    if (!e.lengthComputable) return;
+    const p = Math.round(e.loaded / e.total * 100);
+    $("i", bar).style.width = p + "%";
+    btn.textContent = t("sending", { p });
+  };
+  const done = () => { btn.disabled = false; bar.hidden = true; btn.textContent = t("send"); };
+  xhr.onerror = () => { done(); showError(t("errNet")); };
+  xhr.onload = () => {
+    done();
+    let data = {};
+    try { data = JSON.parse(xhr.responseText); } catch (e) {}
+    if (xhr.status !== 201 || !data.code) { showError(data.error || t("errNet")); return; }
+    saveOrder({ code: data.code, token: data.token, at: Date.now() });
+    justSent = data.code;
+    files = []; $("#notes").value = ""; renderFiles();
+    renderOrders(true);
+    $("#myorders").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  xhr.send(fd);
+}
+
+/* ==================================================================
+   My orders — kept on this phone; status from the website
+   ================================================================== */
+const STORE = "tprint-orders";
+let justSent = null;
+const statusCache = {};
+
+function loadOrders() {
+  try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+}
+function saveOrders(list) { try { localStorage.setItem(STORE, JSON.stringify(list.slice(0, 20))); } catch (e) {} }
+function saveOrder(o) { saveOrders([o, ...loadOrders().filter(x => x.code !== o.code)]); }
+const orderLink = o => `${location.origin}${location.pathname}?order=${o.code}&t=${o.token}#myorders`;
+
+const STEPS = ["pending", "received", "paid", "printing", "ready"];
+
+function orderCard(o) {
+  const s = statusCache[o.code];
+  const status = s && s.status || "pending";
+  const stepIdx = status === "collected" ? 4 : Math.max(0, STEPS.indexOf(status));
+  const amount = s && s.confirmed_total != null ? s.confirmed_total : s && s.est_total;
+  const confirmed = s && s.confirmed_total != null;
+  const placed = new Date(o.at).toLocaleString(lang === "ml" ? "ml-IN" : "en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+
+  const copyBtn = el("button", { type: "button", class: "btn btn-ghost", text: t("copyLink") });
+  copyBtn.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(orderLink(o)); copyBtn.textContent = t("copied"); }
+    catch (e) { prompt(t("copyLink"), orderLink(o)); }
+  });
+  return el("div", { class: "ocard" + (o.code === justSent ? " new" : "") },
+    o.code === justSent ? el("p", { class: "osent", text: t("orderSent") }) : null,
+    el("div", { class: "ohead" },
+      el("div", { class: "ocode" }, el("small", { text: t("orderCode") + " · " + placed }), document.createTextNode(o.code)),
+      amount != null ? el("div", { class: "oamt" }, el("small", { text: confirmed ? t("total") : t("estimate") }), document.createTextNode(rupee(amount))) : null),
+    el("p", { class: "ostatus", text: t("st_" + status) }),
+    el("p", { class: "odetail", text: s ? t("st_" + status + "_d", { amt: amount != null ? rupee(amount) : "" }) : (o.err ? t("loadErr") : "…") }),
+    el("div", { class: "track", "aria-hidden": "true" }, STEPS.map((_, i) => el("span", { class: i <= stepIdx ? "on" : "" }))),
+    el("div", { class: "track-labels", "aria-hidden": "true" }, ["tr1", "tr2", "tr3", "tr4", "tr5"].map(k => el("span", { text: t(k) }))),
+    s && s.files ? el("ul", { class: "ofiles" }, s.files.map(f => el("li", {},
+      el("span", { text: `${f.name}${f.pages ? ` · ${f.pages}p × ${f.copies}` : ""}` }),
+      f.error ? el("span", { class: "err", text: t("fileProblem") + ": " + f.error })
+        : el("span", { text: f.cost != null ? rupee(f.cost) : "" })))) : null,
+    el("div", { class: "oactions" }, copyBtn,
+      el("button", { type: "button", class: "btn btn-ghost", text: t("hide"),
+        onclick: () => { saveOrders(loadOrders().filter(x => x.code !== o.code)); renderOrders(); } })));
+}
+
+function renderOrders(refresh) {
+  const list = loadOrders();
+  $("#myorders").hidden = !list.length;
+  $("#orderCards").replaceChildren(...list.map(orderCard));
+  if (refresh) refreshOrders();
+}
+
+async function refreshOrders() {
+  const list = loadOrders();
+  await Promise.all(list.map(async o => {
+    try {
+      const r = await fetch(`${API}status.php?code=${encodeURIComponent(o.code)}&t=${encodeURIComponent(o.token)}`, { cache: "no-store" });
+      if (r.ok) { statusCache[o.code] = await r.json(); o.err = false; }
+      else if (r.status === 404) o.err = true;
+    } catch (e) { o.err = true; }
+  }));
+  renderOrders();
+}
+
+// A shared order link: ?order=TPXXXXXX&t=TOKEN
+(function importLink() {
+  const p = new URLSearchParams(location.search);
+  const code = (p.get("order") || "").toUpperCase(), token = p.get("t") || "";
+  if (/^TP[A-Z0-9]{6}$/.test(code) && /^[a-f0-9]{32}$/.test(token)) {
+    if (!loadOrders().some(o => o.code === code)) saveOrder({ code, token, at: Date.now() });
+    history.replaceState(null, "", location.pathname + "#myorders");
+  }
+})();
 
 /* --- Wire up --- */
-$$("[data-wa-plain]").forEach(a => a.href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent("Hi T FIX CUSAT, I'd like to print something.")}`);
+$$("[data-wa-plain]").forEach(a => a.href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent("Hi T FIX CUSAT, I have a question about printing.")}`);
 $("#mapLink").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
 $("#callLink").href = "tel:" + SHOP.phone;
 $("#year").textContent = new Date().getFullYear();
 
-$("#orderForm").addEventListener("input", calc);
-$("#orderForm").addEventListener("change", calc);
-$$("[data-step]").forEach(b => b.addEventListener("click", () => {
-  const el = $("#" + b.dataset.step);
-  el.value = Math.max(+el.min, Math.min(+el.max, (Math.floor(+el.value) || 1) + +b.dataset.d));
-  calc();
-}));
+const input = $("#fileInput"), drop = $("#drop");
+input.addEventListener("change", () => { addFiles([...input.files]); input.value = ""; });
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
+$("#submitBtn").addEventListener("click", submitOrder);
 $$(".lang button").forEach(b => b.addEventListener("click", () => {
   lang = b.dataset.lang;
   try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
@@ -654,7 +990,9 @@ $$(".lang button").forEach(b => b.addEventListener("click", () => {
 }));
 
 applyLang();
+refreshOrders();
 setInterval(updateStatus, 60000);
+setInterval(() => { if (!document.hidden && loadOrders().length) refreshOrders(); }, 30000);
 </script>
 </body>
 </html>

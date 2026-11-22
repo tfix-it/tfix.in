@@ -112,3 +112,36 @@ References:
 - https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
 - https://github.com/modelcontextprotocol/python-sdk/tree/v1.26.0
 - https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/
+
+## 7. Online orders from print.tfix.in (orders while the shop is closed)
+
+Customers can upload files and choose print options on https://print.tfix.in at any
+time. Orders wait on the website. When this server runs on the shop PC it fetches
+them every minute, converts and prices them with your own price table, and adds
+each file to the normal queue as an UNPAID job. Nothing prints until staff mark it
+Paid (the same print gate as in-shop jobs). The customer sees the status on the
+website: Waiting for shop → Price confirmed → Paid → Printing → Ready → Collected.
+
+The shop PC only makes outgoing HTTPS requests to print.tfix.in. No router port
+forwarding or tunnel is needed for this.
+
+Setup (once): put the shop token you were given in these two environment variables
+in the PowerShell window that starts the shop server, then start it as usual:
+
+```powershell
+$env:PRINTSHOP_CLOUD_URL = 'https://print.tfix.in/api/shop.php'
+$env:PRINTSHOP_CLOUD_TOKEN = 'PASTE_THE_SHOP_TOKEN'
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+The console shows `[cloud] syncing online orders ...`, and `[cloud] imported N online
+job(s)` when orders arrive. Online jobs appear in /admin with the order code and the
+customer's name in the file name, e.g. `[TP3XL96D · Anu] notes.pdf — Note: ...`.
+
+- Keep the token private (it lets a program download customer files). To change it,
+  generate a new one, put its SHA-256 in the website's `_private/config.php`, and
+  update PRINTSHOP_CLOUD_TOKEN here.
+- Word/PowerPoint files are converted on this PC by LibreOffice, as for in-shop uploads.
+  A file that can't be opened is reported to the customer on the website.
+- Files are deleted from the website as soon as the shop PC has them.
+- Leave PRINTSHOP_CLOUD_URL unset to turn online orders off.
