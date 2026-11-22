@@ -1,0 +1,9 @@
+# Local runtime data — never commit
+printshop.db
+printshop.db-*
+uploads/
+*.pem
+venv/
+venv-mcp/
+__pycache__/
+.pytest_cache/

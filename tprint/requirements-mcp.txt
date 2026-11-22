@@ -1,0 +1,3 @@
+# Install in a SEPARATE venv; the original web server pins older Starlette.
+mcp==1.26.0
+pywin32==306; sys_platform == 'win32'

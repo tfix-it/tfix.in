@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print shop — admin</title>
+<style>
+  :root{
+    --bg:#F4F5F3; --panel:#fff; --border:#E1E3DE; --ink:#1B1B17; --ink-soft:#6B6D66;
+    --blue:#2B5FAD; --ok:#2E7D4F; --warn:#8A5A16; --err:#B23A2E;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header{ background:var(--ink); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header h1{ font-size:16px; margin:0; font-weight:600; }
+  header button{ background:transparent; border:1px solid #555; color:#fff; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:13px; }
+  main{ max-width:1100px; margin:0 auto; padding:24px; display:grid; gap:24px; grid-template-columns: 2fr 1fr; align-items:start; }
+  @media (max-width:800px){ main{ grid-template-columns: 1fr; } }
+  section.panel{ background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:18px; }
+  section.panel h2{ font-size:14px; margin:0 0 14px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  th{ color:var(--ink-soft); font-weight:600; font-size:12px; }
+  .pill{ display:inline-block; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600; }
+  .pill-queued{ background:#EFE3D0; color:var(--warn); }
+  .pill-printing{ background:#DCE7F7; color:var(--blue); }
+  .pill-ready{ background:#DCF0E1; color:var(--ok); }
+  .pill-collected{ background:#E7E7E2; color:var(--ink-soft); }
+  .pill-auto{ background:#E4DEF7; color:#5B3FA6; margin-left:6px; }
+  .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .row-actions select, .row-actions button{
+    font-size:12px; padding:5px 8px; border-radius:4px; border:1px solid var(--border); background:#fff; cursor:pointer;
+  }
+  .row-actions button.primary{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .row-actions button.paid{ background:var(--ok); color:#fff; border-color:var(--ok); }
+  td a{ text-decoration:none; }
+  td a:hover{ text-decoration:underline; }
+  .printer-row{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .printer-row:last-child{ border-bottom:none; }
+  .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .dot-ready{ background:var(--ok); }
+  .dot-offline, .dot-error{ background:var(--err); }
+  .dot-busy, .dot-unknown, .dot-paper_out{ background:var(--warn); }
+  .price-form{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .price-form label{ font-size:11px; color:var(--ink-soft); display:block; margin-bottom:3px; }
+  .price-form input{ width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px; }
+  .price-form .full{ grid-column:1 / -1; display:flex; justify-content:space-between; align-items:center; }
+  .price-form button{ font-size:12px; padding:6px 10px; border-radius:4px; border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
+  #loginScreen{ max-width:340px; margin:80px auto; background:#fff; padding:28px; border-radius:8px; border:1px solid var(--border); }
+  #loginScreen h1{ font-size:18px; margin:0 0 18px; }
+  #loginScreen input{ width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--border); border-radius:4px; font-size:14px; }
+  #loginScreen button{ width:100%; padding:10px; background:var(--ink); color:#fff; border:none; border-radius:4px; font-size:14px; cursor:pointer; }
+  #loginScreen .err{ color:var(--err); font-size:13px; margin-bottom:10px; display:none; }
+  .empty{ color:var(--ink-soft); font-size:13px; padding:12px 0; }
+  .filter-bar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .filter-bar input[type=text]{
+    flex:1;
+    min-width:220px;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    font-size:13px;
+  }
+  .filter-bar input[type=date]{
+    padding:7px 10px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    font-size:13px;
+  }
+  .filter-bar button{
+    padding:8px 14px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:#fff;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .filter-summary{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:-6px 0 12px;
+  }
+  .hidden{ display:none; }
+  .settings-form{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .settings-form label{ font-size:11px; color:var(--ink-soft); display:block; margin-bottom:3px; }
+  .settings-form input{ width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px; }
+  .settings-form .full{ grid-column:1 / -1; }
+  .settings-form .actions{ grid-column:1 / -1; display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+  .settings-form button{ font-size:12px; padding:6px 10px; border-radius:4px; border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
+  .settings-form button.secondary{ background:#fff; color:var(--ink); border-color:var(--border); }
+  .settings-hint{ font-size:11px; color:var(--ink-soft); margin:-4px 0 2px; grid-column:1 / -1; line-height:1.4; }
+  .files-gone{ color:var(--ink-soft); font-size:11px; font-style:italic; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <h1>Admin sign in</h1>
+  <div class="err" id="loginErr">Invalid username or password</div>
+  <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+  <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+  <button id="loginBtn">Sign in</button>
+</div>
+
+<div id="dashboard" class="hidden">
+  <header>
+    <h1>Print shop — admin</h1>
+    <button id="logoutBtn">Sign out</button>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Job queue</h2>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search mobile number or job code (e.g. 9876543210 or 9876543210-3)">
+        <input type="date" id="dateFilter" title="Filter by date">
+        <button id="clearFiltersBtn" type="button">Clear</button>
+      </div>
+      <p class="filter-summary hidden" id="filterSummary"></p>
+      <table>
+        <thead>
+          <tr><th>Job code</th><th>File</th><th>Options</th><th>Cost</th><th>Status</th><th>Paid</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="jobsBody"></tbody>
+      </table>
+      <div class="empty hidden" id="jobsEmpty">No jobs yet.</div>
+      <div class="empty hidden" id="jobsNoMatch">No jobs match your search/filter.</div>
+    </section>
+
+    <div style="display:grid; gap:24px; align-content:start;">
+      <section class="panel">
+        <h2>Account</h2>
+        <div class="settings-form" id="pwForm">
+          <div class="full"><label>Current password</label><input type="password" id="pwCurrent" autocomplete="current-password"></div>
+          <div><label>New password</label><input type="password" id="pwNew" autocomplete="new-password"></div>
+          <div><label>Confirm new password</label><input type="password" id="pwConfirm" autocomplete="new-password"></div>
+          <p class="settings-hint">At least 8 characters. Changing it signs out every device
+            currently logged in (including this one) — you'll need to sign back in with the
+            new password.</p>
+          <div class="actions"><button id="pwSaveBtn">Change password</button></div>
+        </div>
+        <div class="err" id="pwError" style="display:none; margin-top:10px;"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Printers</h2>
+        <div id="printersList"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Auto-print</h2>
+        <div class="price-form" id="autoPrintForm">
+          <div class="full" style="justify-content:flex-start; gap:8px;">
+            <input type="checkbox" id="apEnabled" style="width:16px;height:16px;">
+            <label style="font-size:13px; margin:0;" for="apEnabled">Enable auto-print</label>
+          </div>
+          <div class="full" style="display:block;">
+            <label>Printer</label>
+            <select id="apPrinter" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px;">
+              <option value="">— select a printer —</option>
+            </select>
+          </div>
+          <div class="full" style="justify-content:flex-start; gap:8px;">
+            <input type="checkbox" id="apBwOnly" style="width:16px;height:16px;">
+            <label style="font-size:13px; margin:0;" for="apBwOnly">Only auto-print black &amp; white jobs</label>
+          </div>
+          <div><label>Max sheets</label><input type="number" id="apMaxSheets" min="1" placeholder="No limit"></div>
+          <div><label>Max copies</label><input type="number" id="apMaxCopies" min="1" placeholder="No limit"></div>
+          <div class="full"><button id="apSaveBtn">Save</button></div>
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin:10px 0 0; line-height:1.5;">
+          When enabled, a new job that meets every condition here is sent straight to the
+          selected printer the moment it's submitted — no manual "Print" click needed.
+          Jobs that don't match stay in the queue as usual.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>System settings</h2>
+        <div class="settings-form" id="systemSettingsForm">
+          <p class="settings-hint">Controls to stop a bad-faith upload — a huge file, an old
+            unpaid file sitting on disk, or a burst of requests from one device.</p>
+
+          <div class="full"><label>Max upload size (MB)</label><input type="number" id="ssMaxUploadMb" min="1"></div>
+
+          <div><label>Unpaid job cleanup (days)</label><input type="number" id="ssCleanupDays" min="1"></div>
+          <div style="align-self:end;"><button type="button" class="secondary" id="ssRunCleanupBtn" style="width:100%;">Run cleanup now</button></div>
+          <p class="settings-hint">Files for jobs still unpaid after this many days are deleted from disk.
+            The job stays in the list for your records — just without a downloadable file.</p>
+
+          <div><label>Rate limit — max requests</label><input type="number" id="ssRateMax" min="0"></div>
+          <div><label>Rate limit — window (seconds)</label><input type="number" id="ssRateWindow" min="1"></div>
+          <p class="settings-hint">Caps how many uploads/submissions one device (by IP) can make per window.
+            Set max requests to 0 to turn the limiter off.</p>
+
+          <div class="actions"><button id="ssSaveBtn">Save</button></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Pricing</h2>
+        <div id="pricingForms"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+let ws = null;
+let printerCache = [];
+
+// ---------- auth ----------
+el('loginBtn').addEventListener('click', doLogin);
+el('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogin() {
+  const fd = new FormData();
+  fd.append('username', el('loginUser').value);
+  fd.append('password', el('loginPass').value);
+  const res = await fetch('/api/admin/login', { method: 'POST', body: fd, credentials: 'include' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    el('loginErr').textContent = err.detail || 'Invalid username or password';
+    el('loginErr').style.display = 'block';
+    return;
+  }
+  el('loginErr').style.display = 'none';
+  showDashboard();
+}
+
+el('logoutBtn').addEventListener('click', async () => {
+  await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+  location.reload();
+});
+
+el('pwSaveBtn').addEventListener('click', async () => {
+  const current = el('pwCurrent').value;
+  const next = el('pwNew').value;
+  const confirmVal = el('pwConfirm').value;
+  const errEl = el('pwError');
+  errEl.style.display = 'none';
+
+  if (next.length < 8) {
+    errEl.textContent = 'New password must be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (next !== confirmVal) {
+    errEl.textContent = "New password and confirmation don't match.";
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('current_password', current);
+  fd.append('new_password', next);
+
+  const btn = el('pwSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const res = await fetch('/api/admin/change-password', { method: 'POST', body: fd, credentials: 'include' });
+  if (res.ok) {
+    // The server already cleared the session cookie (change-password signs
+    // out every device, including this one) — reloading drops back to the
+    // login screen for a fresh sign-in with the new password.
+    alert('Password changed. Please sign in again with your new password.');
+    location.reload();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    errEl.textContent = err.detail || 'Could not change password.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Change password';
+  }
+});
+
+async function showDashboard() {
+  el('loginScreen').classList.add('hidden');
+  el('dashboard').classList.remove('hidden');
+  await Promise.all([loadJobs(), loadPrinters(), loadPricing(), loadSystemSettings()]);
+  await loadAutoPrint(); // needs printerCache, populated by loadPrinters above
+  connectWs();
+}
+
+// try to load dashboard directly in case a session cookie already exists
+(async () => {
+  const res = await fetch('/api/admin/jobs', { credentials: 'include' });
+  if (res.ok) showDashboard(); // showDashboard's loadJobs() will fetch + render properly
+})();
+
+// ---------- jobs ----------
+const STATUS_OPTIONS = ['queued', 'printing', 'ready', 'collected'];
+let allJobs = [];       // full job list as last known from server + live updates
+let searchTimer = null;
+
+async function loadJobs() {
+  const res = await fetch('/api/admin/jobs', { credentials: 'include' });
+  if (res.ok) {
+    allJobs = await res.json();
+    applyFilters();
+  }
+}
+
+function applyFilters() {
+  const search = el('searchInput').value.trim().toLowerCase();
+  const date = el('dateFilter').value; // 'YYYY-MM-DD' or ''
+
+  const filtered = allJobs.filter(job => {
+    if (search) {
+      const code = `${job.phone}-${job.daily_seq}`.toLowerCase();
+      const internalId = String(job.id).padStart(3, '0');
+      const matchesSearch =
+        job.phone.toLowerCase().includes(search) ||
+        code.includes(search) ||
+        internalId.includes(search);
+      if (!matchesSearch) return false;
+    }
+    if (date) {
+      const jobDate = (job.created_at || '').slice(0, 10); // job dates are stored in UTC
+      if (jobDate !== date) return false;
+    }
+    return true;
+  });
+
+  el('filterSummary').classList.toggle('hidden', !(search || date));
+  if (search || date) {
+    el('filterSummary').textContent = `Showing ${filtered.length} of ${allJobs.length} job${allJobs.length === 1 ? '' : 's'}.`;
+  }
+
+  renderJobs(filtered);
+}
+
+el('searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(applyFilters, 200);
+});
+el('dateFilter').addEventListener('change', applyFilters);
+el('clearFiltersBtn').addEventListener('click', () => {
+  el('searchInput').value = '';
+  el('dateFilter').value = '';
+  applyFilters();
+});
+
+function renderJobs(jobs) {
+  const body = el('jobsBody');
+  body.innerHTML = '';
+  el('jobsEmpty').classList.toggle('hidden', allJobs.length > 0);
+  el('jobsNoMatch').classList.toggle('hidden', !(allJobs.length > 0 && jobs.length === 0));
+
+  jobs.forEach(job => {
+    const tr = document.createElement('tr');
+    tr.id = `job-row-${job.id}`;
+    tr.innerHTML = renderJobRow(job);
+    body.appendChild(tr);
+  });
+  attachRowHandlers();
+}
+
+function renderJobRow(job) {
+  const opts = [
+    job.color ? 'Color' : 'B&W',
+    job.doubleside ? `Duplex (${job.duplex_edge === 'short' ? 'short' : 'long'} edge)` : 'Simplex',
+    `${job.paper_size}`,
+    job.orientation === 'landscape' ? 'Landscape' : 'Portrait',
+    `${job.pages_per_sheet}/sheet`,
+    `×${job.copies}`,
+    job.pages_range ? `Pages ${job.pages_range}` : 'All pages',
+    job.scale_mode === 'actual' ? 'Actual size' : 'Fit to page',
+  ].join(' · ');
+
+  const printerOptions = printerCache
+    .map(p => `<option value="${p.windows_printer_name}">${p.name}</option>`)
+    .join('');
+
+  const fileLinks = job.files_deleted
+    ? `<div class="files-gone" style="margin-top:4px;">Files removed (unpaid, expired)</div>`
+    : `<div style="margin-top:4px; display:flex; gap:8px;">
+        <a href="/uploads/${encodeURIComponent(job.pdf_filename)}" target="_blank" rel="noopener" style="font-size:11px; color:var(--blue);">PDF</a>
+        ${job.source_filename ? `<a href="/uploads/${encodeURIComponent(job.source_filename)}" target="_blank" rel="noopener" style="font-size:11px; color:var(--blue);">Original</a>` : ''}
+      </div>`;
+
+  return `
+    <td>${job.phone}-${job.daily_seq}<br><span style="color:#999; font-size:11px;">#${String(job.id).padStart(3, '0')}</span></td>
+    <td title="${job.original_filename}">
+      ${truncate(job.original_filename, 16)}<br>
+      <span style="color:#999;">${job.pages}p</span>
+      ${fileLinks}
+    </td>
+    <td>${opts}</td>
+    <td>₹${Number(job.cost).toFixed(2)}</td>
+    <td><span class="pill pill-${job.status}">${job.status}</span>${job.auto_printed ? '<span class="pill pill-auto">Auto</span>' : ''}</td>
+    <td>${job.paid ? '✅' : '—'}</td>
+    <td>
+      <div class="row-actions">
+        <select class="printerSelect" data-job="${job.id}">${printerOptions || '<option>No printers</option>'}</select>
+        <button class="primary printBtn" data-job="${job.id}" ${job.files_deleted ? 'disabled title="File was removed"' : ''}>Print</button>
+        <select class="statusSelect" data-job="${job.id}">
+          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${s === job.status ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        ${job.paid ? '' : `<button class="paid paidBtn" data-job="${job.id}">Mark paid</button>`}
+      </div>
+    </td>`;
+}
+
+function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+
+function attachRowHandlers() {
+  document.querySelectorAll('.printBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const jobId = btn.dataset.job;
+      const select = document.querySelector(`.printerSelect[data-job="${jobId}"]`);
+      const printerName = select.value;
+      if (!printerName) return alert('No printer selected');
+      btn.disabled = true; btn.textContent = 'Printing…';
+      const fd = new FormData();
+      fd.append('printer_name', printerName);
+      const res = await fetch(`/api/admin/jobs/${jobId}/print`, { method: 'POST', body: fd, credentials: 'include' });
+      btn.disabled = false; btn.textContent = 'Print';
+      if (!res.ok) alert((await res.json()).detail || 'Print failed');
+    });
+  });
+
+  document.querySelectorAll('.statusSelect').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const jobId = sel.dataset.job;
+      const fd = new FormData();
+      fd.append('status', sel.value);
+      await fetch(`/api/admin/jobs/${jobId}/status`, { method: 'POST', body: fd, credentials: 'include' });
+    });
+  });
+
+  document.querySelectorAll('.paidBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const jobId = btn.dataset.job;
+      const fd = new FormData();
+      fd.append('paid', 'true');
+      await fetch(`/api/admin/jobs/${jobId}/paid`, { method: 'POST', body: fd, credentials: 'include' });
+    });
+  });
+}
+
+// ---------- printers ----------
+async function loadPrinters() {
+  const res = await fetch('/api/admin/printers', { credentials: 'include' });
+  if (!res.ok) return;
+  printerCache = await res.json();
+  const list = el('printersList');
+  list.innerHTML = printerCache.length
+    ? printerCache.map(p => `
+        <div class="printer-row">
+          <span><span class="dot dot-${p.live_status}"></span>${p.name}</span>
+          <span style="color:#999; font-size:12px;">${p.live_status}</span>
+        </div>`).join('')
+    : '<div class="empty">No printers detected. Check they are installed on this Windows PC.</div>';
+}
+
+// ---------- pricing ----------
+async function loadPricing() {
+  const res = await fetch('/api/admin/pricing', { credentials: 'include' });
+  if (!res.ok) return;
+  const rates = await res.json();
+  const container = el('pricingForms');
+  container.innerHTML = '';
+  rates.forEach(r => {
+    const label = `${r.paper_size} — ${r.color ? 'Color' : 'B&W'}`;
+    const form = document.createElement('div');
+    form.className = 'price-form';
+    form.innerHTML = `
+      <div class="full"><strong style="font-size:13px;">${label}</strong></div>
+      <div><label>Single-side</label><input type="number" step="0.5" class="rSingle" value="${r.singleside_cost}"></div>
+      <div><label>Double-side</label><input type="number" step="0.5" class="rDouble" value="${r.doubleside_cost}"></div>
+      <div><label>Min. charge</label><input type="number" step="0.5" class="rMin" value="${r.min_cost}"></div>
+      <div class="full"><button class="saveBtn">Save</button></div>
+    `;
+    form.querySelector('.saveBtn').addEventListener('click', async () => {
+      const fd = new FormData();
+      fd.append('paper_size', r.paper_size);
+      fd.append('color', r.color);
+      fd.append('singleside_cost', form.querySelector('.rSingle').value);
+      fd.append('doubleside_cost', form.querySelector('.rDouble').value);
+      fd.append('min_cost', form.querySelector('.rMin').value);
+      const btn = form.querySelector('.saveBtn');
+      btn.textContent = 'Saving…';
+      await fetch('/api/admin/pricing', { method: 'POST', body: fd, credentials: 'include' });
+      btn.textContent = 'Saved ✓';
+      setTimeout(() => (btn.textContent = 'Save'), 1200);
+    });
+    container.appendChild(form);
+  });
+}
+
+// ---------- auto-print ----------
+async function loadAutoPrint() {
+  // populate the printer dropdown from the printers we already fetched
+  const select = el('apPrinter');
+  select.innerHTML = '<option value="">— select a printer —</option>' +
+    printerCache.map(p => `<option value="${p.windows_printer_name}">${p.name}</option>`).join('');
+
+  const res = await fetch('/api/admin/auto-print', { credentials: 'include' });
+  if (!res.ok) return;
+  const s = await res.json();
+  el('apEnabled').checked = !!s.enabled;
+  select.value = s.printer_name || '';
+  el('apBwOnly').checked = !!s.bw_only;
+  el('apMaxSheets').value = s.max_sheets ?? '';
+  el('apMaxCopies').value = s.max_copies ?? '';
+}
+
+el('apSaveBtn').addEventListener('click', async () => {
+  const enabled = el('apEnabled').checked;
+  const printerName = el('apPrinter').value;
+  if (enabled && !printerName) {
+    alert('Pick a printer before enabling auto-print.');
+    return;
+  }
+  const fd = new FormData();
+  fd.append('enabled', enabled);
+  fd.append('printer_name', printerName);
+  fd.append('bw_only', el('apBwOnly').checked);
+  if (el('apMaxSheets').value !== '') fd.append('max_sheets', el('apMaxSheets').value);
+  if (el('apMaxCopies').value !== '') fd.append('max_copies', el('apMaxCopies').value);
+
+  const btn = el('apSaveBtn');
+  btn.textContent = 'Saving…';
+  const res = await fetch('/api/admin/auto-print', { method: 'POST', body: fd, credentials: 'include' });
+  btn.textContent = res.ok ? 'Saved ✓' : 'Save failed';
+  setTimeout(() => (btn.textContent = 'Save'), 1200);
+});
+
+// ---------- system settings (upload cap, cleanup, rate limit) ----------
+async function loadSystemSettings() {
+  const res = await fetch('/api/admin/settings', { credentials: 'include' });
+  if (!res.ok) return;
+  const s = await res.json();
+  el('ssMaxUploadMb').value = s.max_upload_mb;
+  el('ssCleanupDays').value = s.unpaid_cleanup_days;
+  el('ssRateMax').value = s.rate_limit_max_requests;
+  el('ssRateWindow').value = s.rate_limit_window_sec;
+}
+
+el('ssSaveBtn').addEventListener('click', async () => {
+  const fd = new FormData();
+  fd.append('max_upload_mb', el('ssMaxUploadMb').value);
+  fd.append('unpaid_cleanup_days', el('ssCleanupDays').value);
+  fd.append('rate_limit_max_requests', el('ssRateMax').value);
+  fd.append('rate_limit_window_sec', el('ssRateWindow').value);
+
+  const btn = el('ssSaveBtn');
+  btn.textContent = 'Saving…';
+  const res = await fetch('/api/admin/settings', { method: 'POST', body: fd, credentials: 'include' });
+  if (res.ok) {
+    btn.textContent = 'Saved ✓';
+  } else {
+    btn.textContent = 'Save failed';
+    alert((await res.json()).detail || 'Could not save settings');
+  }
+  setTimeout(() => (btn.textContent = 'Save'), 1200);
+});
+
+el('ssRunCleanupBtn').addEventListener('click', async () => {
+  const btn = el('ssRunCleanupBtn');
+  btn.textContent = 'Running…';
+  await fetch('/api/admin/settings/run-cleanup-now', { method: 'POST', credentials: 'include' });
+  btn.textContent = 'Done ✓';
+  await loadJobs(); // refresh so any newly-cleaned jobs show "Files removed"
+  setTimeout(() => (btn.textContent = 'Run cleanup now'), 1200);
+});
+
+// ---------- live updates ----------
+function connectWs() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws/admin`);
+  ws.onmessage = (evt) => {
+    const msg = JSON.parse(evt.data);
+    if (msg.type === 'job_update') {
+      upsertJobRow(msg.job);
+    }
+  };
+  ws.onclose = () => setTimeout(connectWs, 3000); // auto-reconnect on flaky WiFi
+}
+
+function upsertJobRow(job) {
+  const idx = allJobs.findIndex(j => j.id === job.id);
+  if (idx >= 0) {
+    allJobs[idx] = job;
+  } else {
+    allJobs.unshift(job);
+  }
+  applyFilters();
+}
+</script>
+</body>
+</html>

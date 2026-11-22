@@ -1,0 +1,3 @@
+10 tests passed (Linux, Python 3.12, mocked Windows printer).
+MCP SDK 1.26.0 initialization, discovery and tool calls exercised via ASGI HTTP client.
+Python compilation passed. Live Claude and physical Windows printer testing remain pending.
