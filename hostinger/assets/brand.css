@@ -28,10 +28,10 @@ body { background: var(--black); color: var(--white); font-family: var(--f-b); -
 :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; border-radius: 6px; }
 ::selection { background: var(--yellow); color: var(--on-yellow); }
 
-/* Logo row: the T FIX CUSAT logo + a small mono chip naming the service (as on tfix.in) */
+/* Logo row: the T FIX store logo + a small mono chip naming the service (as on tfix.in) */
 .brand-row { display: flex; align-items: center; gap: 10px; }
 .brand-row img { height: 26px; width: auto; display: block; }
-.brand-row img.logo-cusat { height: 40px; }   /* T FIX CUSAT lockup (mark + T FIX + CUSAT), 154x64 */
+.brand-row img.logo-main { height: 30px; }   /* T FIX store logo: triangle-T mark + T FIX wordmark */
 .brand-chip { font: 500 11px/1 var(--f-m); letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
               padding: 5px 7px; border: 1px solid var(--line-2); border-radius: 6px; }
 
