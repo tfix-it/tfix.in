@@ -1,6 +1,6 @@
 <?php
 /*
- * TPrint private settings. Copy this file to
+ * T-PRINT private settings. Copy this file to
  *     /home/<your-user>/domains/tfix.in/tprint-config.php
  * i.e. NEXT TO public_html, never inside it, and fill in every value.
  * Generate the random values with: php -r "echo bin2hex(random_bytes(24)), PHP_EOL;"

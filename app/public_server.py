@@ -1,5 +1,5 @@
 """
-The internet-facing side of TPrint, served at https://print.tfix.in through a
+The internet-facing side of T-PRINT, served at https://print.tfix.in through a
 Cloudflare named tunnel to 127.0.0.1:8765 on the shop PC.
 
   /mcp        Claude's connector (bearer token). See mcp_server.py.
@@ -43,7 +43,7 @@ NO_STORE = {"Cache-Control": "no-store"}
 
 
 def build_admin_app() -> FastAPI:
-    app = FastAPI(title="TPrint admin", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="T-PRINT admin", docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(HSTSMiddleware)
     app.include_router(routes_admin.router)
 

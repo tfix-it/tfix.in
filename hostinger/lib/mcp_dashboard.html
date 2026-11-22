@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TPrint dashboard</title>
+<title>T-PRINT dashboard</title>
 <!--
-  MCP App view for TPrint. Rendered by the host (Claude) in a sandboxed iframe and
+  MCP App view for T-PRINT. Rendered by the host (Claude) in a sandboxed iframe and
   served by app/mcp_server.py as ui://tprint/dashboard.html.
   Speaks the MCP Apps postMessage protocol (JSON-RPC 2.0, protocol 2026-01-26)
   directly, so it needs no bundler, CDN or external requests.
@@ -185,7 +185,7 @@
 <body>
 <header>
   <div class="grow">
-    <h1>TPrint queue</h1>
+    <h1>T-PRINT queue</h1>
     <div class="sub" id="updated">Connecting…</div>
   </div>
   <button class="btn ghost" id="openAdmin" type="button" hidden>
@@ -347,7 +347,7 @@
       const res = await callTool('print_paid_job', { job_id: jobId, printer_name: printer, confirm: true });
       if (res && res.isError) throw new Error(toolText(res) || 'Print was refused.');
       toast(`Job ${jobId} sent to ${printer}. Check the printer for the physical output.`);
-      tellModel(`The shop owner used the TPrint dashboard to send job ${jobId} to printer "${printer}". ` +
+      tellModel(`The shop owner used the T-PRINT dashboard to send job ${jobId} to printer "${printer}". ` +
                 'SumatraPDF accepted it; physical output is not verified.');
     } catch (err) {
       toast(`Job ${jobId}: ${err.message}`, true);
@@ -511,7 +511,7 @@
   function render() {
     const s = state.snap;
     $('notice').innerHTML = s.printing_enabled ? '' :
-      '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner has to turn on remote printing in the TPrint server settings (see the setup guide).</div>';
+      '<div class="notice"><b>Remote printing is off.</b> You can view the queue here. To print from Claude, the shop owner has to turn on remote printing in the T-PRINT server settings (see the setup guide).</div>';
     const when = new Date(s.generated_at);
     $('updated').textContent = 'Updated ' + (Number.isNaN(when.getTime()) ? s.generated_at : when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }));
     const admin = $('openAdmin');
@@ -538,12 +538,12 @@
   // ------------------------------------------------------------ handshake
   (async () => {
     if (window.parent === window) {
-      showNotice('This view runs inside Claude. Ask Claude to open the TPrint dashboard.', false);
+      showNotice('This view runs inside Claude. Ask Claude to open the T-PRINT dashboard.', false);
       return;
     }
     try {
       const init = await request('ui/initialize', {
-        appInfo: { name: 'TPrint Dashboard', version: '2.0.0' },
+        appInfo: { name: 'T-PRINT Dashboard', version: '2.0.0' },
         appCapabilities: { availableDisplayModes: ['inline'] },
         protocolVersion: PROTOCOL_VERSION,
       }, 15000);

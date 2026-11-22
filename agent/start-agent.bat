@@ -1,5 +1,5 @@
 @echo off
-rem TPrint print agent: connects this shop PC to https://print.tfix.in.
+rem T-PRINT print agent: connects this shop PC to https://print.tfix.in.
 rem Needs TPRINT_AGENT_KEY set once with:  setx TPRINT_AGENT_KEY "<agent_key from tprint-config.php>"
 cd /d "%~dp0.."
 :loop

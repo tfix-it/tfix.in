@@ -66,8 +66,8 @@ function mcp_dispatch(string $method, array $params)
             return [
                 'protocolVersion' => in_array($asked, MCP_PROTOCOLS, true) ? $asked : MCP_PROTOCOLS[0],
                 'capabilities' => ['tools' => ['listChanged' => false], 'resources' => ['listChanged' => false, 'subscribe' => false]],
-                'serverInfo' => ['name' => 'TPrint', 'title' => 'TPrint print shop', 'version' => TPRINT_VERSION],
-                'instructions' => 'TPrint manages a print shop queue. Use open_print_dashboard to show the interactive queue. '
+                'serverInfo' => ['name' => 'T-PRINT', 'title' => 'T-PRINT · T FIX Auto Print', 'version' => TPRINT_VERSION],
+                'instructions' => 'T-PRINT manages a print shop queue. Use open_print_dashboard to show the interactive queue. '
                     . 'Never claim a job is paid: only shop staff can confirm payment. Before calling print_paid_job, '
                     . 'get explicit confirmation of the job ID and printer from the user.',
             ];
@@ -79,7 +79,7 @@ function mcp_dispatch(string $method, array $params)
             return mcp_call_tool((string) ($params['name'] ?? ''), is_array($params['arguments'] ?? null) ? $params['arguments'] : []);
         case 'resources/list':
             return ['resources' => [[
-                'uri' => DASHBOARD_URI, 'name' => 'tprint-dashboard', 'title' => 'TPrint dashboard',
+                'uri' => DASHBOARD_URI, 'name' => 'tprint-dashboard', 'title' => 'T-PRINT dashboard',
                 'description' => 'Interactive print queue for the shop owner.', 'mimeType' => APP_MIME,
                 '_meta' => ['ui' => ['prefersBorder' => true]],
             ]]];
@@ -111,8 +111,8 @@ function mcp_tools(): array
     $none = ['type' => 'object', 'properties' => new stdClass()];
     return [
         [
-            'name' => 'open_print_dashboard', 'title' => 'Open TPrint dashboard',
-            'description' => 'Show the live TPrint print-shop dashboard: job queue, payment state, printer status and pricing. '
+            'name' => 'open_print_dashboard', 'title' => 'Open T-PRINT dashboard',
+            'description' => 'Show the live T-PRINT print-shop dashboard: job queue, payment state, printer status and pricing. '
                 . 'Staff can refresh it and send paid jobs to a printer from inside the dashboard. '
                 . 'status: queued (default), printing, ready, collected or all. limit: 1..200.',
             'inputSchema' => $query, 'annotations' => $read, '_meta' => ['ui' => ['resourceUri' => DASHBOARD_URI]],
@@ -243,7 +243,7 @@ function snapshot_text(array $s): string
 {
     $c = $s['counts'];
     $lines = [
-        "TPrint queue - showing {$s['status_filter']} (" . count($s['jobs']) . " of {$s['total_matching']}).",
+        "T-PRINT queue - showing {$s['status_filter']} (" . count($s['jobs']) . " of {$s['total_matching']}).",
         "Totals: {$c['queued']} queued ({$c['awaiting_payment']} awaiting payment), {$c['printing']} printing, "
             . "{$c['ready']} ready, {$c['collected']} collected.",
         'Shop PC print agent: ' . ($s['shop_pc_online'] ? 'online' : 'OFFLINE') . '. Remote printing from Claude: '

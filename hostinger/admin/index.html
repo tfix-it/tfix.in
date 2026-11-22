@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>T FIX Print — admin</title>
+<title>T-PRINT Admin · T FIX Auto Print</title>
 <meta name="theme-color" content="#0B0B0C">
 <meta name="robots" content="noindex">
 <link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
@@ -172,7 +172,7 @@
 <body>
 
 <div id="loginScreen">
-  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
+  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">T-PRINT Admin</span></div>
   <h1>Admin sign in</h1>
   <div class="err" id="loginErr">Invalid username or password</div>
   <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
@@ -181,7 +181,7 @@
 </div>
 
 <div id="setupScreen" class="hidden">
-  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
+  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">T-PRINT Admin</span></div>
   <h1>First-time setup</h1>
   <p style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 12px;">
     Enter the <b>setup code</b> from <code>tprint-config.php</code> (Hostinger File Manager, next to
@@ -195,7 +195,7 @@
 
 <div id="dashboard" class="hidden">
   <header>
-    <div class="brand-row"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
+    <div class="brand-row"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">T-PRINT Admin</span></div>
     <button id="logoutBtn">Sign out</button>
   </header>
   <main>
@@ -612,8 +612,8 @@ async function loadPrinters() {
   box.textContent = agentInfo.online
     ? 'Shop PC connected — printing is available.'
     : agentInfo.last_seen
-      ? `Shop PC offline (last seen ${new Date(agentInfo.last_seen + 'Z').toLocaleString()}). Start the TPrint print agent to print.`
-      : 'Shop PC not connected yet. Install and start the TPrint print agent on the shop PC.';
+      ? `Shop PC offline (last seen ${new Date(agentInfo.last_seen + 'Z').toLocaleString()}). Start the T-PRINT agent to print.`
+      : 'Shop PC not connected yet. Install and start the T-PRINT agent on the shop PC.';
   const list = el('printersList');
   list.innerHTML = printerCache.length
     ? printerCache.map(p => `

@@ -32,7 +32,7 @@ MOCK = r"""
 /* ---------- Preview stand-in for the print.tfix.in API (runs only in this file) ---------- */
 (() => {
   const RATES = { A4: { 0: [2, 3, 10], 1: [10, 15, 10] }, A3: { 0: [5, 7, 15], 1: [15, 20, 15] } };  // default shop prices
-  const PAY = { upi_id: 'preview.sample@invalid', upi_payee_name: 'T FIX Print (preview)' };
+  const PAY = { upi_id: 'preview.sample@invalid', upi_payee_name: 'T-PRINT (preview)' };
   const uploads = {}, jobs = [], perPhone = {};
   let nextId = 101;
   const hex = n => [...crypto.getRandomValues(new Uint8Array(n / 2))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -210,7 +210,7 @@ def build(sample: Path, out: Path):
          "URL.createObjectURL(new Blob([document.getElementById('pdfjsWorker').textContent], { type: 'text/javascript' }))")
     swap("pdfjsLib.getDocument(`${API}/api/uploads/${uploadInfo.upload_id}/pdf`)", "pdfjsLib.getDocument(window.__tprintPreviewPdf(uploadInfo.upload_id))")
     swap('src="assets/brand/tfix-logo-gold.svg"', f'src="{data_uri(ASSETS / "brand/tfix-logo-gold.svg", "image/svg+xml")}"')
-    swap("<title>T FIX Print — send a print job</title>", "<title>T FIX Print — preview</title>")
+    swap("<title>T-PRINT · T FIX Auto Print</title>", "<title>T-PRINT · preview</title>")
     out.write_text(html)
     print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
 

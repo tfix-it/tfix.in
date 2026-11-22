@@ -1,4 +1,4 @@
-"""TPrint MCP App: the shop's print queue as an interactive dashboard inside Claude.
+"""T-PRINT MCP App: the shop's print queue as an interactive dashboard inside Claude.
 
 Built on the official MCP Python SDK 2.x (`mcp.server.mcpserver.MCPServer`) with
 the MCP Apps extension (`mcp.server.apps`). The `open_print_dashboard` tool is
@@ -101,7 +101,7 @@ def snapshot_text(snap: dict) -> str:
     """Plain-text rendering for the model and for clients without MCP Apps support."""
     c = snap['counts']
     lines = [
-        f"TPrint queue - showing {snap['status_filter']} ({len(snap['jobs'])} of {snap['total_matching']}).",
+        f"T-PRINT queue - showing {snap['status_filter']} ({len(snap['jobs'])} of {snap['total_matching']}).",
         f"Totals: {c.get('queued', 0)} queued ({c['awaiting_payment']} awaiting payment), "
         f"{c.get('printing', 0)} printing, {c.get('ready', 0)} ready, {c.get('collected', 0)} collected.",
         'Remote printing from Claude: ' + ('ENABLED' if snap['printing_enabled'] else 'disabled') + '.',
@@ -124,9 +124,9 @@ apps = Apps()
 @apps.tool(
     resource_uri=DASHBOARD_URI,
     name='open_print_dashboard',
-    title='Open TPrint dashboard',
+    title='Open T-PRINT dashboard',
     description=(
-        'Show the live TPrint print-shop dashboard: job queue, payment state, printer status '
+        'Show the live T-PRINT print-shop dashboard: job queue, payment state, printer status '
         'and pricing. Staff can refresh it and send paid jobs to a printer from inside the '
         "dashboard. status: queued (default), printing, ready, collected or all. limit: 1..200."),
     annotations=READ_ONLY,
@@ -141,17 +141,17 @@ apps.add_html_resource(
     DASHBOARD_URI,
     DASHBOARD_HTML,
     name='tprint-dashboard',
-    title='TPrint dashboard',
+    title='T-PRINT dashboard',
     description='Interactive print queue for the shop owner.',
     prefers_border=True,
 )
 
 mcp = MCPServer(
-    'TPrint',
-    title='TPrint print shop',
+    'T-PRINT',
+    title='T-PRINT · T FIX Auto Print',
     version='2.0.0',
     instructions=(
-        'TPrint manages a print shop queue. Use open_print_dashboard to show the interactive '
+        'T-PRINT manages a print shop queue. Use open_print_dashboard to show the interactive '
         'queue. Never claim a job is paid: only shop staff can confirm payment. Before calling '
         'print_paid_job, get explicit confirmation of the job ID and printer from the user.'),
     extensions=[apps],

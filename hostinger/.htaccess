@@ -1,4 +1,4 @@
-# TPrint on Hostinger (LiteSpeed/Apache). Upload the contents of this folder to
+# T-PRINT on Hostinger (LiteSpeed/Apache). Upload the contents of this folder to
 # public_html/TPRINT (the folder Hostinger made for print.tfix.in).
 Options -Indexes
 DirectoryIndex index.html

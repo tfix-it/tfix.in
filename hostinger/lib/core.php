@@ -365,7 +365,7 @@ function confirm_payment(int $jobId, bool $paid): array
 function dispatch_job(int $jobId, string $printerName, string $actor = 'staff', bool $auto = false): array
 {
     if (!agent_status()['online']) {
-        throw new PrintBlocked('The shop PC is offline. Start the TPrint print agent on the shop PC, then try again.');
+        throw new PrintBlocked('The shop PC is offline. Start the T-PRINT agent on the shop PC, then try again.');
     }
     in_transaction(function () use ($jobId, $printerName, $actor, $auto) {
         $job = row('SELECT * FROM jobs WHERE id=? FOR UPDATE', [$jobId]) ?? throw new PrintBlocked('Job not found');

@@ -1,5 +1,12 @@
 # Changes
 
+## 3.2.0 — T-PRINT · T FIX Auto Print
+- New product name everywhere people see it: **T-PRINT** (full name *T FIX Auto Print*, tagline
+  "Upload. Pay. Printed."). The customer page header has a T-PRINT wordmark whose hyphen is the brand's yellow bar.
+- Page titles, the admin label, the UPI payment note (`T-PRINT #<job>`), the Claude connector/dashboard and the
+  print agent use the new name. Internal names (TPRINT_* settings, tprint-config.php, database) are unchanged,
+  so existing setups keep working.
+
 ## 3.1.0 — T FIX brand theme
 - hostinger/assets/brand.css: the tfix.in brand system in one file (Lab Black, Graphite, T FIX Yellow for calls to
   action only, Off-white; Archivo / Inter / JetBrains Mono, self-hosted with their OFL licences; gold T FIX logo

@@ -1,5 +1,5 @@
 """
-Test harness for the Hostinger (PHP + MySQL) version of TPrint.
+Test harness for the Hostinger (PHP + MySQL) version of T-PRINT.
 
 Runs the real PHP code under `php -S` (with router.php standing in for
 .htaccess) against a MySQL/MariaDB database. Needs: php 8.1+ with pdo_mysql

@@ -1,6 +1,6 @@
 <?php
 /**
- * TPrint on Hostinger: shared bootstrap.
+ * T-PRINT on Hostinger: shared bootstrap.
  *
  * Every request enters through api/index.php, which loads this file. It reads
  * the private config (kept OUTSIDE public_html, see tprint-config.sample.php),
@@ -31,7 +31,7 @@ function tprint_config(): array
     // public_html/TPRINT/lib -> domains/tfix.in/tprint-config.php (not web-reachable)
     $path = getenv('TPRINT_CONFIG') ?: dirname(__DIR__, 3) . '/tprint-config.php';
     if (!is_file($path)) {
-        throw new HttpError(500, 'TPrint is not configured yet: tprint-config.php is missing.');
+        throw new HttpError(500, 'T-PRINT is not configured yet: tprint-config.php is missing.');
     }
     $loaded = require $path;
     $config = array_replace([

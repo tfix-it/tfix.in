@@ -38,7 +38,7 @@ def test_auth_and_transport(server):
 def test_initialize_and_discovery(server):
     init = rpc(server, "initialize", {"protocolVersion": "2025-11-25", "capabilities": {},
                                       "clientInfo": {"name": "test", "version": "1"}})["result"]
-    assert init["protocolVersion"] == "2025-11-25" and init["serverInfo"]["name"] == "TPrint"
+    assert init["protocolVersion"] == "2025-11-25" and init["serverInfo"]["name"] == "T-PRINT"
     older = rpc(server, "initialize", {"protocolVersion": "2025-03-26"})["result"]
     assert older["protocolVersion"] == "2025-03-26"
     tools = {t["name"]: t for t in rpc(server, "tools/list")["result"]["tools"]}

@@ -1,6 +1,6 @@
 # Shop Print Server
 
-> **TPrint now runs at https://print.tfix.in on Hostinger** (PHP + MySQL), with UPI QR payment,
+> **T-PRINT (T FIX Auto Print) now runs at https://print.tfix.in on Hostinger** (PHP + MySQL), with UPI QR payment,
 > a print agent on the shop PC and the Claude connector: see **[HOSTINGER.md](HOSTINGER.md)**.
 > The Python server described below is the original shop-WiFi version; the print agent reuses its
 > `app/printing.py`. START_HERE.md covers the older Cloudflare-tunnel setup.

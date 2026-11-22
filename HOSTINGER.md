@@ -1,6 +1,8 @@
-# TPrint at https://print.tfix.in (Hostinger only)
+# T-PRINT — T FIX Auto Print
 
-TPrint runs on your Hostinger web hosting. Customers order from anywhere, pay by UPI QR code, and a small
+**Upload. Pay. Printed.** · https://print.tfix.in · runs on Hostinger only
+
+T-PRINT runs on your Hostinger web hosting. Customers order from anywhere, pay by UPI QR code, and a small
 **print agent** on the shop PC prints the jobs. No Cloudflare, tunnel, VPS or router changes.
 
 ```
@@ -68,19 +70,19 @@ On the Windows PC connected to the printers:
 
 1. Install **Python 3.12** (tick "Add python.exe to PATH"), **SumatraPDF** and **LibreOffice**,
    as in README.md section 1. Make sure the printers work normally in Windows.
-2. Copy the `app` and `agent` folders from this repository to `C:\TPrint` (so you have `C:\TPrint\app` and `C:\TPrint\agent`).
+2. Copy the `app` and `agent` folders from this repository to `C:\T-PRINT` (so you have `C:\T-PRINT\app` and `C:\T-PRINT\agent`).
    If SumatraPDF or LibreOffice are not in their default folders, set `SUMATRA_PATH` / `LIBREOFFICE_PATH` (see `app/config.py`).
 3. In PowerShell:
    ```powershell
-   cd C:\TPrint
+   cd C:\T-PRINT
    py -3.12 -m venv venv-agent
    .\venv-agent\Scripts\python.exe -m pip install -r agent\requirements.txt
    setx TPRINT_AGENT_KEY "PASTE_THE_agent_key_FROM_tprint-config.php"
    ```
-   Close PowerShell (so `setx` takes effect), then double-click **`C:\TPrint\agent\start-agent.bat`**.
+   Close PowerShell (so `setx` takes effect), then double-click **`C:\T-PRINT\agent\start-agent.bat`**.
 4. In the admin page, **Printers** should say **Shop PC connected** and list your Windows printers within a few seconds.
 5. Start it automatically: Windows **Task Scheduler** → Create Basic Task → "When I log on" → Start a program →
-   `C:\TPrint\agent\start-agent.bat`.
+   `C:\T-PRINT\agent\start-agent.bat`.
 
 If the shop PC is off, customers can still order and pay. Jobs wait in the queue and print once the PC is back.
 Word/PowerPoint uploads need the shop PC on (it converts them); customers are asked to upload a PDF otherwise.
@@ -91,11 +93,11 @@ Word/PowerPoint uploads need the shop PC on (it converts them); customers are as
 
 **Customer:** opens print.tfix.in (put a QR code to it on the counter), uploads PDF/JPG/PNG/Word/PowerPoint,
 chooses options, enters their mobile number and sends. The next page shows their job code and a **UPI QR code**
-for the exact total (note: `TPrint #<job number>`), plus a "Pay with a UPI app" button on phones. The page updates
+for the exact total (note: `T-PRINT #<job number>`), plus a "Pay with a UPI app" button on phones. The page updates
 by itself: once staff confirm the payment it shows "Payment received", then the print status.
 
 **Shop owner** (admin, from any phone or computer):
-1. Check the payment in your UPI app (amount and `TPrint #…` note), then press **Mark paid**.
+1. Check the payment in your UPI app (amount and `T-PRINT #…` note), then press **Mark paid**.
 2. Press **Print** (or let auto-print do it). The row shows *Waiting for the shop PC → Sending → Sent to <printer>*.
 3. A print still *waiting for the shop PC* can be **cancelled**. Once sending has started it can't be.
 4. **"Check printer … Not retried automatically"** means SumatraPDF failed or timed out. Look at the printer and
@@ -113,7 +115,7 @@ Claude can show the live queue as an interactive dashboard and, if you allow it,
 - In Claude: Customize → Connectors → Add custom connector
   - URL: `https://print.tfix.in/mcp`
   - Request header `Authorization` = `Bearer <mcp_token from tprint-config.php>`
-- Try: "Open the TPrint dashboard."
+- Try: "Open the T-PRINT dashboard."
 - To let Claude print paid jobs, set `'mcp_allow_print' => true` in `tprint-config.php`.
 - To turn the connector off, set `'mcp_token' => ''`.
 

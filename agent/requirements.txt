@@ -1,4 +1,4 @@
-# TPrint print agent (shop PC). Install into its own venv:
+# T-PRINT print agent (shop PC). Install into its own venv:
 #   py -3.12 -m venv venv-agent
 #   .\venv-agent\Scripts\python.exe -m pip install -r agent\requirements.txt
 httpx==0.28.1

@@ -1,9 +1,9 @@
-# TPrint + Claude MCP — installation guide (shop-WiFi / Cloudflare version)
+# T-PRINT + Claude MCP — installation guide (shop-WiFi / Cloudflare version)
 
 > **Using Hostinger only?** Follow [HOSTINGER.md](HOSTINGER.md) instead. It replaces the Cloudflare tunnel,
 > the Python web server and the Python connector with the site at print.tfix.in plus a print agent.
 
-TPrint's connector is an **MCP App**: besides plain tools, it gives Claude an interactive
+T-PRINT's connector is an **MCP App**: besides plain tools, it gives Claude an interactive
 print-queue dashboard that appears right inside the chat (job queue, payment state, printer
 status, pricing, and a guarded Print button). It is built on the official MCP Python SDK 2.x
 (`mcp.server.mcpserver.MCPServer` plus the `mcp.server.apps` extension).
@@ -87,8 +87,8 @@ cloudflared tunnel route dns tprint print.tfix.in
 
 In the Cloudflare dashboard open **Zero Trust > Access > Applications**:
 
-1. **Add an application > Self-hosted**, name `TPrint admin`, domain `print.tfix.in`, no path. Add a policy: Action **Allow**, Include **Emails**: only the owner's and trusted staff's email addresses. The login method can be the default **One-time PIN** (a code sent by email). Save, then copy the application's **Application Audience (AUD) tag**.
-2. **Add an application > Self-hosted**, name `TPrint connector`, domain `print.tfix.in`, path `mcp`. Add a policy: Action **Bypass**, Include **Everyone**. Claude cannot do the email login; this path is protected by the bearer token instead.
+1. **Add an application > Self-hosted**, name `T-PRINT admin`, domain `print.tfix.in`, no path. Add a policy: Action **Allow**, Include **Emails**: only the owner's and trusted staff's email addresses. The login method can be the default **One-time PIN** (a code sent by email). Save, then copy the application's **Application Audience (AUD) tag**.
+2. **Add an application > Self-hosted**, name `T-PRINT connector`, domain `print.tfix.in`, path `mcp`. Add a policy: Action **Bypass**, Include **Everyone**. Claude cannot do the email login; this path is protected by the bearer token instead.
 
 Your team name is the first part of `<team>.cloudflareaccess.com` (Zero Trust > Settings).
 
@@ -135,7 +135,7 @@ Both admin pages, LAN and online, now update each other live. Each process watch
 
 In Claude's web interface open Customize > Connectors > Add custom connector.
 
-- Name: TPrint
+- Name: T-PRINT
 - URL: https://print.tfix.in/mcp
 - Authentication: use the fixed Request headers configuration, not OAuth login.
 - Header name: Authorization
@@ -143,7 +143,7 @@ In Claude's web interface open Customize > Connectors > Add custom connector.
 
 This server uses a fixed secret, not OAuth. Do not place the token in the URL. If your Claude interface does not offer request headers, this connector needs an OAuth adapter before it can be connected there; do not disable authentication as a workaround.
 
-Try: "Open the TPrint dashboard." Claude calls `open_print_dashboard` and the dashboard appears in the chat. Phone numbers and uploaded filenames are never sent to Claude or the dashboard. Connector tools are open_print_dashboard, list_print_jobs, list_printers, get_pricing, get_auto_print_settings and print_paid_job. No payment-confirmation, deletion or pricing-edit tool is exposed.
+Try: "Open the T-PRINT dashboard." Claude calls `open_print_dashboard` and the dashboard appears in the chat. Phone numbers and uploaded filenames are never sent to Claude or the dashboard. Connector tools are open_print_dashboard, list_print_jobs, list_printers, get_pricing, get_auto_print_settings and print_paid_job. No payment-confirmation, deletion or pricing-edit tool is exposed.
 
 ### 4.1 Using the dashboard
 

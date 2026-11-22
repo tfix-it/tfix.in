@@ -1,5 +1,5 @@
 """
-TPrint print agent: runs on the shop PC and connects it to https://print.tfix.in.
+T-PRINT agent (T FIX Auto Print): runs on the shop PC and connects it to https://print.tfix.in.
 
 The website lives on Hostinger and cannot reach into the shop. This agent
 reaches out instead, over plain HTTPS, every few seconds:
@@ -35,7 +35,7 @@ from pathlib import Path
 
 import httpx
 
-AGENT_VERSION = "tprint-agent/3.0.0"
+AGENT_VERSION = "t-print-agent/3.2.0"
 log = logging.getLogger("tprint-agent")
 
 
@@ -64,7 +64,7 @@ class Agent:
     # ------------------------------------------------------------ main loop
     def run_forever(self, interval: float = 3.0):
         delay = interval
-        log.info("TPrint agent started; talking to %s", self.server)
+        log.info("T-PRINT agent started; talking to %s", self.server)
         while True:
             try:
                 self.run_once()
@@ -178,7 +178,7 @@ class Agent:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="TPrint print agent for the shop PC")
+    parser = argparse.ArgumentParser(description="T-PRINT print agent for the shop PC")
     parser.add_argument("--server", default=os.environ.get("TPRINT_SERVER", "https://print.tfix.in"))
     parser.add_argument("--interval", type=float, default=3.0)
     parser.add_argument("--once", action="store_true", help="poll one time and exit (for testing)")
