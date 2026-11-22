@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Print shop — admin</title>
+<title>T FIX Print — admin</title>
+<meta name="theme-color" content="#0B0B0C">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/brand.css">
 <style>
   :root{
     --bg:#F4F5F3; --panel:#fff; --border:#E1E3DE; --ink:#1B1B17; --ink-soft:#6B6D66;
@@ -47,10 +51,10 @@
   .price-form .full{ grid-column:1 / -1; display:flex; justify-content:space-between; align-items:center; }
   .price-form button{ font-size:12px; padding:6px 10px; border-radius:4px; border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
   #loginScreen, #setupScreen{ max-width:340px; margin:80px auto; background:#fff; padding:28px; border-radius:8px; border:1px solid var(--border); }
-  #loginScreen, #setupScreen h1{ font-size:18px; margin:0 0 18px; }
-  #loginScreen, #setupScreen input{ width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--border); border-radius:4px; font-size:14px; }
-  #loginScreen, #setupScreen button{ width:100%; padding:10px; background:var(--ink); color:#fff; border:none; border-radius:4px; font-size:14px; cursor:pointer; }
-  #loginScreen, #setupScreen .err{ color:var(--err); font-size:13px; margin-bottom:10px; display:none; }
+  #loginScreen h1, #setupScreen h1{ font-size:18px; margin:0 0 18px; }
+  #loginScreen input, #setupScreen input{ width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--border); border-radius:4px; font-size:14px; }
+  #loginScreen button, #setupScreen button{ width:100%; padding:10px; background:var(--ink); color:#fff; border:none; border-radius:4px; font-size:14px; cursor:pointer; }
+  #loginScreen .err, #setupScreen .err{ color:var(--err); font-size:13px; margin-bottom:10px; display:none; }
   .empty{ color:var(--ink-soft); font-size:13px; padding:12px 0; }
   .filter-bar{
     display:flex;
@@ -100,11 +104,75 @@
   .dispatch-note{ display:block; font-size:11px; margin-top:4px; color:var(--ink-soft); max-width:180px; }
   .dispatch-note.bad{ color:#A1311F; font-weight:600; }
   #setupScreen code{ font-size:12px; }
+  /* ================= T FIX brand theme =================
+     Tokens and fonts from ../assets/brand.css (same as tfix.in). Maps the page's variables onto them. */
+  :root{
+    --bg:var(--black); --panel:var(--graphite); --border:var(--line); --ink:var(--white); --ink-soft:var(--muted);
+    --blue:var(--yellow); --ok:var(--success); --warn:var(--yellow-2); --err:var(--error);
+  }
+  body{ font-family:var(--f-b); background:var(--black); color:var(--white); }
+  header{ position:sticky; top:0; z-index:10; background:rgba(11,11,12,.86); color:var(--white);
+          -webkit-backdrop-filter:saturate(1.4) blur(14px); backdrop-filter:saturate(1.4) blur(14px);
+          border-bottom:1px solid var(--line); padding:12px 24px; }
+  header button, .filter-bar button{ background:transparent; color:var(--white); border:1px solid var(--line-2);
+          border-radius:999px; padding:7px 14px; }
+  header button:hover, .filter-bar button:hover{ border-color:var(--white); }
+  section.panel{ background:var(--graphite); border:1px solid var(--line); border-radius:var(--r); }
+  section.panel h2{ display:flex; align-items:center; gap:10px; font:500 12px/1.2 var(--f-m); letter-spacing:.14em; color:var(--white); }
+  section.panel h2::before{ content:""; width:22px; height:4px; border-radius:2px; background:var(--yellow); flex:none; }
+  th{ color:var(--dim); font:500 11px/1.2 var(--f-m); letter-spacing:.08em; text-transform:uppercase; }
+  th, td{ border-bottom-color:var(--line); }
+  td a{ color:var(--yellow) !important; }
+
+  input, select, textarea, button{ color-scheme:dark; font-family:inherit; }
+  .filter-bar input[type=text], .filter-bar input[type=date], .price-form input, .settings-form input,
+  .row-actions select, #autoPrintForm select{
+    background:var(--graphite-2) !important; color:var(--white); border:1px solid var(--line-2) !important; border-radius:var(--r-sm) !important; }
+  .filter-bar input:focus, .price-form input:focus, .settings-form input:focus, .row-actions select:focus{ border-color:var(--yellow) !important; outline:none; }
+  input::placeholder{ color:var(--dim); }
+  input[type=checkbox]{ accent-color:var(--yellow); }
+
+  .row-actions button, .price-form button, .settings-form button{ border-radius:999px; font-weight:650; padding:6px 12px; }
+  .row-actions button{ background:transparent; color:var(--white); border:1px solid var(--line-2); }
+  /* Yellow is for the main action (Print); panel Save buttons are outlined, per the brand's <=10% rule. */
+  .row-actions button.primary{ background:var(--yellow); color:var(--on-yellow); border:1px solid var(--yellow); }
+  .row-actions button.primary:hover{ background:var(--yellow-2); }
+  .price-form button, .settings-form button, #apSaveBtn{ background:transparent; color:var(--white); border:1px solid var(--white); }
+  .price-form button:hover, .settings-form button:hover, #apSaveBtn:hover{ background:var(--white); color:var(--on-yellow); }
+  .row-actions button.paid{ background:rgba(111,220,154,.12); color:var(--success); border:1px solid rgba(111,220,154,.45); }
+  .row-actions button:disabled{ opacity:.5; }
+  .settings-form button.secondary, button.secondary{ background:transparent !important; color:var(--white) !important; border:1px solid var(--line-2) !important; }
+
+  .pill-queued{ background:rgba(244,244,242,.08); color:var(--white); }
+  .pill-printing{ background:rgba(255,196,0,.14); color:var(--yellow); }
+  .pill-ready{ background:rgba(111,220,154,.14); color:var(--success); }
+  .pill-collected{ background:transparent; color:var(--dim); box-shadow:inset 0 0 0 1px var(--line-2); }
+  .pill-auto{ background:transparent; color:var(--white); box-shadow:inset 0 0 0 1px var(--line-2); }
+  .dot-busy, .dot-unknown, .dot-paper_out{ background:var(--yellow-2); }
+  .printer-row{ border-bottom-color:var(--line); }
+  .price-form{ border-bottom-color:var(--line); }
+
+  .agent-status{ background:rgba(255,138,122,.1); color:var(--error); border:1px solid rgba(255,138,122,.3); border-radius:var(--r-sm); }
+  .agent-status.online{ background:rgba(111,220,154,.1); color:var(--success); border-color:rgba(111,220,154,.3); }
+  .dispatch-note{ color:var(--muted); }
+  .dispatch-note.bad{ color:var(--error); }
+  .files-gone{ color:var(--dim); }
+
+  #loginScreen, #setupScreen{ background:var(--graphite); border:1px solid var(--line-2); border-radius:var(--r-lg); max-width:380px; padding:28px; }
+  .login-brand{ margin-bottom:22px; }
+  #loginScreen h1, #setupScreen h1{ font-family:var(--f-h); font-stretch:88%; font-weight:800; font-size:26px; letter-spacing:-.015em; }
+  #loginScreen input, #setupScreen input{ background:var(--graphite-2); color:var(--white); border:1px solid var(--line-2); border-radius:var(--r-sm); padding:12px; }
+  #loginScreen input:focus, #setupScreen input:focus{ border-color:var(--yellow); outline:none; }
+  #loginScreen button, #setupScreen button{ background:var(--yellow); color:var(--on-yellow); border-radius:999px; font-weight:700; padding:12px; min-height:46px; }
+  #loginScreen button:hover, #setupScreen button:hover{ background:var(--yellow-2); }
+  #setupScreen p{ color:var(--muted) !important; }
+  #setupScreen code{ font-family:var(--f-m); color:var(--white); }
 </style>
 </head>
 <body>
 
 <div id="loginScreen">
+  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
   <h1>Admin sign in</h1>
   <div class="err" id="loginErr">Invalid username or password</div>
   <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
@@ -113,6 +181,7 @@
 </div>
 
 <div id="setupScreen" class="hidden">
+  <div class="brand-row login-brand"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
   <h1>First-time setup</h1>
   <p style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 12px;">
     Enter the <b>setup code</b> from <code>tprint-config.php</code> (Hostinger File Manager, next to
@@ -126,7 +195,7 @@
 
 <div id="dashboard" class="hidden">
   <header>
-    <h1>Print shop — admin</h1>
+    <div class="brand-row"><img src="../assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print admin</span></div>
     <button id="logoutBtn">Sign out</button>
   </header>
   <main>
@@ -236,6 +305,7 @@
 <script>
 const el = id => document.getElementById(id);
 let printerCache = [];
+let lastPrintersKey = '';
 let agentInfo = { online: false };
 
 // Everything customers or the shop PC supply is escaped before it goes into the page.
@@ -554,6 +624,13 @@ async function loadPrinters() {
               style="font-size:11px; padding:2px 6px; margin-left:6px;">${p.enabled ? 'Disable' : 'Enable'}</button></span>
         </div>`).join('')
     : '<div class="empty">No printers yet. They appear once the print agent runs on the shop PC.</div>';
+  // Job rows hold a printer drop-down: redraw them when the printer list changes.
+  const printersKey = JSON.stringify(printerCache.map(p => [p.windows_printer_name, p.enabled]));
+  const a = document.activeElement;
+  if (printersKey !== lastPrintersKey && !(a && a.tagName === 'SELECT' && a.closest('table'))) {
+    lastPrintersKey = printersKey;
+    applyFilters();
+  }
   list.querySelectorAll('.printerToggle').forEach(b => b.addEventListener('click', async () => {
     const fd = new FormData();
     fd.append('enabled', b.dataset.enabled === '1' ? 'true' : 'false');

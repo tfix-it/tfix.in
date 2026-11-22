@@ -1,0 +1,6 @@
+Archivo (archivo-var.woff2, archivo-rupee.woff2)
+Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+The full license text is available at https://openfontlicense.org/open-font-license-official-text/
+and is identical to the text in OFL-Inter.txt in this folder, with the copyright line above.

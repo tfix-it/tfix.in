@@ -1,5 +1,16 @@
 # Changes
 
+## 3.1.0 — T FIX brand theme
+- hostinger/assets/brand.css: the tfix.in brand system in one file (Lab Black, Graphite, T FIX Yellow for calls to
+  action only, Off-white; Archivo / Inter / JetBrains Mono, self-hosted with their OFL licences; gold T FIX logo
+  and favicon from the main site). No Google Fonts request any more.
+- Customer page and admin restyled on it, in dark mode with the T FIX logo, mono eyebrows with the yellow bar and
+  pill buttons. Selected options use off-white (like tfix.in's language switcher) so yellow stays for the main
+  action. Print previews and the UPI QR stay white so they show paper and scan reliably.
+- Claude dashboard: main action buttons in T FIX Yellow; the rest still follows Claude's light/dark theme.
+- Fixed: admin job rows showed "No printers" until the queue changed. They now redraw when the printer list arrives.
+- Fixed: admin login/setup CSS selectors broken in 3.0.0 (styles leaked from the setup screen onto the login box).
+
 ## 3.0.0 — Hostinger only: print.tfix.in + print agent + UPI QR
 - hostinger/: the whole online side in PHP 8.2+ and MySQL for Hostinger shared hosting. It has the customer
   order site, the full admin at /admin/ (same API paths as the LAN admin), and the Claude connector at /mcp (same

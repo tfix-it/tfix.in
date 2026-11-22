@@ -1,0 +1,42 @@
+/* T FIX brand for print.tfix.in. Same tokens and fonts as the main site (tfix.in, lab.css):
+   Lab Black #0B0B0C · Graphite #1A1C1F · T FIX Yellow #FFC400 (calls to action only, <=10% of the screen)
+   Gold gradient #FFE27A -> #E0A800 (logo only) · Off-white #F4F4F2.
+   Circuit Cyan is reserved for the main site's 3D/AR and is not used here. */
+
+@font-face { font-family: "Archivo"; src: url(fonts/archivo-var.woff2) format("woff2"); font-weight: 600 900; font-stretch: 75% 100%; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url(fonts/archivo-rupee.woff2) format("woff2"); font-weight: 600 900; font-stretch: 75% 100%; font-display: swap; unicode-range: U+20B9; }
+@font-face { font-family: "Inter"; src: url(fonts/inter-var.woff2) format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Inter"; src: url(fonts/inter-rupee.woff2) format("woff2"); font-weight: 400 700; font-display: swap; unicode-range: U+20B9; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+
+:root {
+  --black: #0B0B0C; --graphite: #1A1C1F; --graphite-2: #212327; --graphite-3: #2B2E33;
+  --line: rgba(244, 244, 242, .09); --line-2: rgba(244, 244, 242, .17);
+  --yellow: #FFC400; --yellow-2: #FFD23F; --on-yellow: #0B0B0C;
+  --gold-1: #FFE27A; --gold-2: #E0A800;
+  --white: #F4F4F2; --muted: rgba(244, 244, 242, .7); --dim: rgba(244, 244, 242, .58);
+  --error: #FF8A7A; --success: #6FDC9A;
+  --r-sm: 10px; --r: 14px; --r-lg: 22px;
+  --f-h: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-b: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-m: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: dark;
+}
+
+body { background: var(--black); color: var(--white); font-family: var(--f-b); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; border-radius: 6px; }
+::selection { background: var(--yellow); color: var(--on-yellow); }
+
+/* Logo row: gold T FIX mark + a small mono chip naming the service (as on tfix.in) */
+.brand-row { display: flex; align-items: center; gap: 10px; }
+.brand-row img { height: 26px; width: auto; display: block; }
+.brand-chip { font: 500 11px/1 var(--f-m); letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+              padding: 5px 7px; border: 1px solid var(--line-2); border-radius: 6px; }
+
+/* Eyebrow label with the yellow bar */
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 500 12px/1.2 var(--f-m); letter-spacing: .14em;
+           text-transform: uppercase; color: var(--white); }
+.eyebrow::before { content: ""; width: 28px; height: 4px; background: var(--yellow); border-radius: 2px; flex: none; }
+
+.brand-h { font-family: var(--f-h); font-stretch: 88%; font-weight: 800; letter-spacing: -.015em; line-height: 1.08; }

@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Send a print job</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>T FIX Print — send a print job</title>
+<meta name="theme-color" content="#0B0B0C">
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/brand.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="assets/qrcode.js"></script>
 <style>
@@ -481,12 +484,100 @@
   .job-code-small{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; }
   .job-card-file{ font-size:13px; color:var(--ink-soft); margin-bottom:4px; word-break:break-word; }
   .job-card-detail{ font-size:12px; color:var(--ink-soft); }
+  /* ================= T FIX brand theme =================
+     Tokens and fonts come from assets/brand.css (same as tfix.in). This block maps the page's
+     original variables onto them and restyles each component. Print previews and the UPI QR
+     stay white on purpose: they show paper and must scan reliably. */
+  :root{
+    --paper:var(--black); --paper-edge:var(--line); --ink:var(--white); --ink-soft:var(--muted);
+    --blue:var(--yellow); --blue-dark:var(--yellow-2); --stamp:var(--error); --ok:var(--success);
+  }
+  body{ background:var(--black); font-family:var(--f-b); }
+  .ticket{ background:var(--black); box-shadow:none; }
+  @media (min-width:520px){ .ticket{ border-inline:1px solid var(--line); } }
+  header{ padding:20px 24px 28px; border-bottom:1px solid var(--line);
+          background:radial-gradient(130% 120% at 0% 0%, #17191c 0%, var(--black) 68%); }
+  header .brand-row{ margin-bottom:26px; }
+  header .shop{ color:var(--white); margin:0 0 12px; font-size:12px; }
+  header h1{ font-family:var(--f-h); font-stretch:88%; font-weight:800; font-size:34px; letter-spacing:-.015em; line-height:1.05; }
+  .section{ border-bottom:1px solid var(--line); }
+  .label{ font-family:var(--f-h); font-stretch:92%; font-weight:700; font-size:16.5px; color:var(--white); letter-spacing:-.005em; margin-bottom:12px; }
+  .helper{ color:var(--dim); }
+
+  .dropzone{ border:1.5px dashed var(--line-2); border-radius:var(--r); background:var(--graphite); padding:32px 16px;
+             transition:border-color .2s var(--ease), background-color .2s var(--ease); }
+  .dropzone:hover, .dropzone:active{ border-color:var(--yellow); background:var(--graphite-2); }
+  .dropzone .big{ color:var(--white); }
+  .file-chip{ background:var(--graphite); border:1px solid var(--line); border-radius:var(--r-sm); }
+  .file-chip button{ color:var(--yellow); }
+
+  .toggle{ background:var(--graphite); border:1px solid var(--line-2); border-radius:var(--r-sm); }
+  .toggle input{ accent-color:var(--yellow); }
+  select, input[type=number], input[type=tel], input[type=text]{
+    background:var(--graphite); color:var(--white); border:1px solid var(--line-2); border-radius:var(--r-sm); }
+  select:focus, input[type=number]:focus, input[type=tel]:focus, input[type=text]:focus{ border-color:var(--yellow); outline:none; }
+  input::placeholder{ color:var(--dim); }
+  .segmented{ border:1px solid var(--line-2); border-radius:var(--r-sm); }
+  .segmented button{ background:var(--graphite); color:var(--muted); }
+  .segmented button + button{ border-left-color:var(--line-2); }
+  .segmented.seg-2x2 button:nth-child(n+3){ border-top-color:var(--line-2); }
+  /* Selected option: off-white like tfix.in's language switcher; yellow stays for calls to action. */
+  .segmented button.active{ background:var(--white); color:var(--on-yellow); }
+
+  .preview-wrap{ background:var(--graphite); border:1px solid var(--line); border-radius:var(--r); padding:16px 10px; }
+  .sheet-label{ color:var(--dim); font-family:var(--f-m); font-weight:500; letter-spacing:.1em; }
+  .preview-nav button{ background:var(--graphite-2); color:var(--white); border:1px solid var(--line-2); }
+  .preview-nav button:not(:disabled):hover{ border-color:var(--yellow); }
+
+  .price-total{ border-top:1px solid var(--line-2); }
+  .price-total .amount, .modal-total .amount, .pay-card .pay-amount, .entry-card-cost{
+    font-family:var(--f-h); font-stretch:88%; font-weight:800; color:var(--white); }
+
+  .btn{ border-radius:999px; min-height:50px; font-weight:700; font-family:var(--f-b);
+        transition:transform .15s var(--ease), background-color .2s; }
+  .btn:active{ transform:scale(.98); }
+  .btn-primary{ background:var(--yellow); color:var(--on-yellow); }
+  .btn-primary:hover{ background:var(--yellow-2); }
+  .btn-primary:active{ background:var(--yellow-2); }
+  .btn-primary:disabled{ background:var(--graphite-3); color:var(--dim); transform:none; }
+  .btn-secondary{ background:transparent; color:var(--white); border:1.5px solid var(--line-2); }
+  .btn-secondary:hover{ border-color:var(--white); }
+  .btn-primary .spinner{ border-color:var(--on-yellow); border-top-color:transparent; }
+  .error{ background:rgba(255,138,122,.1); color:var(--error); border:1px solid rgba(255,138,122,.3); border-radius:var(--r-sm); }
+
+  .modal-overlay{ background:rgba(0,0,0,.72); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+  .modal-box{ background:var(--graphite); color:var(--white); border:1px solid var(--line-2); border-radius:var(--r-lg); }
+  .modal-box h2{ font-family:var(--f-h); font-stretch:88%; font-weight:800; }
+  .modal-row{ border-bottom-color:var(--line); }
+  .modal-total{ border-top:1px solid var(--line-2); }
+
+  .entry-card{ background:var(--graphite); border-color:var(--line); border-radius:var(--r-sm); }
+  .entry-edit{ color:var(--yellow); }
+  .entry-remove{ color:var(--error); }
+
+  .status-wrap .label{ color:var(--muted); font-family:var(--f-m); font-weight:500; font-size:12px; letter-spacing:.14em; }
+  .job-card{ background:var(--graphite); border:1px solid var(--line); border-radius:var(--r); text-align:left; }
+  .job-code-small{ font-family:var(--f-m); color:var(--white); }
+  .status-queued{ background:rgba(244,244,242,.08); color:var(--white); }
+  .status-printing{ background:rgba(255,196,0,.14); color:var(--yellow); }
+  .status-ready{ background:rgba(111,220,154,.14); color:var(--success); }
+  .status-collected{ background:transparent; color:var(--dim); box-shadow:inset 0 0 0 1px var(--line-2); }
+  .status-detail{ color:var(--muted); }
+
+  .pay-card{ background:var(--graphite); border:1px solid var(--line-2); border-radius:var(--r-lg); padding:22px 18px; }
+  .pay-card .label{ display:flex; justify-content:center; }
+  .upi-qr{ width:236px; height:236px; padding:12px; border-radius:var(--r); background:#fff; box-sizing:border-box; }
+  .pay-to{ color:var(--muted); }
+  .pay-to strong{ color:var(--white); }
+  .pay-card .helper{ color:var(--dim); }
+  .pay-done{ background:rgba(111,220,154,.1); color:var(--success); border:1px solid rgba(111,220,154,.3); border-radius:var(--r); }
 </style>
 </head>
 <body>
 <div class="ticket">
   <header>
-    <p class="shop">TFIX CUSAT · PRINT SERVICE</p>
+    <div class="brand-row"><img src="assets/brand/tfix-logo-gold.svg" alt="T FIX" width="83" height="26"><span class="brand-chip">Print</span></div>
+    <p class="shop eyebrow">TFIX CUSAT · Print service</p>
     <h1>Self Service</h1>
   </header>
 
@@ -624,7 +715,7 @@
     <p class="label" style="text-align:center;" id="statusLabel">YOUR JOB</p>
     <div id="statusJobsWrap" class="status-jobs-wrap"></div>
     <div class="pay-card hidden" id="payCard">
-      <p class="label" style="text-align:center;margin:0;">PAY BY UPI</p>
+      <p class="eyebrow" style="justify-content:center;margin:0 0 6px;">Pay by UPI</p>
       <div class="pay-amount" id="payAmount">₹0</div>
       <div class="upi-qr" id="upiQr" role="img" aria-label="UPI payment QR code"></div>
       <p class="pay-to">to <strong id="upiName"></strong><br><span id="upiId"></span></p>
