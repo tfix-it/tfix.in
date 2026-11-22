@@ -167,6 +167,8 @@ textarea{min-height:84px; resize:vertical}
 .price .sub{display:block; font-size:13px; color:var(--muted); font-weight:400}
 .price .amt{font-weight:700; white-space:nowrap}
 .price .amt.ask{color:var(--magenta)}
+.price .amt-line{display:block; text-align:right; line-height:1.35}
+.price .amt-line + .amt-line{font-weight:500; color:var(--muted); font-size:14px}
 
 /* Visit */
 .visit{display:grid; grid-template-columns:1fr 1fr; gap:20px}
@@ -352,6 +354,7 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
       <p class="eyebrow" data-i18n="priceEyebrow">Prices</p>
       <h2 data-i18n="priceTitle">Simple, fixed prices</h2>
       <div class="prices" id="priceList"></div>
+      <p class="note" id="priceNote" style="margin-top:14px"></p>
     </div>
   </section>
 
@@ -413,27 +416,41 @@ const SHOP = {
            4:["08:30","21:30"], 5:["08:30","21:30"], 6:["08:30","21:30"] }
 };
 
-// Price per printed page (one side), by type and size
-const PRINT_RATE = { bw: { A4: 2, A3: 6 }, colour: { A4: 10, A3: 25 } };
-// Finishing: "perCopy" is charged once per copy, "perSheet" per sheet of paper
-const FINISH = {
-  none:       { price: 0,  per: "perCopy" },
-  staple:     { price: 0,  per: "perCopy" },
-  spiral:     { price: 40, per: "perCopy" },
-  lamination: { price: 30, per: "perSheet" }
+// Prices (₹) — same as the T Print shop system (app/config.py DEFAULT_PRICING).
+// single = one sheet printed on one side, double = one sheet printed on both sides,
+// min = B&W minimum charge (applies to a customer's first order of the day).
+const RATES = {
+  A4: { bw: { single: 2, double: 3, min: 10 }, colour: { single: 10, double: 15 } },
+  A3: { bw: { single: 5, double: 7, min: 15 }, colour: { single: 15, double: 20 } }
 };
-// Price list shown on the page. price: number, or null for "Ask"
+// Price list shown on the page. Rows with single/double show both prices;
+// price: null shows "Ask us".
 const PRICE_LIST = [
-  { en: "B/W print / Xerox",  ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A4", price: 2,  unit: "page" },
-  { en: "Colour print",       ml: "കളർ പ്രിന്റ്",       sub: "A4", price: 10, unit: "page" },
-  { en: "B/W print",          ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ്", sub: "A3", price: 6,  unit: "page" },
-  { en: "Colour print",       ml: "കളർ പ്രിന്റ്",       sub: "A3", price: 25, unit: "page" },
-  { en: "Spiral binding",     ml: "സ്പൈറൽ ബൈൻഡിംഗ്",   sub: "",   price: 40, unit: "book" },
-  { en: "Lamination",         ml: "ലാമിനേഷൻ",          sub: "A4", price: 30, unit: "sheet" },
-  { en: "Scanning",           ml: "സ്കാനിംഗ്",          sub: "to PDF / WhatsApp", price: 10, unit: "page" },
-  { en: "Passport photos",    ml: "പാസ്പോർട്ട് ഫോട്ടോ", sub: "",   price: null },
-  { en: "Project / record binding", ml: "പ്രോജക്റ്റ് / റെക്കോർഡ് ബൈൻഡിംഗ്", sub: "", price: null }
+  { en: "B/W print / Xerox", ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A4", size: "A4", type: "bw" },
+  { en: "Colour print",      ml: "കളർ പ്രിന്റ്", sub: "A4", size: "A4", type: "colour" },
+  { en: "B/W print / Xerox", ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A3", size: "A3", type: "bw" },
+  { en: "Colour print",      ml: "കളർ പ്രിന്റ്", sub: "A3", size: "A3", type: "colour" },
+  { en: "Spiral binding",    ml: "സ്പൈറൽ ബൈൻഡിംഗ്", sub: "", price: null },
+  { en: "Lamination",        ml: "ലാമിനേഷൻ", sub: "", price: null },
+  { en: "Passport photos",   ml: "പാസ്പോർട്ട് ഫോട്ടോ", sub: "", price: null }
 ];
+
+// Same calculation as the T Print system (app/pricing.py, 1 page per sheet).
+function tprintCost(pages, type, double, copies, size) {
+  const r = RATES[size][type];
+  let sheets, odd = 0, cost;
+  if (double) { odd = pages % 2; sheets = Math.floor(pages / 2); cost = sheets * r.double + odd * r.single; }
+  else { sheets = pages; cost = sheets * r.single; }
+  cost *= copies;
+  const totalSheets = (sheets + odd) * copies;
+  let total = cost, minApplied = false;
+  if (type === "bw") {
+    const min = RATES[size].bw.min;
+    total = (pages > 1 && double) ? cost - r.double + min : cost - r.single + min;
+    minApplied = true;
+  }
+  return { total, cost, totalSheets, minApplied };
+}
 
 /* ==================================================================
    Text — English & Malayalam
@@ -453,11 +470,13 @@ const T = {
     fnNone:"None", fnStaple:"Staple", fnSpiral:"Spiral binding", fnLam:"Lamination",
     fName:"Your name", fPickup:"Pickup time", fNotes:"Notes (optional)",
     notesPh:"e.g. print pages 3–10 only, colour cover page",
-    sumTitle:"Your order", estTotal:"Estimated total", estNote:"Final price is confirmed on WhatsApp before printing.",
+    sumTitle:"Your order", estTotal:"Estimated total", estNote:"Includes the minimum charge for a first B&W order of the day. Final price is confirmed on WhatsApp before printing.",
     attachTip:"After WhatsApp opens, tap the 📎 clip and attach your file before sending.",
     sendOrder:"Order on WhatsApp", fab:"Order",
-    priceEyebrow:"Prices", priceTitle:"Simple, fixed prices", ask:"Ask us",
-    unit_page:"/ page", unit_book:"/ book", unit_sheet:"/ sheet",
+    priceEyebrow:"Prices", priceTitle:"Printing prices", ask:"Ask us",
+    oneSide:"one side", bothSides:"both sides",
+    priceNote:"Prices per sheet. B&W minimum charge {a4} (A4) / {a3} (A3) on your first order of the day — waived from your second order.",
+    lnMin:"B&W minimum charge", finishAsk:"on WhatsApp",
     visitEyebrow:"Visit", visitTitle:"Collect at the shop", directions:"Directions", call:"Call",
     hoursTitle:"Opening hours", monSat:"Monday – Saturday", sun:"Sunday",
     open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow",
@@ -477,11 +496,13 @@ const T = {
     fnNone:"ഒന്നുമില്ല", fnStaple:"സ്റ്റാപ്പിൾ", fnSpiral:"സ്പൈറൽ ബൈൻഡിംഗ്", fnLam:"ലാമിനേഷൻ",
     fName:"നിങ്ങളുടെ പേര്", fPickup:"വാങ്ങാൻ വരുന്ന സമയം", fNotes:"കുറിപ്പ് (ആവശ്യമെങ്കിൽ)",
     notesPh:"ഉദാ: 3–10 പേജുകൾ മാത്രം, കവർ പേജ് കളറിൽ",
-    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", estNote:"പ്രിന്റ് ചെയ്യുന്നതിന് മുൻപ് അന്തിമ തുക WhatsApp-ൽ ഉറപ്പിക്കും.",
+    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", estNote:"ദിവസത്തെ ആദ്യ B&W ഓർഡറിന്റെ മിനിമം ചാർജ് ഉൾപ്പെടെ. പ്രിന്റ് ചെയ്യുന്നതിന് മുൻപ് അന്തിമ തുക WhatsApp-ൽ ഉറപ്പിക്കും.",
     attachTip:"WhatsApp തുറന്ന ശേഷം 📎 അമർത്തി ഫയൽ അറ്റാച്ച് ചെയ്ത് അയയ്ക്കൂ.",
     sendOrder:"WhatsApp-ൽ ഓർഡർ ചെയ്യൂ", fab:"ഓർഡർ",
     priceEyebrow:"നിരക്കുകൾ", priceTitle:"ലളിതമായ നിരക്കുകൾ", ask:"ചോദിക്കൂ",
-    unit_page:"/ പേജ്", unit_book:"/ ബുക്ക്", unit_sheet:"/ ഷീറ്റ്",
+    oneSide:"ഒരു വശം", bothSides:"ഇരുവശവും",
+    priceNote:"നിരക്ക് ഓരോ ഷീറ്റിനും. ബ്ലാക്ക് & വൈറ്റിന് ദിവസത്തെ ആദ്യ ഓർഡറിൽ മിനിമം ചാർജ് {a4} (A4) / {a3} (A3) — രണ്ടാമത്തെ ഓർഡർ മുതൽ ഇല്ല.",
+    lnMin:"ബ്ലാക്ക് & വൈറ്റ് മിനിമം ചാർജ്", finishAsk:"WhatsApp-ൽ",
     visitEyebrow:"സന്ദർശിക്കൂ", visitTitle:"കടയിൽ നിന്ന് വാങ്ങൂ", directions:"വഴി കാണാം", call:"വിളിക്കൂ",
     hoursTitle:"പ്രവർത്തന സമയം", monSat:"തിങ്കൾ – ശനി", sun:"ഞായർ",
     open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ",
@@ -520,11 +541,25 @@ function renderPrices() {
     name.textContent = lang === "ml" ? p.ml : p.en;
     if (p.sub) { const s = document.createElement("span"); s.className = "sub"; s.textContent = p.sub; name.appendChild(s); }
     const amt = document.createElement("span");
-    amt.className = "amt" + (p.price == null ? " ask" : "");
-    amt.textContent = p.price == null ? t("ask") : rupee(p.price) + " " + t("unit_" + p.unit);
+    if (p.type) {
+      const r = RATES[p.size][p.type];
+      amt.className = "amt";
+      amt.innerHTML = "";
+      [[r.single, "oneSide"], [r.double, "bothSides"]].forEach(([v, k]) => {
+        const line = document.createElement("span");
+        line.className = "amt-line";
+        line.textContent = rupee(v) + " " + t(k);
+        amt.appendChild(line);
+      });
+    } else {
+      amt.className = "amt ask";
+      amt.textContent = t("ask");
+    }
     el.append(name, amt);
     $("#priceList").appendChild(el);
   });
+  $("#priceNote").textContent = t("priceNote")
+    .replace("{a4}", rupee(RATES.A4.bw.min)).replace("{a3}", rupee(RATES.A3.bw.min));
 }
 
 /* --- Open / closed, in India time --- */
@@ -560,18 +595,15 @@ const num = (id, min, max) => { const n = Math.floor(+$("#" + id).value); return
 function calc() {
   const colour = val("colour"), size = val("size"), sides = val("sides"), finish = val("finish");
   const pages = num("pages", 1, 2000), copies = num("copies", 1, 500);
-  const rate = PRINT_RATE[colour][size];
-  const sheets = sides === "double" ? Math.ceil(pages / 2) : pages;
-  const printCost = rate * pages * copies;
-  const f = FINISH[finish];
-  const finishCost = f.per === "perSheet" ? f.price * sheets * copies : f.price * copies;
-  const total = printCost + finishCost;
+  const q = tprintCost(pages, colour, sides === "double", copies, size);
+  const total = q.total;
 
   const lines = [
-    [t("lnPrint"), `${pages} ${t("lnPages")} × ${copies} ${t("lnCopies")} × ${rupee(rate)}`, rupee(printCost)],
+    [t("lnPrint"), `${pages} ${t("lnPages")} × ${copies} ${t("lnCopies")}`, rupee(q.cost)],
   ];
-  if (finish !== "none") lines.push([t("lnFinish") + " · " + $("#finish").selectedOptions[0].textContent, "", rupee(finishCost)]);
-  lines.push([t("lnSheets"), "", String(sheets * copies)]);
+  if (q.minApplied) lines.push([t("lnMin"), "", (q.total >= q.cost ? "+" : "−") + rupee(Math.abs(q.total - q.cost))]);
+  if (finish !== "none") lines.push([t("lnFinish") + " · " + $("#finish").selectedOptions[0].textContent, "", t("finishAsk")]);
+  lines.push([t("lnSheets"), "", String(q.totalSheets)]);
 
   const ul = $("#lines"); ul.innerHTML = "";
   lines.forEach(([a, b, c]) => {
@@ -591,11 +623,11 @@ function calc() {
     `Sides: ${sides === "double" ? "Both sides" : "Single side"}`,
     `Pages: ${pages}`,
     `Copies: ${copies}`,
-    `Finishing: ${{ none: "None", staple: "Staple", spiral: "Spiral binding", lamination: "Lamination" }[finish]}`,
+    `Finishing: ${{ none: "None", staple: "Staple", spiral: "Spiral binding", lamination: "Lamination" }[finish]}${finish !== "none" ? " (price to confirm)" : ""}`,
     name ? `Name: ${name}` : null,
     pickup ? `Pickup: ${fmt12(pickup)}` : null,
     notes ? `Notes: ${notes}` : null,
-    `Estimated total: ${rupee(total)}`,
+    `Estimated print total: ${rupee(total)}${q.minApplied ? " (incl. B&W minimum charge)" : ""}`,
     "",
     "📎 File attached below."
   ].filter(x => x != null).join("\n");
