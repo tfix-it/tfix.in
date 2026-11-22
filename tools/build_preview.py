@@ -209,7 +209,7 @@ def build(sample: Path, out: Path):
     swap("'assets/pdfjs/pdf.worker.min.js'",
          "URL.createObjectURL(new Blob([document.getElementById('pdfjsWorker').textContent], { type: 'text/javascript' }))")
     swap("pdfjsLib.getDocument(`${API}/api/uploads/${uploadInfo.upload_id}/pdf`)", "pdfjsLib.getDocument(window.__tprintPreviewPdf(uploadInfo.upload_id))")
-    swap('src="assets/brand/tfix-logo-gold.svg"', f'src="{data_uri(ASSETS / "brand/tfix-logo-gold.svg", "image/svg+xml")}"')
+    swap('src="assets/brand/tfix-cusat.svg"', f'src="{data_uri(ASSETS / "brand/tfix-cusat.svg", "image/svg+xml")}"')
     swap("<title>T-PRINT · T FIX Auto Print</title>", "<title>T-PRINT · preview</title>")
     out.write_text(html)
     print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
