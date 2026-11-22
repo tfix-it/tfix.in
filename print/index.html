@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T FIX CUSAT Print</title>
+<meta name="description" content="Printing, Xerox, lamination and binding at T FIX CUSAT, South Pipeline Road, Kalamassery. Order on WhatsApp and collect at the shop.">
+<meta name="theme-color" content="#14161F">
+<meta property="og:title" content="T FIX CUSAT Print — Send. Print. Collect.">
+<meta property="og:description" content="Printing, Xerox, lamination and binding near CUSAT. Order on WhatsApp.">
+<meta property="og:url" content="https://print.tfix.in/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+Malayalam:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   Brand system — one signature device used everywhere:
+   the CMY "offset" (cyan / magenta / yellow slightly out of register),
+   one mantra (Send. Print. Collect.), one action (Order on WhatsApp).
+------------------------------------------------------------------- */
+:root{
+  --ink:#14161F;
+  --paper:#FAF7F2;
+  --card:#FFFFFF;
+  --muted:#5B5F6E;
+  --line:#E6E1D8;
+  --magenta:#FF1F8E;
+  --cyan:#00A9E0;
+  --yellow:#FFD400;
+  --wa:#1FAF5A;
+  --ok:#1C9A55;
+  --bad:#D2344B;
+  --shadow:0 1px 2px rgba(20,22,31,.06),0 8px 24px rgba(20,22,31,.06);
+  --radius:18px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F4F1EA; --paper:#101219; --card:#191C26; --muted:#A3A7B5; --line:#2A2E3B;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F4F1EA; --paper:#101219; --card:#191C26; --muted:#A3A7B5; --line:#2A2E3B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:clip;
+}
+html[lang="ml"] body{font-family:"Noto Sans Malayalam","Space Grotesk",system-ui,sans-serif}
+a{color:inherit}
+.wrap{max-width:1080px; margin:0 auto; padding:0 16px}
+
+/* Header */
+header{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--line)}
+.bar{display:flex; align-items:center; gap:12px; height:64px}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:700; letter-spacing:.02em}
+.brand svg{width:36px; height:36px; flex:none}
+.brand small{display:block; font-size:11px; font-weight:500; letter-spacing:.18em; color:var(--magenta)}
+.spacer{flex:1}
+.lang{display:inline-flex; border:1px solid var(--line); border-radius:999px; padding:3px; background:var(--card)}
+.lang button{border:0; background:transparent; color:var(--muted); font:inherit; font-size:13px; font-weight:600;
+  padding:6px 12px; border-radius:999px; cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+
+/* Status pill */
+.status{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
+  padding:6px 12px; border-radius:999px; background:var(--card); border:1px solid var(--line)}
+.status i{width:8px; height:8px; border-radius:50%; background:var(--muted)}
+.status.open i{background:var(--ok); box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 20%,transparent)}
+.status.closed i{background:var(--bad)}
+
+/* The offset — signature device */
+.offset{position:relative; display:inline-block; color:var(--ink)}
+.offset::before,.offset::after{content:attr(data-text); position:absolute; inset:0; z-index:-1; pointer-events:none}
+.offset::before{color:var(--cyan); transform:translate(-3px,2px)}
+.offset::after{color:var(--magenta); transform:translate(3px,-1px); mix-blend-mode:multiply}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .offset::after{mix-blend-mode:screen} }
+:root[data-theme="dark"] .offset::after{mix-blend-mode:screen}
+.dots{display:inline-flex; gap:6px; vertical-align:middle}
+.dots b{width:12px; height:12px; border-radius:50%; display:block}
+.dots b:nth-child(1){background:var(--cyan)}
+.dots b:nth-child(2){background:var(--magenta)}
+.dots b:nth-child(3){background:var(--yellow)}
+
+/* Hero */
+.hero{padding-top:56px; padding-bottom:32px; position:relative; isolation:isolate}
+.hero h1{font-size:clamp(44px,10vw,92px); line-height:.98; margin:18px 0 18px; letter-spacing:-.03em; font-weight:700}
+html[lang="ml"] .hero h1{font-size:clamp(34px,8vw,72px); line-height:1.15; letter-spacing:0}
+.hero h1 span{display:block}
+.hero p.lead{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:620px; margin:0 0 28px}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:0 22px;
+  border-radius:14px; font:inherit; font-weight:700; font-size:16px; text-decoration:none; cursor:pointer; border:0}
+.btn svg{width:22px; height:22px; flex:none}
+.btn-wa{background:var(--wa); color:#fff; box-shadow:0 6px 18px color-mix(in srgb,var(--wa) 35%,transparent)}
+.btn-wa:hover{filter:brightness(1.05)}
+.btn-ink{background:var(--ink); color:var(--paper)}
+.btn-ghost{background:var(--card); color:var(--ink); border:1px solid var(--line)}
+.btn:focus-visible,.lang button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.seg label:has(input:focus-visible){
+  outline:3px solid var(--cyan); outline-offset:2px}
+
+/* Sections */
+section{padding:40px 0}
+.eyebrow{font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--magenta); margin:0 0 8px}
+h2{font-size:clamp(28px,5vw,40px); line-height:1.1; margin:0 0 24px; letter-spacing:-.02em}
+html[lang="ml"] h2{letter-spacing:0; line-height:1.3}
+html[lang="ml"] .eyebrow{letter-spacing:.02em}
+
+/* Steps */
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.step{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)}
+.step .n{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:18px; color:#14161F; margin-bottom:14px}
+.step:nth-child(1) .n{background:var(--cyan)}
+.step:nth-child(2) .n{background:var(--magenta); color:#fff}
+.step:nth-child(3) .n{background:var(--yellow)}
+.step h3{margin:0 0 6px; font-size:19px}
+.step p{margin:0; color:var(--muted)}
+
+/* Order */
+.order{display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)}
+.field{margin-bottom:18px}
+.field > label,.field > .lbl{display:block; font-weight:600; font-size:14px; margin-bottom:8px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+input[type=number],input[type=text],input[type=time],select,textarea{
+  width:100%; min-height:48px; padding:10px 14px; border-radius:12px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink); font:inherit; font-size:16px}
+textarea{min-height:84px; resize:vertical}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.seg label{position:relative; display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border-radius:12px;
+  border:1px solid var(--line); background:var(--paper); cursor:pointer; font-weight:600; font-size:15px; user-select:none}
+.seg input{position:absolute; opacity:0; pointer-events:none}
+.seg label:has(input:checked){background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.stepper{display:flex; align-items:stretch; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--paper)}
+.stepper button{width:48px; border:0; background:transparent; color:var(--ink); font:inherit; font-size:22px; cursor:pointer}
+.stepper input{border:0; border-radius:0; text-align:center; min-height:48px; background:transparent; -moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+
+.summary{position:sticky; top:84px}
+.summary h3{margin:0 0 14px; font-size:18px}
+.lines{list-style:none; margin:0 0 14px; padding:0; font-size:15px}
+.lines li{display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px dashed var(--line)}
+.lines li span:first-child{color:var(--muted)}
+.total{display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 4px}
+.total strong{font-size:40px; letter-spacing:-.02em}
+.note{font-size:13px; color:var(--muted); margin:0 0 16px}
+.attach{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin-bottom:16px;
+  background:color-mix(in srgb,var(--yellow) 22%,var(--card)); font-size:14px}
+.attach svg{width:20px; height:20px; flex:none; margin-top:2px}
+.summary .btn{width:100%}
+
+/* Prices */
+.prices{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px}
+.price{display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:16px 18px}
+.price .name{font-weight:600}
+.price .sub{display:block; font-size:13px; color:var(--muted); font-weight:400}
+.price .amt{font-weight:700; white-space:nowrap}
+.price .amt.ask{color:var(--magenta)}
+
+/* Visit */
+.visit{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+.hours{width:100%; border-collapse:collapse; font-size:15px}
+.hours td{padding:10px 0; border-bottom:1px solid var(--line)}
+.hours td:last-child{text-align:right; font-weight:600}
+.hours tr.today td{color:var(--magenta)}
+address{font-style:normal; font-size:17px; line-height:1.6; margin-bottom:18px}
+.actions{display:flex; flex-wrap:wrap; gap:10px}
+
+footer{padding:40px 0 110px; border-top:1px solid var(--line); margin-top:24px; color:var(--muted); font-size:14px}
+footer .mantra{font-size:clamp(26px,6vw,44px); font-weight:700; color:var(--ink); letter-spacing:-.02em; margin:0 0 10px; isolation:isolate; position:relative}
+html[lang="ml"] footer .mantra{letter-spacing:0}
+
+/* Floating WhatsApp (phones) */
+.fab{position:fixed; right:16px; bottom:16px; z-index:30; display:none}
+.fab .btn{border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+@media (max-width:860px){
+  .order,.visit{grid-template-columns:1fr}
+  .summary{position:static}
+  .steps{grid-template-columns:1fr}
+  .fab{display:block}
+}
+@media (max-width:520px){
+  .bar .status{display:none}
+  .row2{grid-template-columns:1fr}
+  .hero{padding-top:36px}
+  .brand-text{font-size:15px}
+}
+.status-mobile{display:none; margin-bottom:8px}
+@media (max-width:520px){ .status-mobile{display:inline-flex} }
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="T FIX CUSAT Print">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#14161F"/>
+        <g font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="44" text-anchor="middle">
+          <text x="29" y="48" fill="#00A9E0">T</text>
+          <text x="35" y="48" fill="#FFD400">T</text>
+          <text x="32" y="48" fill="#FF1F8E">T</text>
+        </g>
+      </svg>
+      <span class="brand-text">T FIX CUSAT<small>PRINT</small></span>
+    </a>
+    <span class="spacer"></span>
+    <span class="status" data-status><i></i><span data-status-text>…</span></span>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ml" aria-pressed="false">മല</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <span class="status status-mobile" data-status><i></i><span data-status-text>…</span></span>
+    <div><span class="dots" aria-hidden="true"><b></b><b></b><b></b></span></div>
+    <h1>
+      <span class="offset" data-i18n="m1" data-text="Send.">Send.</span>
+      <span class="offset" data-i18n="m2" data-text="Print.">Print.</span>
+      <span class="offset" data-i18n="m3" data-text="Collect.">Collect.</span>
+    </h1>
+    <p class="lead" data-i18n="lead">Printing, Xerox, lamination and binding next to CUSAT. Send your file on WhatsApp, we print it, you collect it at the shop.</p>
+    <div class="cta">
+      <a class="btn btn-ink" href="#order" data-i18n="ctaOrder">Start an order</a>
+      <a class="btn btn-wa" data-wa-plain href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
+        <span data-i18n="ctaWa">WhatsApp us</span>
+      </a>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow" data-i18n="howEyebrow">How it works</p>
+      <h2 data-i18n="howTitle">Three steps. That's it.</h2>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3 data-i18n="s1t">Send</h3><p data-i18n="s1p">Choose your options below and tap “Order on WhatsApp”. Attach your PDF, photo or document in the chat.</p></div>
+        <div class="step"><div class="n">2</div><h3 data-i18n="s2t">Print</h3><p data-i18n="s2p">We confirm the price on WhatsApp and print your order.</p></div>
+        <div class="step"><div class="n">3</div><h3 data-i18n="s3t">Collect</h3><p data-i18n="s3p">Pick it up at the shop on South Pipeline Road, near CUSAT. Pay at the counter.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="order">
+    <div class="wrap">
+      <p class="eyebrow" data-i18n="orderEyebrow">Order</p>
+      <h2 data-i18n="orderTitle">Build your print order</h2>
+      <div class="order">
+        <form class="card" id="orderForm" autocomplete="on" onsubmit="return false">
+          <div class="field">
+            <span class="lbl" data-i18n="fColour">Print type</span>
+            <div class="seg">
+              <label><input type="radio" name="colour" value="bw" checked><span data-i18n="bw">Black &amp; white</span></label>
+              <label><input type="radio" name="colour" value="colour"><span data-i18n="colour">Colour</span></label>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <span class="lbl" data-i18n="fSize">Paper size</span>
+              <div class="seg">
+                <label><input type="radio" name="size" value="A4" checked><span>A4</span></label>
+                <label><input type="radio" name="size" value="A3"><span>A3</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" data-i18n="fSides">Sides</span>
+              <div class="seg">
+                <label><input type="radio" name="sides" value="single" checked><span data-i18n="single">Single</span></label>
+                <label><input type="radio" name="sides" value="double"><span data-i18n="double">Both sides</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="pages" data-i18n="fPages">Pages in file</label>
+              <div class="stepper">
+                <button type="button" data-step="pages" data-d="-1" aria-label="Fewer pages">−</button>
+                <input id="pages" name="pages" type="number" inputmode="numeric" min="1" max="2000" value="1">
+                <button type="button" data-step="pages" data-d="1" aria-label="More pages">+</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="copies" data-i18n="fCopies">Copies</label>
+              <div class="stepper">
+                <button type="button" data-step="copies" data-d="-1" aria-label="Fewer copies">−</button>
+                <input id="copies" name="copies" type="number" inputmode="numeric" min="1" max="500" value="1">
+                <button type="button" data-step="copies" data-d="1" aria-label="More copies">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="finish" data-i18n="fFinish">Finishing</label>
+            <select id="finish" name="finish">
+              <option value="none" data-i18n="fnNone">None</option>
+              <option value="staple" data-i18n="fnStaple">Staple</option>
+              <option value="spiral" data-i18n="fnSpiral">Spiral binding</option>
+              <option value="lamination" data-i18n="fnLam">Lamination</option>
+            </select>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="name" data-i18n="fName">Your name</label>
+              <input id="name" name="name" type="text" autocomplete="name" maxlength="60">
+            </div>
+            <div class="field">
+              <label for="pickup" data-i18n="fPickup">Pickup time</label>
+              <input id="pickup" name="pickup" type="time">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="notes" data-i18n="fNotes">Notes (optional)</label>
+            <textarea id="notes" name="notes" maxlength="400" data-i18n-ph="notesPh" placeholder="e.g. print pages 3–10 only, colour cover page"></textarea>
+          </div>
+        </form>
+
+        <aside class="card summary" aria-live="polite">
+          <h3 data-i18n="sumTitle">Your order</h3>
+          <ul class="lines" id="lines"></ul>
+          <div class="total"><span data-i18n="estTotal">Estimated total</span><strong id="total">₹0</strong></div>
+          <p class="note" data-i18n="estNote">Final price is confirmed on WhatsApp before printing.</p>
+          <div class="attach">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
+            <span data-i18n="attachTip">After WhatsApp opens, tap the 📎 clip and attach your file before sending.</span>
+          </div>
+          <a class="btn btn-wa" id="sendOrder" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
+            <span data-i18n="sendOrder">Order on WhatsApp</span>
+          </a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="prices">
+    <div class="wrap">
+      <p class="eyebrow" data-i18n="priceEyebrow">Prices</p>
+      <h2 data-i18n="priceTitle">Simple, fixed prices</h2>
+      <div class="prices" id="priceList"></div>
+    </div>
+  </section>
+
+  <section id="visit">
+    <div class="wrap">
+      <p class="eyebrow" data-i18n="visitEyebrow">Visit</p>
+      <h2 data-i18n="visitTitle">Collect at the shop</h2>
+      <div class="visit">
+        <div class="card">
+          <address>
+            <strong>T FIX CUSAT</strong><br>
+            South Pipeline Road, CUSAT PO<br>
+            Kalamassery, Kochi 682022
+          </address>
+          <div class="actions">
+            <a class="btn btn-ink" id="mapLink" href="#" target="_blank" rel="noopener" data-i18n="directions">Directions</a>
+            <a class="btn btn-ghost" id="callLink" href="#" data-i18n="call">Call</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 6px" data-i18n="hoursTitle">Opening hours</h3>
+          <table class="hours">
+            <tbody>
+              <tr data-days="1,2,3,4,5,6"><td data-i18n="monSat">Monday – Saturday</td><td>8:30 AM – 9:30 PM</td></tr>
+              <tr data-days="0"><td data-i18n="sun">Sunday</td><td>9:30 AM – 9:30 PM</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="mantra"><span class="offset" data-i18n="mantra" data-text="Send. Print. Collect.">Send. Print. Collect.</span></p>
+    <p>T FIX CUSAT · South Pipeline Road, CUSAT PO, Kalamassery 682022 · <a href="#" data-wa-plain target="_blank" rel="noopener">WhatsApp</a></p>
+    <p>© <span id="year"></span> T FIX CUSAT</p>
+  </div>
+</footer>
+
+<div class="fab">
+  <a class="btn btn-wa" href="#order" aria-label="Order on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
+    <span data-i18n="fab">Order</span>
+  </a>
+</div>
+
+<script>
+/* ==================================================================
+   EDIT HERE — shop details and prices (₹)
+   ================================================================== */
+const SHOP = {
+  whatsapp: "917907065818",          // country code + number, no "+"
+  phone: "+917907065818",
+  mapQuery: "T FIX CUSAT, South Pipeline Road, CUSAT PO, Kalamassery 682022",
+  // Opening hours, IST. 0 = Sunday … 6 = Saturday. [open, close] in 24h "HH:MM"
+  hours: { 0:["09:30","21:30"], 1:["08:30","21:30"], 2:["08:30","21:30"], 3:["08:30","21:30"],
+           4:["08:30","21:30"], 5:["08:30","21:30"], 6:["08:30","21:30"] }
+};
+
+// Price per printed page (one side), by type and size
+const PRINT_RATE = { bw: { A4: 2, A3: 6 }, colour: { A4: 10, A3: 25 } };
+// Finishing: "perCopy" is charged once per copy, "perSheet" per sheet of paper
+const FINISH = {
+  none:       { price: 0,  per: "perCopy" },
+  staple:     { price: 0,  per: "perCopy" },
+  spiral:     { price: 40, per: "perCopy" },
+  lamination: { price: 30, per: "perSheet" }
+};
+// Price list shown on the page. price: number, or null for "Ask"
+const PRICE_LIST = [
+  { en: "B/W print / Xerox",  ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A4", price: 2,  unit: "page" },
+  { en: "Colour print",       ml: "കളർ പ്രിന്റ്",       sub: "A4", price: 10, unit: "page" },
+  { en: "B/W print",          ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ്", sub: "A3", price: 6,  unit: "page" },
+  { en: "Colour print",       ml: "കളർ പ്രിന്റ്",       sub: "A3", price: 25, unit: "page" },
+  { en: "Spiral binding",     ml: "സ്പൈറൽ ബൈൻഡിംഗ്",   sub: "",   price: 40, unit: "book" },
+  { en: "Lamination",         ml: "ലാമിനേഷൻ",          sub: "A4", price: 30, unit: "sheet" },
+  { en: "Scanning",           ml: "സ്കാനിംഗ്",          sub: "to PDF / WhatsApp", price: 10, unit: "page" },
+  { en: "Passport photos",    ml: "പാസ്പോർട്ട് ഫോട്ടോ", sub: "",   price: null },
+  { en: "Project / record binding", ml: "പ്രോജക്റ്റ് / റെക്കോർഡ് ബൈൻഡിംഗ്", sub: "", price: null }
+];
+
+/* ==================================================================
+   Text — English & Malayalam
+   ================================================================== */
+const T = {
+  en: {
+    m1:"Send.", m2:"Print.", m3:"Collect.", mantra:"Send. Print. Collect.",
+    lead:"Printing, Xerox, lamination and binding next to CUSAT. Send your file on WhatsApp, we print it, you collect it at the shop.",
+    ctaOrder:"Start an order", ctaWa:"WhatsApp us",
+    howEyebrow:"How it works", howTitle:"Three steps. That's it.",
+    s1t:"Send", s1p:"Choose your options below and tap “Order on WhatsApp”. Attach your PDF, photo or document in the chat.",
+    s2t:"Print", s2p:"We confirm the price on WhatsApp and print your order.",
+    s3t:"Collect", s3p:"Pick it up at the shop on South Pipeline Road, near CUSAT. Pay at the counter.",
+    orderEyebrow:"Order", orderTitle:"Build your print order",
+    fColour:"Print type", bw:"Black & white", colour:"Colour", fSize:"Paper size", fSides:"Sides",
+    single:"Single", double:"Both sides", fPages:"Pages in file", fCopies:"Copies", fFinish:"Finishing",
+    fnNone:"None", fnStaple:"Staple", fnSpiral:"Spiral binding", fnLam:"Lamination",
+    fName:"Your name", fPickup:"Pickup time", fNotes:"Notes (optional)",
+    notesPh:"e.g. print pages 3–10 only, colour cover page",
+    sumTitle:"Your order", estTotal:"Estimated total", estNote:"Final price is confirmed on WhatsApp before printing.",
+    attachTip:"After WhatsApp opens, tap the 📎 clip and attach your file before sending.",
+    sendOrder:"Order on WhatsApp", fab:"Order",
+    priceEyebrow:"Prices", priceTitle:"Simple, fixed prices", ask:"Ask us",
+    unit_page:"/ page", unit_book:"/ book", unit_sheet:"/ sheet",
+    visitEyebrow:"Visit", visitTitle:"Collect at the shop", directions:"Directions", call:"Call",
+    hoursTitle:"Opening hours", monSat:"Monday – Saturday", sun:"Sunday",
+    open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow",
+    lnPrint:"Printing", lnFinish:"Finishing", lnSheets:"sheets", lnPages:"pages", lnCopies:"copies"
+  },
+  ml: {
+    m1:"അയയ്ക്കൂ.", m2:"പ്രിന്റ്.", m3:"കൈപ്പറ്റൂ.", mantra:"അയയ്ക്കൂ. പ്രിന്റ്. കൈപ്പറ്റൂ.",
+    lead:"CUSAT-ന് തൊട്ടടുത്ത് പ്രിന്റിംഗ്, സെറോക്സ്, ലാമിനേഷൻ, ബൈൻഡിംഗ്. ഫയൽ WhatsApp-ൽ അയയ്ക്കൂ, ഞങ്ങൾ പ്രിന്റ് ചെയ്യും, കടയിൽ വന്ന് വാങ്ങാം.",
+    ctaOrder:"ഓർഡർ തുടങ്ങൂ", ctaWa:"WhatsApp ചെയ്യൂ",
+    howEyebrow:"എങ്ങനെ", howTitle:"മൂന്ന് ഘട്ടങ്ങൾ മാത്രം.",
+    s1t:"അയയ്ക്കൂ", s1p:"താഴെ ഓപ്ഷനുകൾ തിരഞ്ഞെടുത്ത് “WhatsApp-ൽ ഓർഡർ ചെയ്യൂ” അമർത്തൂ. ചാറ്റിൽ PDF, ഫോട്ടോ അല്ലെങ്കിൽ ഡോക്യുമെന്റ് അറ്റാച്ച് ചെയ്യൂ.",
+    s2t:"പ്രിന്റ്", s2p:"WhatsApp-ൽ തുക ഉറപ്പിച്ച ശേഷം ഞങ്ങൾ പ്രിന്റ് ചെയ്യും.",
+    s3t:"കൈപ്പറ്റൂ", s3p:"CUSAT-ന് സമീപം സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡിലെ കടയിൽ നിന്ന് വാങ്ങാം. പണം കൗണ്ടറിൽ നൽകാം.",
+    orderEyebrow:"ഓർഡർ", orderTitle:"നിങ്ങളുടെ പ്രിന്റ് ഓർഡർ",
+    fColour:"പ്രിന്റ് തരം", bw:"ബ്ലാക്ക് & വൈറ്റ്", colour:"കളർ", fSize:"പേപ്പർ വലുപ്പം", fSides:"വശങ്ങൾ",
+    single:"ഒരു വശം", double:"ഇരുവശവും", fPages:"ഫയലിലെ പേജുകൾ", fCopies:"കോപ്പികൾ", fFinish:"ഫിനിഷിംഗ്",
+    fnNone:"ഒന്നുമില്ല", fnStaple:"സ്റ്റാപ്പിൾ", fnSpiral:"സ്പൈറൽ ബൈൻഡിംഗ്", fnLam:"ലാമിനേഷൻ",
+    fName:"നിങ്ങളുടെ പേര്", fPickup:"വാങ്ങാൻ വരുന്ന സമയം", fNotes:"കുറിപ്പ് (ആവശ്യമെങ്കിൽ)",
+    notesPh:"ഉദാ: 3–10 പേജുകൾ മാത്രം, കവർ പേജ് കളറിൽ",
+    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", estNote:"പ്രിന്റ് ചെയ്യുന്നതിന് മുൻപ് അന്തിമ തുക WhatsApp-ൽ ഉറപ്പിക്കും.",
+    attachTip:"WhatsApp തുറന്ന ശേഷം 📎 അമർത്തി ഫയൽ അറ്റാച്ച് ചെയ്ത് അയയ്ക്കൂ.",
+    sendOrder:"WhatsApp-ൽ ഓർഡർ ചെയ്യൂ", fab:"ഓർഡർ",
+    priceEyebrow:"നിരക്കുകൾ", priceTitle:"ലളിതമായ നിരക്കുകൾ", ask:"ചോദിക്കൂ",
+    unit_page:"/ പേജ്", unit_book:"/ ബുക്ക്", unit_sheet:"/ ഷീറ്റ്",
+    visitEyebrow:"സന്ദർശിക്കൂ", visitTitle:"കടയിൽ നിന്ന് വാങ്ങൂ", directions:"വഴി കാണാം", call:"വിളിക്കൂ",
+    hoursTitle:"പ്രവർത്തന സമയം", monSat:"തിങ്കൾ – ശനി", sun:"ഞായർ",
+    open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ",
+    lnPrint:"പ്രിന്റിംഗ്", lnFinish:"ഫിനിഷിംഗ്", lnSheets:"ഷീറ്റ്", lnPages:"പേജ്", lnCopies:"കോപ്പി"
+  }
+};
+
+/* ================================================================== */
+let lang = "en";
+try { const s = localStorage.getItem("tfix-print-lang"); if (s === "ml" || s === "en") lang = s; } catch (e) {}
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
+const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  $$("[data-i18n]").forEach(el => {
+    const v = t(el.dataset.i18n);
+    el.textContent = v;
+    if (el.classList.contains("offset")) el.dataset.text = v;
+  });
+  $$("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  $$(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  renderPrices(); updateStatus(); calc();
+}
+
+function renderPrices() {
+  $("#priceList").innerHTML = "";
+  PRICE_LIST.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "price";
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = lang === "ml" ? p.ml : p.en;
+    if (p.sub) { const s = document.createElement("span"); s.className = "sub"; s.textContent = p.sub; name.appendChild(s); }
+    const amt = document.createElement("span");
+    amt.className = "amt" + (p.price == null ? " ask" : "");
+    amt.textContent = p.price == null ? t("ask") : rupee(p.price) + " " + t("unit_" + p.unit);
+    el.append(name, amt);
+    $("#priceList").appendChild(el);
+  });
+}
+
+/* --- Open / closed, in India time --- */
+function nowIST() {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false })
+    .formatToParts(new Date());
+  const get = type => parts.find(p => p.type === type).value;
+  const day = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(get("weekday"));
+  return { day, mins: (+get("hour") % 24) * 60 + +get("minute") };
+}
+const toMins = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+const fmt12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; };
+
+function updateStatus() {
+  const { day, mins } = nowIST();
+  const [o, c] = SHOP.hours[day];
+  let open = mins >= toMins(o) && mins < toMins(c), text;
+  if (open) text = t("open") + " " + fmt12(c);
+  else {
+    const before = mins < toMins(o);
+    const nd = before ? day : (day + 1) % 7;
+    text = t("closed") + " " + (before ? t("today") : t("tomorrow")) + " " + fmt12(SHOP.hours[nd][0]);
+  }
+  $$("[data-status]").forEach(el => { el.classList.toggle("open", open); el.classList.toggle("closed", !open); });
+  $$("[data-status-text]").forEach(el => el.textContent = text);
+  $$(".hours tr").forEach(tr => tr.classList.toggle("today", tr.dataset.days.split(",").includes(String(day))));
+}
+
+/* --- Calculator --- */
+const val = name => { const el = $(`[name="${name}"]:checked`) || $(`[name="${name}"]`); return el ? el.value : ""; };
+const num = (id, min, max) => { const n = Math.floor(+$("#" + id).value); return Math.min(max, Math.max(min, isFinite(n) ? n : min)); };
+
+function calc() {
+  const colour = val("colour"), size = val("size"), sides = val("sides"), finish = val("finish");
+  const pages = num("pages", 1, 2000), copies = num("copies", 1, 500);
+  const rate = PRINT_RATE[colour][size];
+  const sheets = sides === "double" ? Math.ceil(pages / 2) : pages;
+  const printCost = rate * pages * copies;
+  const f = FINISH[finish];
+  const finishCost = f.per === "perSheet" ? f.price * sheets * copies : f.price * copies;
+  const total = printCost + finishCost;
+
+  const lines = [
+    [t("lnPrint"), `${pages} ${t("lnPages")} × ${copies} ${t("lnCopies")} × ${rupee(rate)}`, rupee(printCost)],
+  ];
+  if (finish !== "none") lines.push([t("lnFinish") + " · " + $("#finish").selectedOptions[0].textContent, "", rupee(finishCost)]);
+  lines.push([t("lnSheets"), "", String(sheets * copies)]);
+
+  const ul = $("#lines"); ul.innerHTML = "";
+  lines.forEach(([a, b, c]) => {
+    const li = document.createElement("li");
+    const l = document.createElement("span"); l.textContent = b ? `${a} (${b})` : a;
+    const r = document.createElement("span"); r.textContent = c;
+    li.append(l, r); ul.appendChild(li);
+  });
+  $("#total").textContent = rupee(total);
+
+  // WhatsApp message (kept in English so staff can read every order the same way)
+  const name = $("#name").value.trim(), pickup = $("#pickup").value, notes = $("#notes").value.trim();
+  const msg = [
+    "*New print order — print.tfix.in*",
+    `Type: ${colour === "bw" ? "Black & white" : "Colour"}`,
+    `Size: ${size}`,
+    `Sides: ${sides === "double" ? "Both sides" : "Single side"}`,
+    `Pages: ${pages}`,
+    `Copies: ${copies}`,
+    `Finishing: ${{ none: "None", staple: "Staple", spiral: "Spiral binding", lamination: "Lamination" }[finish]}`,
+    name ? `Name: ${name}` : null,
+    pickup ? `Pickup: ${fmt12(pickup)}` : null,
+    notes ? `Notes: ${notes}` : null,
+    `Estimated total: ${rupee(total)}`,
+    "",
+    "📎 File attached below."
+  ].filter(x => x != null).join("\n");
+  $("#sendOrder").href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent(msg)}`;
+}
+
+/* --- Wire up --- */
+$$("[data-wa-plain]").forEach(a => a.href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent("Hi T FIX CUSAT, I'd like to print something.")}`);
+$("#mapLink").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
+$("#callLink").href = "tel:" + SHOP.phone;
+$("#year").textContent = new Date().getFullYear();
+
+$("#orderForm").addEventListener("input", calc);
+$("#orderForm").addEventListener("change", calc);
+$$("[data-step]").forEach(b => b.addEventListener("click", () => {
+  const el = $("#" + b.dataset.step);
+  el.value = Math.max(+el.min, Math.min(+el.max, (Math.floor(+el.value) || 1) + +b.dataset.d));
+  calc();
+}));
+$$(".lang button").forEach(b => b.addEventListener("click", () => {
+  lang = b.dataset.lang;
+  try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
+  applyLang();
+}));
+
+applyLang();
+setInterval(updateStatus, 60000);
+</script>
+</body>
+</html>
