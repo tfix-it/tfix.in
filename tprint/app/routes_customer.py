@@ -14,9 +14,46 @@ from fastapi import (
 
 from . import config, convert, db, pricing, printing
 from .security import check_rate_limit
-from .ws_hub import hub
+from .ws_hub import hub, public_job
 
 router = APIRouter()
+
+ALLOWED_PAGES_PER_SHEET = {1, 2, 4, 6, 9, 16}
+MAX_COPIES = 500
+
+def _upload_path(name: str):
+    """Resolve a client-supplied upload name to a file inside UPLOAD_DIR, or
+    None. Rejects anything that isn't a bare filename (no folders, no
+    absolute paths, no '..')."""
+    if not name or name != Path(name).name:
+        return None
+    root = config.UPLOAD_DIR.resolve()
+    path = (root / name).resolve()
+    if not path.is_relative_to(root) or not path.is_file():
+        return None
+    return path
+
+
+def _parse_pages_range(pages_range: str, total: int) -> list[int]:
+    """Server-side copy of the customer page's page selection. Empty means
+    all pages. Accepts '1-5,8,11-15'. Raises ValueError if out of range."""
+    if not pages_range.strip():
+        return list(range(1, total + 1))
+    selected = set()
+    for part in pages_range.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            a, b = (int(x) for x in part.split("-", 1))
+        else:
+            a = b = int(part)
+        if a < 1 or b > total or a > b:
+            raise ValueError("Page range is outside the document")
+        selected.update(range(a, b + 1))
+    if not selected:
+        raise ValueError("No pages selected")
+    return sorted(selected)
 
 
 @router.post("/api/upload", dependencies=[Depends(check_rate_limit)])
@@ -104,7 +141,7 @@ async def create_job(
     pdf_filename: str = Form(...),
     original_filename: str = Form(...),
     file_type: str = Form(...),
-    pages: int = Form(...),
+    pages: int = Form(0),  # ignored: counted from the PDF on the server
     color: bool = Form(False),
     doubleside: bool = Form(False),
     duplex_edge: str = Form("long"),
@@ -123,13 +160,31 @@ async def create_job(
     if scale_mode not in ("fit", "actual"):
         raise HTTPException(status_code=400, detail="scale_mode must be 'fit' or 'actual'")
 
-    pdf_path = config.UPLOAD_DIR / pdf_filename
-    if not pdf_path.exists():
+    if pages_per_sheet not in ALLOWED_PAGES_PER_SHEET:
+        raise HTTPException(status_code=400, detail="Unsupported pages per sheet")
+    if not 1 <= copies <= MAX_COPIES:
+        raise HTTPException(status_code=400, detail=f"Copies must be between 1 and {MAX_COPIES}")
+
+    pdf_path = _upload_path(pdf_filename)
+    if not pdf_path or pdf_path.suffix.lower() != ".pdf":
         raise HTTPException(status_code=400, detail="Upload expired — please re-upload your file")
 
-    source_path = config.UPLOAD_DIR / source_filename if source_filename else None
-    if source_path and not source_path.exists():
-        source_path = None  # already gone/expired — just skip it
+    source_path = _upload_path(source_filename) if source_filename else None
+
+    # Never trust the page count the browser sends: count the pages in the
+    # actual PDF and apply the chosen range to that. Otherwise a customer
+    # could send pages=1 for a 50-page file and be charged for one page.
+    try:
+        total_pages = pricing.get_page_count(str(pdf_path))
+        selected = _parse_pages_range(pages_range, total_pages)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read the PDF — please re-upload your file")
+    pages = len(selected)
+    # Store the normalised range; empty when every page is printed.
+    if len(selected) == total_pages:
+        pages_range = ""
 
     daily_seq = db.count_jobs_by_phone_today(phone) + 1
     # The minimum-charge floor only applies to a phone number's first job of
@@ -156,7 +211,7 @@ async def create_job(
     job_id = db.create_job(
         phone=phone,
         original_filename=original_filename,
-        pdf_filename=pdf_filename,
+        pdf_filename=pdf_path.name,
         source_filename=new_source_filename,
         file_type=file_type,
         pages=pages,
@@ -224,7 +279,7 @@ async def get_job(job_id: int):
     job = db.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    return job
+    return public_job(job)
 
 
 @router.get("/api/jobs/by-phone/{phone}")
@@ -233,7 +288,7 @@ async def jobs_by_phone_today(phone: str):
     # phone number they themselves just typed in, same as the queue screen
     # they'd see if they asked at the counter. Only today's jobs are
     # returned, and only status/cost/filename — nothing more sensitive.
-    return db.list_jobs_by_phone_today(phone)
+    return [public_job(j) for j in db.list_jobs_by_phone_today(phone)]
 
 
 @router.websocket("/ws/customer/{job_id}")

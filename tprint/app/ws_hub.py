@@ -9,6 +9,19 @@ status page.
 """
 from fastapi import WebSocket
 
+# Fields the public (no-login) job lookups may return. Phone numbers and
+# on-disk filenames are left out: job IDs are sequential, so anyone could
+# otherwise walk /api/jobs/1, /2, ... and collect every customer's phone
+# number and a direct /uploads/ link to their document.
+PUBLIC_JOB_FIELDS = (
+    "id", "status", "paid", "cost", "sheets", "copies", "color", "doubleside",
+    "paper_size", "daily_seq", "created_at", "updated_at",
+)
+
+
+def public_job(job: dict) -> dict:
+    return {k: job[k] for k in PUBLIC_JOB_FIELDS if k in job}
+
 
 class Hub:
     def __init__(self):
@@ -44,7 +57,7 @@ class Hub:
 
         for ws in self.customer_sockets.get(job["id"], []):
             try:
-                await ws.send_json({"type": "job_update", "job": job})
+                await ws.send_json({"type": "job_update", "job": public_job(job)})
             except Exception:
                 pass
 
