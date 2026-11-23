@@ -204,3 +204,14 @@ def test_order_validation(site, tmp_path):
     assert r.status_code == 404
     body = status(site, order)
     assert 'phone' not in body
+
+
+def test_settings_work_with_old_config_py(monkeypatch):
+    # An older, customised config.py has no CLOUD_* lines: fall back to env vars.
+    for name in ('CLOUD_URL', 'CLOUD_TOKEN', 'CLOUD_SYNC_INTERVAL_SEC'):
+        monkeypatch.delattr(config, name, raising=False)
+    monkeypatch.delenv('PRINTSHOP_CLOUD_URL', raising=False)
+    assert not cloud_sync.is_configured()
+    monkeypatch.setenv('PRINTSHOP_CLOUD_URL', 'https://print.tfix.in/api/shop.php')
+    monkeypatch.setenv('PRINTSHOP_CLOUD_TOKEN', 'x' * 40)
+    assert cloud_sync.is_configured() and cloud_sync.sync_interval() == 60

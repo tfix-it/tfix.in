@@ -21,6 +21,7 @@ Configure with environment variables (see START_HERE.md):
 """
 import asyncio
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -48,6 +49,24 @@ CREATE TABLE IF NOT EXISTS cloud_imports (
     created_at TEXT NOT NULL
 );
 """
+
+
+def _setting(name: str, env: str, default=""):
+    """Read from app/config.py if it has the setting, else from the environment —
+    so an older, customised config.py without these lines keeps working."""
+    return getattr(config, name, None) or os.environ.get(env, default)
+
+
+def cloud_url() -> str:
+    return _setting("CLOUD_URL", "PRINTSHOP_CLOUD_URL")
+
+
+def cloud_token() -> str:
+    return _setting("CLOUD_TOKEN", "PRINTSHOP_CLOUD_TOKEN")
+
+
+def sync_interval() -> int:
+    return int(_setting("CLOUD_SYNC_INTERVAL_SEC", "PRINTSHOP_CLOUD_SYNC_INTERVAL_SEC", 60))
 
 
 class CloudError(RuntimeError):
@@ -105,7 +124,7 @@ def initialize():
 
 
 def is_configured() -> bool:
-    return bool(config.CLOUD_URL and config.CLOUD_TOKEN)
+    return bool(cloud_url() and cloud_token())
 
 
 # ---------------------------------------------------------------- import
@@ -292,8 +311,9 @@ _task: Optional[asyncio.Task] = None
 
 async def _loop():
     from .ws_hub import hub
-    client = CloudClient(config.CLOUD_URL, config.CLOUD_TOKEN)
-    print(f"[cloud] syncing online orders from {config.CLOUD_URL} every {config.CLOUD_SYNC_INTERVAL_SEC}s")
+    client = CloudClient(cloud_url(), cloud_token())
+    interval = sync_interval()
+    print(f"[cloud] syncing online orders from {cloud_url()} every {interval}s")
     while True:
         try:
             created = await asyncio.to_thread(sync_once, client)
@@ -303,7 +323,7 @@ async def _loop():
                 print(f"[cloud] imported {len(created)} online job(s)")
         except Exception as e:  # keep the shop server running whatever happens online
             print(f"[cloud] sync error: {e}")
-        await asyncio.sleep(config.CLOUD_SYNC_INTERVAL_SEC)
+        await asyncio.sleep(interval)
 
 
 def start():
