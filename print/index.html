@@ -456,8 +456,7 @@ const SHOP = {
   phone: "+919656369773",
   mapQuery: "T FIX CUSAT, South Pipeline Road, CUSAT PO, Kalamassery 682022",
   // UPI for paying online orders (from the shop's Google Pay QR, upi-qr.png).
-  // payeeShown = the name UPI apps show for this ID.
-  upi: { id: "8907724736@okbizaxis", name: "T FIX", payeeShown: "Mobile populo", mc: "5251" },
+  upi: { id: "8907724736@okbizaxis", name: "T FIX", mc: "5251" },
   // Opening hours, IST. 0 = Sunday … 6 = Saturday. [open, close] in 24h "HH:MM"
   hours: { 0:["09:30","21:30"], 1:["08:30","21:30"], 2:["08:30","21:30"], 3:["08:30","21:30"],
            4:["08:30","21:30"], 5:["08:30","21:30"], 6:["08:30","21:30"] }
@@ -549,7 +548,7 @@ const T = {
     orderSent:"Order sent! Keep this code — and copy the link to check your order on another phone.",
     fileProblem:"Problem", orderCode:"Order code", loadErr:"Couldn't load the latest status.",
     payUpi:"Pay {amt} by UPI", showQr:"Show QR code", upiId:"UPI ID", copy:"Copy",
-    upiNote:"Write your order code {code} in the payment note. Your UPI app will show the payee as “{payee}”. The shop marks your order paid after checking the payment.",
+    upiNote:"Write your order code {code} in the payment note. The shop marks your order paid after checking the payment.",
     visitEyebrow:"Visit", visitTitle:"Collect at the shop", directions:"Directions", call:"Call",
     hoursTitle:"Opening hours", monSat:"Monday – Saturday", sun:"Sunday",
     open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow", fab:"Order"
@@ -596,7 +595,7 @@ const T = {
     orderSent:"ഓർഡർ അയച്ചു! ഈ കോഡ് സൂക്ഷിക്കൂ — മറ്റൊരു ഫോണിൽ നില അറിയാൻ ലിങ്ക് കോപ്പി ചെയ്യൂ.",
     fileProblem:"പ്രശ്നം", orderCode:"ഓർഡർ കോഡ്", loadErr:"പുതിയ നില ലഭ്യമായില്ല.",
     payUpi:"{amt} UPI വഴി അടയ്ക്കൂ", showQr:"QR കോഡ് കാണിക്കൂ", upiId:"UPI ID", copy:"കോപ്പി",
-    upiNote:"പേയ്‌മെന്റ് കുറിപ്പിൽ ഓർഡർ കോഡ് {code} എഴുതൂ. UPI ആപ്പിൽ പണം സ്വീകരിക്കുന്നയാളുടെ പേര് “{payee}” എന്ന് കാണിക്കും. പേയ്‌മെന്റ് പരിശോധിച്ച ശേഷം കട ഓർഡർ 'പണം ലഭിച്ചു' ആക്കും.",
+    upiNote:"പേയ്‌മെന്റ് കുറിപ്പിൽ ഓർഡർ കോഡ് {code} എഴുതൂ. പേയ്‌മെന്റ് പരിശോധിച്ച ശേഷം കട ഓർഡർ 'പണം ലഭിച്ചു' ആക്കും.",
     visitEyebrow:"സന്ദർശിക്കൂ", visitTitle:"കടയിൽ നിന്ന് വാങ്ങൂ", directions:"വഴി കാണാം", call:"വിളിക്കൂ",
     hoursTitle:"പ്രവർത്തന സമയം", monSat:"തിങ്കൾ – ശനി", sun:"ഞായർ",
     open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ", fab:"ഓർഡർ"
@@ -980,7 +979,7 @@ function upiBlock(o, amount) {
     mobile ? el("a", { class: "btn btn-ink", href: upiLink(o, amount), text: t("payUpi", { amt: rupee(amount) }) }) : null,
     qr,
     el("div", { class: "upi-id" }, el("span", { text: t("upiId") + ":" }), el("code", { text: SHOP.upi.id }), copy),
-    el("p", { text: t("upiNote", { code: o.code, payee: SHOP.upi.payeeShown }) }));
+    el("p", { text: t("upiNote", { code: o.code}) }));
 }
 
 function renderOrders(refresh) {
