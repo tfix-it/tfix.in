@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>T FIX CUSAT Print</title>
 <meta name="description" content="Printing, Xerox, lamination and binding at T FIX CUSAT, South Pipeline Road, Kalamassery. Upload your files online any time and collect your prints at the shop.">
-<meta name="theme-color" content="#14161F">
+<meta name="theme-color" content="#0B0B0D">
 <meta property="og:title" content="T FIX CUSAT Print — Send. Print. Collect.">
 <meta property="og:description" content="Printing, Xerox, lamination and binding near CUSAT. Upload your files online any time.">
 <meta property="og:url" content="https://print.tfix.in/">
+<meta property="og:image" content="https://print.tfix.in/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -75,6 +79,22 @@ header{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--pa
   padding:6px 12px; border-radius:999px; cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
 
+/* T FIX logo (vector rebuild of the brand logo) */
+.brand-tile{flex:none; width:40px; height:40px; border-radius:11px; background:#0B0B0D; display:grid; place-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.logo-sym{width:31px; height:auto; display:block; overflow:visible}
+.brand-text{font-size:19px; letter-spacing:.04em}
+.logo-plate{display:inline-flex; align-items:center; background:#0B0B0D; border-radius:18px; padding:16px 22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.logo-full{height:46px; width:auto; display:block; overflow:visible}
+.logo-plate-sm{padding:12px 16px; border-radius:14px; margin-bottom:14px}
+.logo-plate-sm .logo-full{height:30px}
+.logo-shine{transform-box:view-box; animation:logo-shine 6s ease-in-out 1.2s infinite}
+.logo-sym .logo-shine{animation-name:logo-shine-sym}
+@keyframes logo-shine{0%{transform:skewX(-20deg) translateX(-200px)}55%,100%{transform:skewX(-20deg) translateX(1800px)}}
+@keyframes logo-shine-sym{0%{transform:skewX(-20deg) translateX(-100px)}55%,100%{transform:skewX(-20deg) translateX(900px)}}
+@media (prefers-reduced-motion:reduce){ .logo-shine{animation:none; opacity:0} }
+
 /* Status pill */
 .status{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
   padding:6px 12px; border-radius:999px; background:var(--card); border:1px solid var(--line)}
@@ -97,7 +117,7 @@ header{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--pa
 
 /* Hero */
 .hero{padding-top:56px; padding-bottom:32px; position:relative; isolation:isolate}
-.hero h1{font-size:clamp(44px,10vw,92px); line-height:.98; margin:18px 0 18px; letter-spacing:-.03em; font-weight:700}
+.hero h1{font-size:clamp(44px,10vw,92px); line-height:.98; margin:22px 0 18px; letter-spacing:-.03em; font-weight:700}
 html[lang="ml"] .hero h1{font-size:clamp(34px,8vw,72px); line-height:1.15; letter-spacing:0}
 .hero h1 span{display:block}
 .hero p.lead{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:620px; margin:0 0 28px}
@@ -274,7 +294,9 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
   .bar .status{display:none}
   .row2{grid-template-columns:1fr}
   .hero{padding-top:36px}
-  .brand-text{font-size:15px}
+  .brand-text{font-size:17px}
+  .logo-full{height:36px}
+  .logo-plate{padding:13px 16px}
 }
 .status-mobile{display:none; margin-bottom:8px}
 @media (max-width:520px){ .status-mobile{display:inline-flex} }
@@ -286,13 +308,8 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
 <header>
   <div class="wrap bar">
     <a class="brand" href="#top" aria-label="T FIX CUSAT Print">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#14161F"/>
-        <path d="M15 14h34v10H37v26H27V24H15z" fill="#00A9E0" transform="translate(-3 2)"/>
-        <path d="M15 14h34v10H37v26H27V24H15z" fill="#FFD400" transform="translate(3 1)"/>
-        <path d="M15 14h34v10H37v26H27V24H15z" fill="#FF1F8E"/>
-      </svg>
-      <span class="brand-text">T FIX CUSAT<small>PRINT</small></span>
+      <span class="brand-tile"><svg viewBox="150 262 466 372" class="logo-sym" aria-hidden="true"><defs><linearGradient id="g-hd" gradientUnits="userSpaceOnUse" x1="0" y1="279" x2="0" y2="617"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hd"><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z" clip-rule="evenodd"/></clipPath><linearGradient id="sh-hd" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z" fill="#00A9E0" fill-rule="evenodd" opacity=".9" transform="translate(-7 5)"/><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z" fill="#FF1F8E" fill-rule="evenodd" opacity=".85" transform="translate(7 -4)"/><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z" fill="url(#g-hd)" fill-rule="evenodd"/><g clip-path="url(#clip-hd)"><rect class="logo-shine" x="0" y="200" width="160" height="500" fill="url(#sh-hd)" transform="skewX(-20)"/></g></svg></span>
+      <span class="brand-text">T FIX<small>CUSAT · PRINT</small></span>
     </a>
     <span class="spacer"></span>
     <span class="status" data-status><i></i><span data-status-text>…</span></span>
@@ -306,7 +323,7 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
 <main id="top">
   <div class="wrap hero">
     <span class="status status-mobile" data-status><i></i><span data-status-text>…</span></span>
-    <div><span class="dots" aria-hidden="true"><b></b><b></b><b></b></span></div>
+    <div class="logo-plate"><svg viewBox="150 262 1345 372" class="logo-full" role="img" aria-label="T FIX"><defs><linearGradient id="g-hr" gradientUnits="userSpaceOnUse" x1="0" y1="279" x2="0" y2="617"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hr"><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z M623 302H827V355H757V542H692V355H623Z M920 302H1100V355H987V401H1081V453H987V542H920Z M1129 302H1193V542H1129Z M1218 302H1297L1349 368L1402 302H1478L1387 419L1477 542H1400L1347 470L1293 542H1218L1308 419Z" clip-rule="evenodd"/></clipPath><linearGradient id="sh-hr" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z M623 302H827V355H757V542H692V355H623Z M920 302H1100V355H987V401H1081V453H987V542H920Z M1129 302H1193V542H1129Z M1218 302H1297L1349 368L1402 302H1478L1387 419L1477 542H1400L1347 470L1293 542H1218L1308 419Z" fill="#00A9E0" fill-rule="evenodd" opacity=".9" transform="translate(-7 5)"/><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z M623 302H827V355H757V542H692V355H623Z M920 302H1100V355H987V401H1081V453H987V542H920Z M1129 302H1193V542H1129Z M1218 302H1297L1349 368L1402 302H1478L1387 419L1477 542H1400L1347 470L1293 542H1218L1308 419Z" fill="#FF1F8E" fill-rule="evenodd" opacity=".85" transform="translate(7 -4)"/><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z M623 302H827V355H757V542H692V355H623Z M920 302H1100V355H987V401H1081V453H987V542H920Z M1129 302H1193V542H1129Z M1218 302H1297L1349 368L1402 302H1478L1387 419L1477 542H1400L1347 470L1293 542H1218L1308 419Z" fill="url(#g-hr)" fill-rule="evenodd"/><g clip-path="url(#clip-hr)"><rect class="logo-shine" x="0" y="200" width="160" height="500" fill="url(#sh-hr)" transform="skewX(-20)"/></g></svg></div>
     <h1>
       <span class="offset" data-i18n="m1" data-text="Send.">Send.</span>
       <span class="offset" data-i18n="m2" data-text="Print.">Print.</span>
@@ -434,6 +451,7 @@ html[lang="ml"] footer .mantra{letter-spacing:0}
 
 <footer>
   <div class="wrap">
+    <div class="logo-plate logo-plate-sm"><svg viewBox="150 262 1345 372" class="logo-full" role="img" aria-label="T FIX"><defs><linearGradient id="g-ft" gradientUnits="userSpaceOnUse" x1="0" y1="279" x2="0" y2="617"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient></defs><path d="M166 279H599L378 617Z M212 303L378 567L552 303Z M299 329H466V362H403V506H360V362H299Z M623 302H827V355H757V542H692V355H623Z M920 302H1100V355H987V401H1081V453H987V542H920Z M1129 302H1193V542H1129Z M1218 302H1297L1349 368L1402 302H1478L1387 419L1477 542H1400L1347 470L1293 542H1218L1308 419Z" fill="url(#g-ft)" fill-rule="evenodd"/></svg></div>
     <p class="mantra"><span class="offset" data-i18n="mantra" data-text="Send. Print. Collect.">Send. Print. Collect.</span></p>
     <p>T FIX CUSAT · South Pipeline Road, CUSAT PO, Kalamassery 682022 · <a href="#" data-wa-plain target="_blank" rel="noopener">WhatsApp</a></p>
     <p>© <span id="year"></span> T FIX CUSAT</p>
