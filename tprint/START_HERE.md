@@ -153,4 +153,38 @@ customer's name in the file name, e.g. `[TP3XL96D · Anu] notes.pdf — Note: ..
 - The website shows whether this server is running: "AI Auto Print online" (green)
   while T Print syncs, "Print server offline" when it hasn't synced for 3 minutes,
   and during opening hours "Print server offline — staff, please start T Print"
-  (red). If you see red at the shop, start T Print on Shop PC 1.
+  (red). If you see red at the shop, check Shop PC 1.
+
+## 8. Start T Print automatically on Shop PC 1 (and restart it if it stops)
+
+`windows\watchdog.ps1` keeps T Print running: it starts it when Windows signs in,
+checks every minute that it answers, and starts it again if it closed or froze.
+Nobody has to remember to start it.
+
+Once, on Shop PC 1:
+
+1. Finish the normal setup first (venv, certificates, a working manual start).
+2. Copy `tprint.env.example` to `tprint.env` in the same folder and paste the shop
+   token into it. (This replaces typing the `$env:` lines from section 7.)
+3. Open PowerShell **as administrator**, signed in as the Windows user that has the
+   printers, go to the T Print folder and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\install-autostart.ps1
+```
+
+That creates the scheduled task "T Print Server" and starts it now. Within about a
+minute the website shows "AI Auto Print online".
+
+- Staff can double-click `windows\start-now.bat` to start it straight away.
+- Logs: `logs\watchdog.log` (starts/restarts) and `logs\tprint-YYYYMMDD.log`.
+- To remove: `powershell -ExecutionPolicy Bypass -File .\windows\uninstall-autostart.ps1`
+  (as administrator).
+- Don't also start T Print by hand in a PowerShell window: the watchdog does it.
+
+So the server also comes back after a power cut or a Windows update restart:
+
+- Windows: Settings → Accounts → Sign-in options — let the shop user sign in
+  automatically (or sign in each morning); the task starts at sign-in.
+- BIOS/UEFI of the PC: set "Restore on AC power loss" / "AC Power Recovery" to
+  **Power On**, so the PC switches itself back on after a power cut.
