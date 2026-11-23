@@ -20,6 +20,10 @@ if ($expected === '' || strlen($provided) < 32 || !hash_equals($expected, hash('
     fail(401, 'Unauthorized');
 }
 
+// Heartbeat: the shop server calls this every minute, so the last call time
+// tells customers (and staff) whether T Print on Shop PC 1 is running.
+@file_put_contents(data_dir() . '/heartbeat', (string)time(), LOCK_EX);
+
 $pdo = db();
 $action = (string)($_GET['action'] ?? '');
 

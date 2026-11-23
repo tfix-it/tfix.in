@@ -215,3 +215,17 @@ def test_settings_work_with_old_config_py(monkeypatch):
     monkeypatch.setenv('PRINTSHOP_CLOUD_URL', 'https://print.tfix.in/api/shop.php')
     monkeypatch.setenv('PRINTSHOP_CLOUD_TOKEN', 'x' * 40)
     assert cloud_sync.is_configured() and cloud_sync.sync_interval() == 60
+
+
+def test_server_status_heartbeat(site, tmp_path):
+    def server():
+        return httpx.get(site.base + '/server.php').json()
+    assert server()['online'] is False and server()['last_seen'] is None   # shop PC never connected
+    with pytest.raises(cloud_sync.CloudError):
+        cloud_sync.sync_once(client(site, token='x' * 40))                 # wrong key: no heartbeat
+    assert server()['online'] is False
+    cloud_sync.sync_once(client(site))                                     # shop PC 1 syncs
+    s = server()
+    assert s['online'] is True and s['seconds_ago'] <= 5
+    (site.data / 'heartbeat').write_text(str(int(time.time()) - 600))       # 10 minutes silent
+    assert server()['online'] is False

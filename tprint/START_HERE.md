@@ -150,3 +150,7 @@ customer's name in the file name, e.g. `[TP3XL96D · Anu] notes.pdf — Note: ..
   A file that can't be opened is reported to the customer on the website.
 - Files are deleted from the website as soon as the shop PC has them.
 - Leave PRINTSHOP_CLOUD_URL unset to turn online orders off.
+- The website shows whether this server is running: "AI Auto Print online" (green)
+  while T Print syncs, "Print server offline" when it hasn't synced for 3 minutes,
+  and during opening hours "Print server offline — staff, please start T Print"
+  (red). If you see red at the shop, start T Print on Shop PC 1.
