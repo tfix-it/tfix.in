@@ -66,7 +66,7 @@ function mcp_dispatch(string $method, array $params)
             return [
                 'protocolVersion' => in_array($asked, MCP_PROTOCOLS, true) ? $asked : MCP_PROTOCOLS[0],
                 'capabilities' => ['tools' => ['listChanged' => false], 'resources' => ['listChanged' => false, 'subscribe' => false]],
-                'serverInfo' => ['name' => 'T-PRINT', 'title' => 'T-PRINT · T FIX Auto Print', 'version' => TPRINT_VERSION],
+                'serverInfo' => ['name' => 'T-PRINT', 'title' => 'T-PRINT · T FIX AI Print', 'version' => TPRINT_VERSION],
                 'instructions' => 'T-PRINT manages a print shop queue. Use open_print_dashboard to show the interactive queue. '
                     . 'Never claim a job is paid: only shop staff can confirm payment. Before calling print_paid_job, '
                     . 'get explicit confirmation of the job ID and printer from the user.',
@@ -200,10 +200,9 @@ function mcp_job(array $job): array
 
 function mcp_printers(): array
 {
-    $online = agent_status()['online'];
     return array_map(fn($p) => [
         'id' => (int) $p['id'], 'name' => $p['name'], 'windows_printer_name' => $p['windows_printer_name'],
-        'enabled' => (int) $p['enabled'], 'status' => $online ? $p['live_status'] : 'offline',
+        'enabled' => (int) $p['enabled'], 'status' => printer_live_status($p), 'shop_pc' => $p['agent_name'],
     ], rows('SELECT * FROM printers ORDER BY name'));
 }
 

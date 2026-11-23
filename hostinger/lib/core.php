@@ -45,17 +45,51 @@ function public_settings_view(array $s): array
     ];
 }
 
+function seconds_since(?string $dbTime): ?int
+{
+    return $dbTime === null ? null : time() - (int) (new DateTimeImmutable($dbTime, new DateTimeZone('UTC')))->format('U');
+}
+
+/** Every print agent (shop PC) and whether it has checked in recently. */
+function agents_list(): array
+{
+    $limit = tprint_config()['agent_offline_after_sec'];
+    return array_map(function ($a) use ($limit) {
+        $age = seconds_since($a['last_seen']);
+        $printers = array_column(rows('SELECT windows_printer_name FROM printers WHERE agent_name=? ORDER BY name', [$a['name']]), 'windows_printer_name');
+        return ['name' => $a['name'], 'version' => $a['version'], 'last_seen' => iso($a['last_seen']),
+                'seconds_ago' => $age, 'online' => $age !== null && $age <= $limit, 'printers' => $printers];
+    }, rows('SELECT * FROM agents ORDER BY name'));
+}
+
+function agent_online(?string $name): bool
+{
+    if ($name === null) {
+        return false;
+    }
+    $a = row('SELECT last_seen FROM agents WHERE name=?', [$name]);
+    $age = $a ? seconds_since($a['last_seen']) : null;
+    return $age !== null && $age <= tprint_config()['agent_offline_after_sec'];
+}
+
+/** Summary: online if at least one shop PC is connected. */
 function agent_status(): array
 {
-    $s = app_settings();
-    $last = $s['agent_last_seen'];
-    $age = $last === null ? null : time() - (int) (new DateTimeImmutable($last, new DateTimeZone('UTC')))->format('U');
+    $agents = agents_list();
+    $online = array_values(array_filter($agents, fn($a) => $a['online']));
+    $latest = $agents ? max(array_map(fn($a) => $a['last_seen'], $agents)) : null;
     return [
-        'online' => $age !== null && $age <= tprint_config()['agent_offline_after_sec'],
-        'last_seen' => iso($last),
-        'seconds_ago' => $age,
-        'version' => $s['agent_version'],
+        'online' => count($online) > 0,
+        'online_count' => count($online),
+        'last_seen' => $latest,
+        'agents' => $agents,
     ];
+}
+
+/** A printer is usable only while the shop PC it is attached to is online. */
+function printer_live_status(array $p): string
+{
+    return agent_online($p['agent_name'] ?? null) ? $p['live_status'] : 'offline';
 }
 
 // ------------------------------------------------------------------ rate limits
@@ -364,8 +398,10 @@ function confirm_payment(int $jobId, bool $paid): array
 // ------------------------------------------------------------------ print gate
 function dispatch_job(int $jobId, string $printerName, string $actor = 'staff', bool $auto = false): array
 {
-    if (!agent_status()['online']) {
-        throw new PrintBlocked('The shop PC is offline. Start the T-PRINT agent on the shop PC, then try again.');
+    $printerRow = row('SELECT * FROM printers WHERE windows_printer_name=?', [$printerName]);
+    if ($printerRow && !agent_online($printerRow['agent_name'])) {
+        throw new PrintBlocked('The shop PC for this printer is offline. Start the T-PRINT agent on '
+            . ($printerRow['agent_name'] ?: 'that PC') . ', then try again.');
     }
     in_transaction(function () use ($jobId, $printerName, $actor, $auto) {
         $job = row('SELECT * FROM jobs WHERE id=? FOR UPDATE', [$jobId]) ?? throw new PrintBlocked('Job not found');

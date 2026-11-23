@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function db(): PDO
 {
@@ -61,6 +61,16 @@ function in_transaction(callable $fn)
             $pdo->rollBack();
         }
         throw $e;
+    }
+}
+
+/** Portable "ADD COLUMN IF NOT EXISTS" (MySQL 8 lacks it; MariaDB has it). */
+function add_column_if_missing(PDO $pdo, string $table, string $column, string $definition): void
+{
+    $exists = $pdo->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+    $exists->execute([$table, $column]);
+    if ((int) $exists->fetchColumn() === 0) {
+        $pdo->exec("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
     }
 }
 
@@ -203,5 +213,14 @@ function migrate(PDO $pdo): void
     }
     $pdo->exec('INSERT IGNORE INTO auto_print_settings (id) VALUES (1)');
     $pdo->exec('INSERT IGNORE INTO app_settings (id) VALUES (1)');
+    // v2: several print agents (one per shop PC) at the same time.
+    $pdo->exec("CREATE TABLE IF NOT EXISTS agents (
+        name VARCHAR(64) PRIMARY KEY,
+        version VARCHAR(40) NULL,
+        last_seen DATETIME(6) NOT NULL
+    ) $T");
+    add_column_if_missing($pdo, 'printers', 'agent_name', 'VARCHAR(64) NULL');
+    add_column_if_missing($pdo, 'uploads', 'conv_agent', 'VARCHAR(64) NULL');
+    add_column_if_missing($pdo, 'uploads', 'conv_claimed_at', 'DATETIME(6) NULL');
     $pdo->exec('INSERT INTO schema_info (id, version) VALUES (1, ' . SCHEMA_VERSION . ') ON DUPLICATE KEY UPDATE version=VALUES(version)');
 }

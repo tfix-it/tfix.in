@@ -1,5 +1,13 @@
 # Changes
 
+## 3.3.0 — Several shop PCs + T FIX AI PRINT
+- Run many print agents at once (tested with 6). Each PC is identified by name, and only receives and can claim jobs
+  for its own printers. Word/PowerPoint conversions are claimed by one PC, and re-offered if that PC stops mid-way.
+  An offline PC blocks only its own printers. The admin lists connected PCs and shows which PC each printer is on.
+  Database v2 adds an agents table and printer/conversion owner columns, migrated automatically.
+- Customer header: T-PRINT headline with the sub-headline "T FIX AI PRINT"; the full name is now T FIX AI Print.
+- The official T FIX store logo (vector redraw) replaces the earlier logo; new favicon from its triangle-T mark.
+
 ## 3.2.0 — T-PRINT · T FIX Auto Print
 - New product name everywhere people see it: **T-PRINT** (full name *T FIX Auto Print*, tagline
   "Upload. Pay. Printed."). The customer page header has a T-PRINT wordmark whose hyphen is the brand's yellow bar.

@@ -185,7 +185,7 @@ function admin_routes(string $method, string $path, callable $is, array &$m): vo
     if ($is('GET', '/api/admin/printers')) {
         json_out(array_map(fn($p) => [
             'id' => (int) $p['id'], 'name' => $p['name'], 'windows_printer_name' => $p['windows_printer_name'],
-            'enabled' => (int) $p['enabled'], 'live_status' => agent_status()['online'] ? $p['live_status'] : 'offline',
+            'enabled' => (int) $p['enabled'], 'live_status' => printer_live_status($p), 'agent_name' => $p['agent_name'],
         ], rows('SELECT * FROM printers ORDER BY name')));
     }
     if ($is('POST', '/api/admin/printers/(\d+)/enabled')) {
@@ -273,8 +273,16 @@ function auto_print_view(): array
     ];
 }
 
+/** Which shop PC is calling: X-TPrint-Agent header (default "shop-pc"). */
+function agent_name(): string
+{
+    $name = preg_replace('/[^A-Za-z0-9 ._-]/', '', (string) (header_value('X-TPrint-Agent') ?? ''));
+    return mb_substr(trim($name), 0, 64) ?: 'shop-pc';
+}
+
 function agent_routes(string $path, callable $is, array &$m): void
 {
+    $agent = agent_name();
     if ($is('POST', '/api/agent/poll')) {
         $body = json_decode((string) file_get_contents('php://input'), true) ?: [];
         $now = now_utc();
@@ -282,17 +290,22 @@ function agent_routes(string $path, callable $is, array &$m): void
             $name = mb_substr(trim((string) ($p['name'] ?? '')), 0, 255);
             $status = in_array($p['status'] ?? '', ['ready', 'offline', 'error', 'paper_out', 'busy', 'unknown'], true) ? $p['status'] : 'unknown';
             if ($name !== '') {
-                q('INSERT INTO printers (name, windows_printer_name, live_status, last_reported_at) VALUES (?,?,?,?)
-                   ON DUPLICATE KEY UPDATE live_status=VALUES(live_status), last_reported_at=VALUES(last_reported_at)',
-                    [$name, $name, $status, $now]);
+                // Printer names must be unique across shop PCs; the PC that reports a printer owns it.
+                q('INSERT INTO printers (name, windows_printer_name, live_status, last_reported_at, agent_name) VALUES (?,?,?,?,?)
+                   ON DUPLICATE KEY UPDATE live_status=VALUES(live_status), last_reported_at=VALUES(last_reported_at), agent_name=VALUES(agent_name)',
+                    [$name, $name, $status, $now, $agent]);
             }
         }
-        q('UPDATE app_settings SET agent_last_seen=?, agent_version=? WHERE id=1',
-            [$now, mb_substr((string) ($body['agent_version'] ?? ''), 0, 40)]);
+        $version = mb_substr((string) ($body['agent_version'] ?? ''), 0, 40);
+        q('INSERT INTO agents (name, version, last_seen) VALUES (?,?,?) ON DUPLICATE KEY UPDATE version=VALUES(version), last_seen=VALUES(last_seen)',
+            [$agent, $version, $now]);
+        q('UPDATE app_settings SET agent_last_seen=?, agent_version=? WHERE id=1', [$now, $version]);
         maybe_run_cleanup();
         $dispatches = [];
+        // Only jobs for printers attached to THIS shop PC.
         foreach (rows("SELECT d.job_id, d.printer, j.* FROM print_dispatches d JOIN jobs j ON j.id=d.job_id
-                       WHERE d.state='pending' ORDER BY d.created_at LIMIT 10") as $r) {
+                       JOIN printers p ON p.windows_printer_name=d.printer
+                       WHERE d.state='pending' AND p.agent_name=? ORDER BY d.created_at LIMIT 10", [$agent]) as $r) {
             $dispatches[] = [
                 'job_id' => (int) $r['job_id'], 'printer' => $r['printer'], 'copies' => (int) $r['copies'],
                 'doubleside' => (bool) $r['doubleside'], 'duplex_edge' => $r['duplex_edge'], 'orientation' => $r['orientation'],
@@ -300,13 +313,18 @@ function agent_routes(string $path, callable $is, array &$m): void
                 'paper_size' => $r['paper_size'],
             ];
         }
+        // Conversions nobody has claimed (or whose claim went stale: that PC stopped mid-way).
+        $stale = (new DateTimeImmutable('-3 minutes', new DateTimeZone('UTC')))->format('Y-m-d H:i:s.u');
         $conversions = array_map(fn($u) => ['upload_id' => $u['id'], 'file_type' => $u['file_type']],
-            rows("SELECT id, file_type FROM uploads WHERE status='converting' ORDER BY created_at LIMIT 5"));
+            rows("SELECT id, file_type FROM uploads WHERE status='converting' AND (conv_agent IS NULL OR conv_claimed_at < ?)
+                  ORDER BY created_at LIMIT 5", [$stale]));
         json_out(['dispatches' => $dispatches, 'conversions' => $conversions, 'server_time' => iso($now)]);
     }
     if ($is('POST', '/api/agent/dispatches/(\d+)/claim')) {
-        $n = q("UPDATE print_dispatches SET state='agent_claimed', updated_at=? WHERE job_id=? AND state='pending'",
-            [now_utc(), (int) $m[1]])->rowCount();
+        // Atomic, and only by the PC the printer is attached to.
+        $n = q("UPDATE print_dispatches d JOIN printers p ON p.windows_printer_name=d.printer
+                SET d.state='agent_claimed', d.updated_at=? WHERE d.job_id=? AND d.state='pending' AND p.agent_name=?",
+            [now_utc(), (int) $m[1], $agent])->rowCount();
         if ($n !== 1) {
             throw new HttpError(409, 'Not claimable (already claimed or cancelled)');
         }
@@ -340,6 +358,15 @@ function agent_routes(string $path, callable $is, array &$m): void
         ])->rowCount();
         q('UPDATE jobs SET updated_at=? WHERE id=?', [now_utc(), (int) $m[1]]);
         json_out(['ok' => $n === 1]);
+    }
+    if ($is('POST', '/api/agent/conversions/([a-f0-9]{32})/claim')) {
+        $stale = (new DateTimeImmutable('-3 minutes', new DateTimeZone('UTC')))->format('Y-m-d H:i:s.u');
+        $n = q("UPDATE uploads SET conv_agent=?, conv_claimed_at=? WHERE id=? AND status='converting'
+                AND (conv_agent IS NULL OR conv_claimed_at < ?)", [$agent, now_utc(), $m[1], $stale])->rowCount();
+        if ($n !== 1) {
+            throw new HttpError(409, 'Another shop PC is converting this file');
+        }
+        json_out(['ok' => true]);
     }
     if ($is('GET', '/api/agent/conversions/([a-f0-9]{32})/source')) {
         $u = get_upload($m[1]);

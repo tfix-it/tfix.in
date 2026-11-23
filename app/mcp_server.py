@@ -148,7 +148,7 @@ apps.add_html_resource(
 
 mcp = MCPServer(
     'T-PRINT',
-    title='T-PRINT · T FIX Auto Print',
+    title='T-PRINT · T FIX AI Print',
     version='2.0.0',
     instructions=(
         'T-PRINT manages a print shop queue. Use open_print_dashboard to show the interactive '

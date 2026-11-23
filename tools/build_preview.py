@@ -210,7 +210,7 @@ def build(sample: Path, out: Path):
          "URL.createObjectURL(new Blob([document.getElementById('pdfjsWorker').textContent], { type: 'text/javascript' }))")
     swap("pdfjsLib.getDocument(`${API}/api/uploads/${uploadInfo.upload_id}/pdf`)", "pdfjsLib.getDocument(window.__tprintPreviewPdf(uploadInfo.upload_id))")
     swap('src="assets/brand/tfix-store-logo.svg"', f'src="{data_uri(ASSETS / "brand/tfix-store-logo.svg", "image/svg+xml")}"')
-    swap("<title>T-PRINT · T FIX Auto Print</title>", "<title>T-PRINT · preview</title>")
+    swap("<title>T-PRINT · T FIX AI Print</title>", "<title>T-PRINT · preview</title>")
     out.write_text(html)
     print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
 

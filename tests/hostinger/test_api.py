@@ -170,7 +170,7 @@ def _paid_job(client, admin, **opts):
 def test_full_print_flow_through_agent(client, admin, agent):
     job = _paid_job(client, admin)
     offline = admin.post(f"/api/admin/jobs/{job['id']}/print", data={"printer_name": "HP LaserJet"})
-    assert offline.status_code == 409 and "offline" in offline.json()["detail"]
+    assert offline.status_code == 409 and "not registered" in offline.json()["detail"]   # no shop PC has connected yet
     agent_poll(agent)
     assert admin.get("/api/admin/agent").json()["online"] is True
     printers = admin.get("/api/admin/printers").json()
@@ -296,3 +296,47 @@ def test_unpaid_files_cleaned_up(client, admin, server):
     view = [j for j in admin.get("/api/admin/jobs").json() if j["id"] == job["id"]][0]
     assert view["files_deleted"] == 1 and not any(server.storage.iterdir())
     assert admin.get(f"/api/admin/jobs/{job['id']}/file").status_code == 404
+
+
+# ------------------------------------------------------------------ several shop PCs at once
+def test_several_agents_each_print_only_their_own_printers(client, admin, agent):
+    pcs = {f"counter-{i}": f"Printer {i}" for i in range(1, 7)}           # six shop PCs, one printer each
+    admin.post("/api/admin/settings", data={"rate_limit_max_requests": 100})  # 6 uploads + 6 orders from one test client
+    for pc, printer in pcs.items():
+        agent_poll(agent, printers=((printer, "ready"),), name=pc)
+    status = admin.get("/api/admin/agent").json()
+    assert status["online_count"] == 6 and {a["name"] for a in status["agents"]} == set(pcs)
+    jobs = {}
+    for pc, printer in pcs.items():
+        job = _paid_job(client, admin)
+        assert admin.post(f"/api/admin/jobs/{job['id']}/print", data={"printer_name": printer}).status_code == 200
+        jobs[pc] = job["id"]
+    for pc, printer in pcs.items():
+        work = agent_poll(agent, printers=((printer, "ready"),), name=pc)
+        assert [d["job_id"] for d in work["dispatches"]] == [jobs[pc]]          # only its own job
+        other = jobs["counter-1" if pc != "counter-1" else "counter-2"]
+        hdr = {"X-TPrint-Agent": pc}
+        assert agent.post(f"/api/agent/dispatches/{other}/claim", headers=hdr).status_code == 409   # can't take another PC's job
+        assert agent.post(f"/api/agent/dispatches/{jobs[pc]}/claim", headers=hdr).status_code == 200
+
+
+def test_offline_pc_blocks_only_its_printers(client, admin, agent):
+    agent_poll(agent, printers=(("Front HP", "ready"),), name="front")
+    agent_poll(agent, printers=(("Back Epson", "ready"),), name="back")
+    sql("UPDATE agents SET last_seen = last_seen - INTERVAL 10 MINUTE WHERE name='back'")
+    printers = {p["windows_printer_name"]: p for p in admin.get("/api/admin/printers").json()}
+    assert printers["Front HP"]["live_status"] == "ready" and printers["Back Epson"]["live_status"] == "offline"
+    a, b = _paid_job(client, admin), _paid_job(client, admin)
+    assert admin.post(f"/api/admin/jobs/{a['id']}/print", data={"printer_name": "Front HP"}).status_code == 200
+    r = admin.post(f"/api/admin/jobs/{b['id']}/print", data={"printer_name": "Back Epson"})
+    assert r.status_code == 409 and "back" in r.json()["detail"]
+
+
+def test_conversion_claimed_by_one_pc_only(client, agent):
+    up = upload(client, "notes.docx", b"PK fake", "application/octet-stream").json()
+    a = agent.post(f"/api/agent/conversions/{up['upload_id']}/claim", headers={"X-TPrint-Agent": "pc-a"})
+    b = agent.post(f"/api/agent/conversions/{up['upload_id']}/claim", headers={"X-TPrint-Agent": "pc-b"})
+    assert (a.status_code, b.status_code) == (200, 409)
+    assert agent_poll(agent, name="pc-c")["conversions"] == []                 # claimed: not offered again
+    sql("UPDATE uploads SET conv_claimed_at = conv_claimed_at - INTERVAL 5 MINUTE")
+    assert [c["upload_id"] for c in agent_poll(agent, name="pc-c")["conversions"]] == [up["upload_id"]]   # stale claim re-offered

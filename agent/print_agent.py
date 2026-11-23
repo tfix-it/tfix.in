@@ -1,5 +1,5 @@
 """
-T-PRINT agent (T FIX Auto Print): runs on the shop PC and connects it to https://print.tfix.in.
+T-PRINT agent (T FIX AI Print): runs on the shop PC and connects it to https://print.tfix.in.
 
 The website lives on Hostinger and cannot reach into the shop. This agent
 reaches out instead, over plain HTTPS, every few seconds:
@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import socket
 import subprocess
 import sys
 import tempfile
@@ -53,18 +54,22 @@ class LibreOfficeConverter:
 
 
 class Agent:
-    def __init__(self, server: str, key: str, printing, converter, http: httpx.Client | None = None):
+    def __init__(self, server: str, key: str, printing, converter, http: httpx.Client | None = None,
+                 name: str | None = None):
         self.server = server.rstrip("/")
+        # Several shop PCs can run agents at once; each one is identified by name and only
+        # receives jobs for the printers attached to it. Printer names must differ between PCs.
+        self.name = (name or socket.gethostname() or "shop-pc")[:64]
         self.printing = printing          # app.printing (Windows) or a test double
         self.converter = converter
         self.http = http or httpx.Client(timeout=httpx.Timeout(30, read=120), headers={
-            "Authorization": "Bearer " + key, "User-Agent": AGENT_VERSION})
+            "Authorization": "Bearer " + key, "User-Agent": AGENT_VERSION, "X-TPrint-Agent": self.name})
         self.workdir = Path(tempfile.mkdtemp(prefix="tprint-agent-"))
 
     # ------------------------------------------------------------ main loop
     def run_forever(self, interval: float = 3.0):
         delay = interval
-        log.info("T-PRINT agent started; talking to %s", self.server)
+        log.info("T-PRINT agent '%s' started; talking to %s", self.name, self.server)
         while True:
             try:
                 self.run_once()
@@ -151,6 +156,10 @@ class Agent:
         upload_id, ext = c["upload_id"], c["file_type"]
         src = self.workdir / f"{upload_id}.{ext}"
         pdf = src.with_suffix(".pdf")
+        claim = self.http.post(f"{self.server}/api/agent/conversions/{upload_id}/claim")
+        if claim.status_code == 409:
+            return                      # another shop PC took it
+        claim.raise_for_status()
         try:
             r = self.http.get(f"{self.server}/api/agent/conversions/{upload_id}/source")
             if r.status_code == 409:
@@ -191,7 +200,8 @@ def main(argv=None):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from app import config, printing   # Windows printers + SumatraPDF (app/printing.py)
 
-    agent = Agent(args.server, key, printing, LibreOfficeConverter(config.LIBREOFFICE_PATH))
+    agent = Agent(args.server, key, printing, LibreOfficeConverter(config.LIBREOFFICE_PATH),
+                  name=os.environ.get("TPRINT_AGENT_NAME") or None)
     if args.once:
         print(agent.run_once())
     else:

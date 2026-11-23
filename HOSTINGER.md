@@ -1,4 +1,4 @@
-# T-PRINT — T FIX Auto Print
+# T-PRINT — T FIX AI Print
 
 **Upload. Pay. Printed.** · https://print.tfix.in · runs on Hostinger only
 
@@ -83,6 +83,16 @@ On the Windows PC connected to the printers:
 4. In the admin page, **Printers** should say **Shop PC connected** and list your Windows printers within a few seconds.
 5. Start it automatically: Windows **Task Scheduler** → Create Basic Task → "When I log on" → Start a program →
    `C:\T-PRINT\agent\start-agent.bat`.
+
+### 2.1 More than one shop PC (5–6 or more)
+
+Each PC with printers can run its own agent at the same time, all with the same `TPRINT_AGENT_KEY`:
+- Every agent shows up in the admin under **Printers** by its Windows computer name. To choose another name,
+  run `setx TPRINT_AGENT_NAME "Counter 2"` once on that PC.
+- An agent only ever receives and prints jobs for the printers attached to **its own** PC. A job can't be taken by
+  another PC, and each Word/PowerPoint file is converted by just one PC.
+- If one PC goes offline, only its printers show as offline; the others keep printing.
+- Printer names must be different on each PC (rename duplicates in Windows, e.g. "HP LaserJet — Counter 2").
 
 If the shop PC is off, customers can still order and pay. Jobs wait in the queue and print once the PC is back.
 Word/PowerPoint uploads need the shop PC on (it converts them); customers are asked to upload a PDF otherwise.

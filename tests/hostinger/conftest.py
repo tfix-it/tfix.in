@@ -107,7 +107,7 @@ def fresh(server):
     """Empty database and storage before every test; default config."""
     server.write_config()
     tables = ["schema_info", "uploads", "jobs", "printers", "pricing", "auto_print_settings", "app_settings",
-              "admin_credentials", "admin_sessions", "print_dispatches", "payment_audit", "rate_hits"]
+              "admin_credentials", "admin_sessions", "print_dispatches", "payment_audit", "rate_hits", "agents"]
     drop = "".join(f"$p->exec('DROP TABLE IF EXISTS {t}');" for t in tables)
     r = _php(f"$p = new PDO('mysql:host={DB['host']};port={DB['port']};dbname={DB['name']}', '{DB['user']}', '{DB['pass']}');{drop}")
     assert r.returncode == 0, r.stderr
@@ -155,8 +155,9 @@ def agent(server):
         yield c
 
 
-def agent_poll(agent, printers=(("HP LaserJet", "ready"), ("Epson Colour", "paper_out"))):
-    r = agent.post("/api/agent/poll", json={"agent_version": "test", "printers": [{"name": n, "status": s} for n, s in printers]})
+def agent_poll(agent, printers=(("HP LaserJet", "ready"), ("Epson Colour", "paper_out")), name=None):
+    headers = {"X-TPrint-Agent": name} if name else {}
+    r = agent.post("/api/agent/poll", headers=headers, json={"agent_version": "test", "printers": [{"name": n, "status": s} for n, s in printers]})
     assert r.status_code == 200, r.text
     return r.json()
 
