@@ -1,1 +1,11 @@
 Options -Indexes
+
+# Make browsers check for a new page every time (no stale copies after an update).
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html?|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(svg|png|jpe?g|woff2|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
