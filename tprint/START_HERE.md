@@ -125,6 +125,11 @@ website: Waiting for shop → Price confirmed → Paid → Printing → Ready �
 The shop PC only makes outgoing HTTPS requests to print.tfix.in. No router port
 forwarding or tunnel is needed for this.
 
+Run this on Shop PC 1 only (the PC that runs the T Print server and is connected
+to the printers). Set the two variables below on that PC only: if two PCs fetched
+online orders, an order could be imported twice. Other PCs and phones use PC 1's
+admin page over the shop WiFi (https://printatshop.local/admin) as usual.
+
 Setup (once): put the shop token you were given in these two environment variables
 in the PowerShell window that starts the shop server, then start it as usual:
 
