@@ -67,7 +67,7 @@ function db(): PDO
 
 function ensure_schema(PDO $pdo): void
 {
-    $flag = data_dir() . '/.schema-v3';
+    $flag = data_dir() . '/.schema-v4';
     if (is_file($flag)) {
         return;
     }
@@ -129,7 +129,23 @@ function ensure_schema(PDO $pdo): void
         note VARCHAR(100) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL
     )$tail");
-    foreach (['CREATE INDEX idx_credit_phone ON reward_credits (phone)', 'CREATE INDEX idx_redeem_phone ON reward_redemptions (phone)'] as $sql) {
+    // v4: tamper-evident log of every credit and use. Each entry stores the SHA-256 of the
+    // previous one, so changing or deleting any past entry breaks the chain (see ledger_verify).
+    $pdo->exec("CREATE TABLE IF NOT EXISTS reward_ledger (
+        seq INT NOT NULL PRIMARY KEY,
+        phone VARCHAR(15) NOT NULL,
+        kind VARCHAR(10) NOT NULL,
+        order_id INT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        points DECIMAL(10,2) NOT NULL,
+        balance_after DECIMAL(10,2) NOT NULL,
+        note VARCHAR(100) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL,
+        prev_hash CHAR(64) NOT NULL,
+        hash CHAR(64) NOT NULL
+    )$tail");
+    foreach (['CREATE INDEX idx_credit_phone ON reward_credits (phone)', 'CREATE INDEX idx_redeem_phone ON reward_redemptions (phone)',
+              'CREATE INDEX idx_ledger_phone ON reward_ledger (phone)'] as $sql) {
         try {
             $pdo->exec($sql);
         } catch (PDOException $e) {
@@ -141,6 +157,7 @@ function ensure_schema(PDO $pdo): void
         ip VARCHAR(45) NOT NULL,
         created_at DATETIME NOT NULL
     )$tail");
+    ledger_backfill($pdo);
     @file_put_contents($flag, gmdate('c'));
 }
 
@@ -356,6 +373,7 @@ function credit_order(int $orderId): void
             $reward = rewards_earned_for($before + $amount) - rewards_earned_for($before);
             $pdo->prepare('INSERT INTO reward_credits (order_id, phone, amount, reward, created_at) VALUES (?, ?, ?, ?, ?)')
                 ->execute([$orderId, $o['phone'], $amount, $reward, now()]);
+            ledger_append($o['phone'], 'credit', $orderId, $amount, $reward, $o['code']);
         }
         $pdo->commit();
     } catch (Throwable $e) {
@@ -364,6 +382,120 @@ function credit_order(int $orderId): void
         }
         error_log('[tprint rewards] ' . $e->getMessage());
     }
+}
+
+/* ---------------- tamper-evident rewards log (hash chain) ---------------- */
+
+const LEDGER_GENESIS = '0000000000000000000000000000000000000000000000000000000000000000';
+
+function ledger_hash(array $e): string
+{
+    return hash('sha256', implode('|', [
+        (int)$e['seq'], $e['phone'], $e['kind'], $e['order_id'] === null ? '' : (int)$e['order_id'],
+        number_format((float)$e['amount'], 2, '.', ''), number_format((float)$e['points'], 2, '.', ''),
+        number_format((float)$e['balance_after'], 2, '.', ''), $e['note'], substr((string)$e['created_at'], 0, 19), $e['prev_hash'],
+    ]));
+}
+
+/**
+ * Add one entry to the log. Call inside the transaction that changed the rewards, after
+ * the change, so balance_after is the customer's new balance.
+ */
+function ledger_append(string $phone, string $kind, ?int $orderId, float $amount, float $points, string $note, ?string $at = null): array
+{
+    $pdo = db();
+    $lock = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
+    $last = $pdo->query('SELECT seq, hash FROM reward_ledger ORDER BY seq DESC LIMIT 1' . $lock)->fetch();
+    $e = [
+        'seq' => $last ? (int)$last['seq'] + 1 : 1, 'phone' => $phone, 'kind' => $kind, 'order_id' => $orderId,
+        'amount' => round($amount, 2), 'points' => round($points, 2), 'balance_after' => rewards_for($phone)['balance'],
+        'note' => clean_text($note, 100), 'created_at' => $at ?? now(), 'prev_hash' => $last ? $last['hash'] : LEDGER_GENESIS,
+    ];
+    $e['hash'] = ledger_hash($e);
+    $pdo->prepare('INSERT INTO reward_ledger (seq, phone, kind, order_id, amount, points, balance_after, note, created_at, prev_hash, hash)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$e['seq'], $e['phone'], $e['kind'], $e['order_id'], $e['amount'], $e['points'], $e['balance_after'],
+                   $e['note'], $e['created_at'], $e['prev_hash'], $e['hash']]);
+    return $e;
+}
+
+/** Rewards given before the log existed are written into it once, oldest first. */
+function ledger_backfill(PDO $pdo): void
+{
+    if ((int)$pdo->query('SELECT COUNT(*) FROM reward_ledger')->fetchColumn() > 0) {
+        return;
+    }
+    $rows = $pdo->query("SELECT c.phone, 'credit' AS kind, c.order_id, c.amount, c.reward AS points, COALESCE(o.code, '') AS note, c.created_at
+                         FROM reward_credits c LEFT JOIN orders o ON o.id = c.order_id
+                         UNION ALL
+                         SELECT phone, 'redeem', NULL, amount, -amount, note, created_at FROM reward_redemptions
+                         ORDER BY created_at")->fetchAll();
+    if (!$rows) {
+        return;
+    }
+    // Balances are rebuilt step by step, so each entry shows the balance at that time.
+    $bal = [];
+    $seq = 0;
+    $prev = LEDGER_GENESIS;
+    $ins = $pdo->prepare('INSERT INTO reward_ledger (seq, phone, kind, order_id, amount, points, balance_after, note, created_at, prev_hash, hash)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    foreach ($rows as $r) {
+        $bal[$r['phone']] = round(($bal[$r['phone']] ?? 0) + (float)$r['points'], 2);
+        $e = ['seq' => ++$seq, 'phone' => $r['phone'], 'kind' => $r['kind'], 'order_id' => $r['order_id'] === null ? null : (int)$r['order_id'],
+              'amount' => round((float)$r['amount'], 2), 'points' => round((float)$r['points'], 2), 'balance_after' => max(0, $bal[$r['phone']]),
+              'note' => clean_text((string)$r['note'], 100), 'created_at' => substr((string)$r['created_at'], 0, 19), 'prev_hash' => $prev];
+        $e['hash'] = $prev = ledger_hash($e);
+        $ins->execute([$e['seq'], $e['phone'], $e['kind'], $e['order_id'], $e['amount'], $e['points'], $e['balance_after'],
+                       $e['note'], $e['created_at'], $e['prev_hash'], $e['hash']]);
+    }
+}
+
+/**
+ * Check the whole log: every entry's hash, every link to the previous entry, and that the
+ * log's totals match the rewards tables. Returns {ok, entries, head, problem}.
+ */
+function ledger_verify(): array
+{
+    $pdo = db();
+    $prev = LEDGER_GENESIS;
+    $n = 0;
+    $credit = 0.0;
+    $used = 0.0;
+    $st = $pdo->query('SELECT * FROM reward_ledger ORDER BY seq');
+    while ($e = $st->fetch()) {
+        $n++;
+        if ((int)$e['seq'] !== $n) {
+            return ['ok' => false, 'entries' => $n, 'head' => $prev, 'problem' => "entry $n is missing"];
+        }
+        if ($e['prev_hash'] !== $prev || !hash_equals($e['hash'], ledger_hash($e))) {
+            return ['ok' => false, 'entries' => $n, 'head' => $prev, 'problem' => "entry $n was changed"];
+        }
+        $prev = $e['hash'];
+        if ($e['kind'] === 'credit') {
+            $credit += (float)$e['points'];
+        } else {
+            $used += (float)$e['amount'];
+        }
+    }
+    $tc = (float)$pdo->query('SELECT COALESCE(SUM(reward), 0) FROM reward_credits')->fetchColumn();
+    $tu = (float)$pdo->query('SELECT COALESCE(SUM(amount), 0) FROM reward_redemptions')->fetchColumn();
+    if (abs($tc - $credit) > 0.009 || abs($tu - $used) > 0.009) {
+        return ['ok' => false, 'entries' => $n, 'head' => $prev, 'problem' => 'rewards totals do not match the log'];
+    }
+    return ['ok' => true, 'entries' => $n, 'head' => $prev, 'problem' => null];
+}
+
+/** A customer's log entries, newest first (for the pickup pass and staff). */
+function ledger_for(string $phone, int $limit = 20): array
+{
+    $st = db()->prepare('SELECT l.*, o.code FROM reward_ledger l LEFT JOIN orders o ON o.id = l.order_id
+                         WHERE l.phone = ? ORDER BY l.seq DESC LIMIT ' . max(1, min(100, $limit)));
+    $st->execute([$phone]);
+    return array_map(fn($e) => [
+        'seq' => (int)$e['seq'], 'kind' => $e['kind'], 'code' => $e['code'], 'amount' => (float)$e['amount'],
+        'points' => (float)$e['points'], 'balance' => (float)$e['balance_after'], 'note' => $e['note'],
+        'at' => iso($e['created_at']), 'receipt' => substr($e['hash'], 0, 12),
+    ], $st->fetchAll());
 }
 
 function masked_phone(string $phone): string

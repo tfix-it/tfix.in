@@ -50,3 +50,9 @@
 - app/routes_admin.py: GET /api/admin/cloud/rewards, POST /api/admin/cloud/redeem (admin only);
   the reset-pin endpoint is gone.
 - static/admin/index.html: CLUTCH Rewards panel (check balance + history, use rewards).
+
+# Rewards log + per-file options
+- Website: tamper-evident rewards log (hash chain, `reward_ledger`); shop.php `ledger_verify`; rewards
+  lookups return the history and the log check. Customers see verified receipts on their pass.
+- Admin CLUTCH Rewards panel: full history with receipt codes and a "Rewards log verified" line.
+- Website: per-file ink / sides / copies / pages (T Print already took options per file).

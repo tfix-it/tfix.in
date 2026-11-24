@@ -150,6 +150,8 @@ def test_order_while_closed_then_import_pay_print(site, tmp_path):
     assert done['status'] == 'collected'
     assert cloud_sync.push_statuses(client(site)) == 0    # finished orders aren't re-sent
     # CLUTCH Rewards: ₹54 of prints so far -> no ₹5 yet, ₹46 to go
+    hist = done['rewards'].pop('history')
+    assert [(h['kind'], h['amount'], h['points']) for h in hist] == [('credit', 54, 0)]   # spend is logged too
     assert done['rewards'] == {'phone': '98******10', 'spent': 54, 'earned': 0, 'redeemed': 0, 'balance': 0,
                                'step': 100, 'per_step': 5, 'next_in': 46, 'order_reward': 0}
 
@@ -321,3 +323,54 @@ def test_use_rewards_at_the_counter(site, tmp_path, monkeypatch):
 def test_online_job_label_is_html_escaped_in_admin():
     admin = (Path(__file__).resolve().parents[1] / 'static' / 'admin' / 'index.html').read_text()
     assert '${esc(job.original_filename)}' in admin and '${esc(truncate(job.original_filename, 16))}' in admin
+
+
+# ---------------- tamper-evident rewards log ----------------
+def test_rewards_log_is_hash_chained_and_tamper_evident(site, tmp_path):
+    import sqlite3
+    o1 = place_order(site, [(pdf(tmp_path, 1), BW)])
+    collect(site, o1, [120])
+    c = client(site)
+    c.redeem('9876543210', 5, 'used at counter')
+    collect(site, place_order(site, [(pdf(tmp_path, 1), BW)]), [90])
+
+    info = c.rewards('9876543210')
+    hist = info['history']
+    assert [(h['kind'], h['points'], h['balance']) for h in hist] == [('credit', 5, 5), ('redeem', -5, 0), ('credit', 5, 5)]
+    assert hist[0]['code'].startswith('CP-') and len(hist[0]['receipt']) == 12
+    assert info['ledger'] == {'ok': True, 'entries': 3, 'head': info['ledger']['head'], 'problem': None}
+
+    # the customer's pass shows the same history (without staff notes)
+    mine = status(site, o1)['rewards']['history']
+    assert [h['receipt'] for h in mine] == [h['receipt'] for h in hist] and all('note' not in h for h in mine)
+
+    # someone edits an old entry directly in the database -> detected
+    db_path = site.data / 'db.sqlite'
+    with sqlite3.connect(db_path) as con:
+        con.execute("UPDATE reward_ledger SET points = 50, balance_after = 50 WHERE seq = 1")
+    bad = c._json('GET', 'ledger_verify')
+    assert bad['ok'] is False and 'entry 1' in bad['problem']
+    with sqlite3.connect(db_path) as con:
+        con.execute("UPDATE reward_ledger SET points = 5, balance_after = 5 WHERE seq = 1")
+    assert c._json('GET', 'ledger_verify')['ok'] is True
+    # extra rewards added outside the log -> totals mismatch
+    with sqlite3.connect(db_path) as con:
+        con.execute("INSERT INTO reward_credits (order_id, phone, amount, reward, created_at) VALUES (999, '9876543210', 1000, 50, '2026-01-01 00:00:00')")
+    assert 'totals' in c._json('GET', 'ledger_verify')['problem']
+    # deleting an entry -> detected
+    with sqlite3.connect(db_path) as con:
+        con.execute("DELETE FROM reward_credits WHERE order_id = 999")
+        con.execute("DELETE FROM reward_ledger WHERE seq = 2")
+    assert c._json('GET', 'ledger_verify')['ok'] is False
+
+
+def test_rewards_given_before_the_log_are_backfilled(site, tmp_path):
+    import sqlite3
+    collect(site, place_order(site, [(pdf(tmp_path, 1), BW)]), [200])
+    db_path = site.data / 'db.sqlite'
+    with sqlite3.connect(db_path) as con:                      # pretend the log is new
+        con.execute('DELETE FROM reward_ledger')
+    (site.data / '.schema-v4').unlink()
+    info = client(site).rewards('9876543210')
+    assert info['ledger']['ok'] and info['ledger']['entries'] == 1
+    assert info['history'][0]['points'] == 10 and info['history'][0]['balance'] == 10

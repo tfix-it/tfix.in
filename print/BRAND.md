@@ -16,7 +16,8 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
 - In code: `.clutch-wordmark` / `.clutch-part` / `.print-part` / `.ai-capsule` in `index.html`.
 
 ## Palette & type
-- Deep matte charcoal radial background (`#07080a` → `#181a20`), subtle gold grid.
+- Deep matte charcoal radial background (`#07080a` → `#181a20`) with a gold lattice of inverted triangles (the ▽
+  emblem) that drifts on scroll, plus slowly turning concentric ▽ rings (calm/static with reduced motion).
 - Metallic T FIX gold matching the inverted-triangle T FIX® CUSAT logo:
   `#fff0b3` / `#f3d97d` / `#d4af37` / `#9c7518` (logo gradient `#FCE379 → #F5D466 → #DEB23A`).
 - Crisp white body text; zinc greys for secondary text.
@@ -48,6 +49,10 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
 - Using rewards: at the T FIX® counter. Staff check and use them in T Print admin (CLUTCH Rewards panel),
   only for the customer collecting an online order on that number.
 - In-shop (walk-in) T Print jobs don't earn rewards and don't use #CP tokens.
+- **Tamper-evident log:** every credit and use is written to `reward_ledger`, each entry sealed with the
+  SHA-256 of the one before it (a hash chain, no cryptocurrency). The customer's pass shows their history with
+  short receipt codes; T Print admin shows "Rewards log verified" or what was changed. A future on-chain
+  token can be built from this log without losing history.
 
 ## Search appearance
 - Google site name: **ClutchPrint AI** (WebSite structured data + og:site_name in `index.html`), page title

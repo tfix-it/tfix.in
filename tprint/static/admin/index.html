@@ -443,11 +443,19 @@ async function rwCheck() {
     out.style.color = res.ok ? '' : 'var(--red, #c0392b)';
     el('rwUse').style.display = res.ok && d.balance > 0 ? '' : 'none';
     if (!res.ok) { out.innerHTML = esc(d.detail || 'Could not check rewards.'); return; }
-    const hist = (d.credits || []).slice(0, 5).map(c => '<li>' + esc(c.code || '') + ' · ' + inr(c.amount) + ' prints → <b>+' + inr(c.reward) + '</b></li>')
-      .concat((d.redemptions || []).slice(0, 5).map(r => '<li>Used <b>−' + inr(r.amount) + '</b>' + (r.note ? ' · ' + esc(r.note) : '') + '</li>')).join('');
+    const day = iso => iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    const hist = (d.history || []).slice(0, 10).map(h => '<li>' + esc(day(h.at)) + ' · '
+      + (h.kind === 'credit' ? esc(h.code || '') + ' · ' + inr(h.amount) + ' prints → <b>+' + inr(h.points) + '</b>'
+                             : 'Used <b>−' + inr(h.amount) + '</b>' + (h.note ? ' · ' + esc(h.note) : ''))
+      + ' · bal ' + inr(h.balance) + ' <span style="color:#999; font-family:monospace;">#' + esc(h.receipt) + '</span></li>').join('');
+    const lg = d.ledger || {};
+    const ledgerLine = lg.ok
+      ? '<span style="color:#1e8e3e;">✓ Rewards log verified</span> (' + esc(lg.entries) + ' entries, head #' + esc(String(lg.head || '').slice(0, 12)) + ')'
+      : '<span style="color:#c0392b;"><b>⚠ Rewards log check failed:</b> ' + esc(lg.problem || 'unknown') + '</span>';
     out.innerHTML = '<b>' + esc(d.name || '') + '</b> ' + esc(d.phone) + '<br>Available: <b style="font-size:20px;">' + inr(d.balance) + '</b>'
       + '<br><span style="color:#666; font-size:12px;">Prints ' + inr(d.spent) + ' · earned ' + inr(d.earned) + ' · used ' + inr(d.redeemed) + ' · ' + inr(d.next_in) + ' more to the next ₹' + esc(d.per_step) + '</span>'
-      + (hist ? '<ul style="margin:6px 0 0 18px; padding:0; font-size:12px;">' + hist + '</ul>' : '');
+      + (hist ? '<ul style="margin:6px 0 0 18px; padding:0; font-size:12px;">' + hist + '</ul>' : '')
+      + '<div style="margin-top:6px; font-size:12px;">' + ledgerLine + '</div>';
     el('rwAmount').max = d.balance;
   } finally { el('rwCheckBtn').disabled = false; }
 }
@@ -462,6 +470,7 @@ el('rwUseBtn').addEventListener('click', async () => {
     const res = await fetch('/api/admin/cloud/redeem', { method: 'POST', body: fd, credentials: 'include' });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) { alert(d.detail || 'Could not use rewards.'); return; }
+    alert('Used ' + inr(d.used) + '. Receipt #' + (d.receipt || '') + ' · new balance ' + inr(d.balance));
     el('rwAmount').value = ''; el('rwNote').value = '';
     await rwCheck();
   } finally { el('rwUseBtn').disabled = false; }

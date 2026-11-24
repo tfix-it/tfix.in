@@ -12,6 +12,7 @@
  *                                     a "collected" order credits CLUTCH Rewards (₹5 per ₹100)
  *   GET  ?action=rewards&phone=N      CLUTCH Rewards balance + recent history for a mobile number
  *   POST ?action=redeem  (JSON)       {phone, amount, note} use rewards at the counter (staff)
+ *   GET  ?action=ledger_verify        check the tamper-evident rewards log (hash chain)
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -186,7 +187,8 @@ switch ($action) {
         $st->execute([$phone]);
         $r = rewards_for($phone);
         $r['phone'] = $phone;   // staff see the full number
-        send_json(200, $r + ['name' => (string)($st->fetchColumn() ?: ''), 'credits' => $credits, 'redemptions' => $used]);
+        send_json(200, $r + ['name' => (string)($st->fetchColumn() ?: ''), 'credits' => $credits, 'redemptions' => $used,
+                             'history' => ledger_for($phone, 30), 'ledger' => ledger_verify()]);
 
     case 'redeem':
         // Staff use a customer's rewards at the counter (the bill is reduced by this amount).
@@ -210,8 +212,14 @@ switch ($action) {
         }
         $pdo->prepare('INSERT INTO reward_redemptions (phone, amount, note, created_at) VALUES (?, ?, ?, ?)')
             ->execute([$phone, $amount, $note, now()]);
+        $entry = ledger_append($phone, 'redeem', null, $amount, -$amount, $note);
         $pdo->commit();
-        send_json(200, ['ok' => true, 'phone' => $phone, 'used' => $amount, 'balance' => rewards_for($phone)['balance']]);
+        send_json(200, ['ok' => true, 'phone' => $phone, 'used' => $amount, 'balance' => rewards_for($phone)['balance'],
+                        'receipt' => substr($entry['hash'], 0, 12)]);
+
+    case 'ledger_verify':
+        require_method('GET');
+        send_json(200, ledger_verify());
 
     default:
         fail(404, 'Unknown action.');

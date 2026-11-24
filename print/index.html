@@ -47,23 +47,41 @@
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
-    html { scroll-behavior: smooth; background-color: var(--bg-deep); color: #f8f9fa; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    body {
-      margin: 0; min-height: 100vh; overflow-x: hidden;
-      background:
-        radial-gradient(ellipse 80% 55% at 50% -10%, rgba(212, 175, 55, 0.13) 0%, rgba(212, 175, 55, 0.03) 38%, transparent 70%),
-        radial-gradient(circle at 50% 20%, var(--bg-radial) 0%, #0d0e12 52%, var(--bg-deep) 100%);
-    }
+    /* The page colour sits on <html> so the ▽ background layers (z-index -1/-2) show above it. */
+    html { scroll-behavior: smooth; color: #f8f9fa; font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse 80% 55% at 50% -10%, rgba(212, 175, 55, 0.13) 0%, rgba(212, 175, 55, 0.03) 38%, transparent 70%),
+        radial-gradient(circle at 50% 20%, var(--bg-radial) 0%, #0d0e12 52%, var(--bg-deep) 100%) fixed, var(--bg-deep); }
+    body { margin: 0; min-height: 100vh; overflow-x: hidden; background: transparent; }
     section[id] { scroll-margin-top: 84px; }
     .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, 'Noto Sans Malayalam', monospace; }
     /* Malayalam: proper font; letter-spacing breaks conjunct letters, so turn it off */
     html[lang="ml"] { font-family: 'Inter', 'Noto Sans Malayalam', system-ui, sans-serif; }
     html[lang="ml"] [class*="tracking-"] { letter-spacing: normal !important; }
     html[lang="ml"] h1, html[lang="ml"] h2 { line-height: 1.3; }
-    .bg-grid-pattern {
-      background-image: linear-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
+    /* Background: a lattice of inverted triangles (the T FIX® ▽ emblem) that drifts as you scroll,
+       a slowly turning set of concentric ▽ rings, and a gold glow that follows the scroll. */
+    .tri-bg { position: fixed; inset: -10vh 0; z-index: -2; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='48.5' viewBox='0 0 56 48.5'%3E%3Cpath d='M0 .5H56M0 .5L28 49M56 .5L28 49' fill='none' stroke='%23d4af37' stroke-opacity='.1' stroke-width='1'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='224' height='194' viewBox='0 0 224 194'%3E%3Cpath d='M56 0.5H112L84 49Z' fill='%23d4af37' fill-opacity='.07'/%3E%3Cpath d='M140 97.5H196L168 146Z' fill='%23d4af37' fill-opacity='.05'/%3E%3C/svg%3E");
+      background-size: 56px 48.5px, 224px 194px;
+      background-position: 0 calc(var(--sy, 0) * -0.12px), 0 calc(var(--sy, 0) * -0.25px);
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%);
+              mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%); }
+    .tri-glow { position: fixed; z-index: -1; pointer-events: none; left: 50%; top: 0; width: 120vmax; height: 120vmax;
+      transform: translate(-50%, calc(-55% + var(--sy, 0) * 0.08px));
+      background: radial-gradient(circle, rgba(212,175,55,.10) 0%, rgba(212,175,55,.035) 28%, transparent 55%);
+      opacity: calc(1 - min(var(--sp, 0), 1) * .45); }
+    .tri-rings { position: fixed; z-index: -1; pointer-events: none; left: 50%; top: 38vh; width: min(150vw, 1300px); height: auto;
+      transform: translate(-50%, -50%) rotate(calc(var(--sy, 0) * 0.018deg)) scale(calc(1 + var(--sp, 0) * .18)); opacity: .8; }
+    .tri-rings path { fill: none; stroke: url(#ring-g); stroke-width: 1; vector-effect: non-scaling-stroke; animation: ringBreath 9s ease-in-out infinite; transform-origin: 50% 40%; transform-box: view-box; }
+    .tri-rings path:nth-child(2) { animation-delay: -1.5s } .tri-rings path:nth-child(3) { animation-delay: -3s }
+    .tri-rings path:nth-child(4) { animation-delay: -4.5s } .tri-rings path:nth-child(5) { animation-delay: -6s } .tri-rings path:nth-child(6) { animation-delay: -7.5s }
+    @keyframes ringBreath { 0%, 100% { opacity: .25; transform: scale(.985); } 50% { opacity: .9; transform: scale(1.015); } }
+    .reveal { opacity: 0; transform: translateY(26px) scale(.985); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: .08s } .reveal-d2 { transition-delay: .16s }
+    .glass-card, .glass-card-gold { transition: box-shadow .4s ease, border-color .4s ease; }
+    .glass-card:hover { border-color: rgba(212,175,55,.22); box-shadow: 0 0 0 1px rgba(212,175,55,.06), 0 18px 50px rgba(0,0,0,.45); }
     .gold-gradient-text {
       background: linear-gradient(135deg, #fff0b3 0%, #e5c158 38%, #c99b26 72%, #f5dc82 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -105,15 +123,28 @@
     @keyframes logo-shine-sym { 0% { transform: skewX(-20deg) translateX(-90px); } 55%, 100% { transform: skewX(-20deg) translateX(400px); } }
     .upi-qr { display: block; width: min(240px, 100%); height: auto; margin: .75rem auto .25rem; border-radius: .75rem; background: #fff; }
     #qr-box img, #qr-box canvas { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .live-dot, .logo-shine, .progress-shimmer::after { animation: none; } }
+    .fo { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: #d4d4d8; border-radius: .45rem; padding: .3rem .55rem; font-size: 11px; line-height: 1.2; }
+    .fo:hover { border-color: rgba(212,175,55,.5); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; } .live-dot, .logo-shine, .progress-shimmer::after, .tri-rings path { animation: none; }
+      .tri-bg, .tri-glow, .tri-rings { background-position: 0 0, 0 0; transform: translate(-50%, -50%); }
+      .tri-bg { transform: none; } .tri-glow { transform: translate(-50%, -55%); }
+      .reveal { opacity: 1; transform: none; transition: none; } }
   </style>
 </head>
-<body class="bg-grid-pattern antialiased selection:bg-[#d4af37]/30 selection:text-[#f3d97d]">
+<body class="antialiased selection:bg-[#d4af37]/30 selection:text-[#f3d97d]">
+  <!-- Brand background: ▽ lattice, gold glow, concentric ▽ rings (decorative) -->
+  <div class="tri-bg" aria-hidden="true"></div>
+  <div class="tri-glow" aria-hidden="true"></div>
+  <svg class="tri-rings" viewBox="-50 -50 1100 980" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b3" stop-opacity=".6"/><stop offset=".5" stop-color="#d4af37" stop-opacity=".3"/><stop offset="1" stop-color="#9c7518" stop-opacity=".08"/></linearGradient></defs>
+    <path d="M0 0H1000L500 866Z"/><path d="M90 52H910L500 762Z"/><path d="M180 104H820L500 658Z"/><path d="M270 156H730L500 554Z"/><path d="M360 208H640L500 450Z"/><path d="M430 248H570L500 369Z"/>
+  </svg>
 
   <!-- Top Navigation -->
   <header class="sticky top-0 z-40 border-b border-white/10 bg-[#08090c]/85 backdrop-blur-md">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-      <a href="#top" class="flex min-w-0 items-center gap-3 focus:outline-none" aria-label="CLUTCHPRINT AI by T FIX CUSAT">
+      <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" title="T FIX® main website (tfix.in)" class="flex min-w-0 items-center gap-3 focus:outline-none" aria-label="CLUTCHPRINT AI by T FIX CUSAT — tfix.in">
         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d4af37]/40 bg-[#0b0b0d] shadow-[0_0_20px_rgba(212,175,55,0.14)]">
           <svg viewBox="-6 -6 301 260" class="logo-sym" aria-hidden="true"><defs><linearGradient id="g-hd" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hd"><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" clip-rule="nonzero"/></clipPath><linearGradient id="sh-hd" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" fill="url(#g-hd)" fill-rule="nonzero"/><g clip-path="url(#clip-hd)"><rect class="logo-shine" x="0" y="-40" width="56" height="340" fill="url(#sh-hd)" transform="skewX(-20)"/></g></svg>
         </div>
@@ -148,16 +179,11 @@
 
     <!-- Hero -->
     <section class="mx-auto max-w-3xl text-center">
-      <div class="flex flex-wrap items-center justify-center gap-2">
-        <!-- Shop open / closed (live, India time) -->
-        <span class="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/35 bg-[#14130f]/90 px-3.5 py-1.5 shadow-[0_0_24px_rgba(212,175,55,0.12)]">
+      <!-- One live status pill: shop hours (India time) + print server (Shop PC 1) -->
+      <div class="flex justify-center">
+        <span id="status-pill" class="inline-flex max-w-full items-center gap-2 rounded-full border border-[#d4af37]/35 bg-[#14130f]/90 px-3.5 py-1.5 shadow-[0_0_24px_rgba(212,175,55,0.12)]">
           <span id="shop-dot" class="live-dot h-2 w-2 shrink-0 rounded-full bg-zinc-500"></span>
-          <span id="shop-pill" class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-[#f3d97d] sm:text-xs">CHECKING HOURS…</span>
-        </span>
-        <!-- Print server (T Print on Shop PC 1) online / offline -->
-        <span id="srv-pill-wrap" hidden class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#101116]/90 px-3.5 py-1.5">
-          <span id="srv-dot" class="h-2 w-2 shrink-0 rounded-full bg-zinc-500"></span>
-          <span id="srv-pill" class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-zinc-200 sm:text-xs"></span>
+          <span class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-[#f3d97d] sm:text-xs"><span id="shop-pill">CHECKING HOURS…</span><span id="srv-pill" class="text-zinc-400"></span></span>
         </span>
       </div>
 
@@ -177,7 +203,7 @@
     </section>
 
     <!-- Upload studio -->
-    <section id="upload-studio" class="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+    <section id="upload-studio" class="reveal mt-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
 
       <!-- Left: details, dropzone, options, estimate -->
       <form id="order-form" class="glass-card rounded-2xl p-5 sm:p-6 lg:col-span-7" novalidate onsubmit="return false">
@@ -191,8 +217,6 @@
           </span>
         </div>
 
-        <p id="closed-note" hidden class="mt-4 rounded-xl border border-[#d4af37]/30 bg-[#14130f] px-3.5 py-2.5 text-xs leading-relaxed text-zinc-300"></p>
-
         <!-- Customer details -->
         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label class="block">
@@ -204,7 +228,6 @@
             <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="username tel" maxlength="16" placeholder="10-digit mobile" data-i18n-ph="phonePh" required />
           </label>
         </div>
-        <p class="mt-2 text-[11px] leading-relaxed text-zinc-400" data-i18n="phoneHelp">Your mobile number is your CLUTCH Rewards ID — every ₹100 of prints earns ₹5 back.</p>
 
         <!-- Dropzone -->
         <div id="dropzone" tabindex="0" role="button" aria-label="Drop Your File (PDF / DOCX / JPG)"
@@ -222,8 +245,9 @@
         <!-- Selected files -->
         <ul id="file-list" class="mt-3 space-y-2"></ul>
 
-        <!-- Print options -->
-        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <!-- Print options: set all files at once; each file can be changed in its own row above -->
+        <p class="mt-5 font-mono-tech text-[11px] uppercase tracking-wider text-zinc-500" data-i18n="optAll">Set all files</p>
+        <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
             <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="optInk">Ink Mode</span>
             <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Ink mode">
@@ -269,7 +293,6 @@
               <input id="notes" class="field mt-1.5" type="text" maxlength="400" placeholder="e.g. spiral binding, colour cover" data-i18n-ph="notePh" />
             </label>
           </div>
-          <p class="mt-2 text-[11px] text-zinc-500" data-i18n="rangeHelp">To print only some pages of a file, tap “All pages” next to the file.</p>
         </details>
 
         <!-- Estimate + send -->
@@ -284,8 +307,10 @@
           <button id="send-btn" type="button" class="gold-btn w-full rounded-xl px-5 py-3 text-sm font-extrabold tracking-wide sm:w-auto" data-i18n="send">Send to CLUTCHPRINT AI</button>
         </div>
         <div id="progress" hidden class="relative mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full w-0 rounded-full bg-gradient-to-r from-[#b5891d] via-[#d4af37] to-[#f3d97d] transition-all duration-200"></div></div>
+        <p id="closed-note" hidden class="mt-2 font-mono-tech text-[11px] text-[#d4af37]/90"></p>
         <p id="form-error" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
         <p id="rate-breakdown" class="mt-2 text-left sm:text-right font-mono-tech text-[10px] leading-relaxed text-zinc-400"></p>
+        <p class="mt-2 text-[10px] leading-relaxed text-zinc-500" data-i18n="privacy">We keep your name, mobile number and order history only to run your orders and CLUTCH Rewards.</p>
       </form>
 
       <!-- Right: live AI status + pickup pass -->
@@ -368,13 +393,18 @@
             <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div id="rw-bar" class="h-full rounded-full bg-gradient-to-r from-[#9c7518] via-[#d4af37] to-[#fff0b3]" style="width:0%"></div></div>
             <p id="rw-next" class="mt-1.5 font-mono-tech text-[11px] text-zinc-300"></p>
             <p class="mt-1 text-[11px] leading-relaxed text-zinc-400" data-i18n="rwHow">Every ₹100 of prints earns ₹5. Rewards are added when you collect, and you can use them at the T FIX® counter.</p>
+            <details id="rw-hist-wrap" hidden class="mt-2">
+              <summary class="cursor-pointer font-mono-tech text-[11px] text-[#f3d97d]" data-i18n="rwHist">History · verified receipts</summary>
+              <ul id="rw-hist" class="mt-2 space-y-1 font-mono-tech text-[11px]"></ul>
+              <p class="mt-1.5 text-[10px] leading-relaxed text-zinc-500" data-i18n="rwChain">Every entry is sealed to the one before it, so past rewards can't be quietly changed.</p>
+            </details>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 3-step flow -->
-    <section id="how-it-works" class="mt-16">
+    <section id="how-it-works" class="reveal mt-16">
       <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
         <div>
           <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="howEyebrow">HOW CLUTCHPRINT WORKS</span>
@@ -406,7 +436,7 @@
     </section>
 
     <!-- Location -->
-    <section id="location" class="mt-14">
+    <section id="location" class="reveal mt-14">
       <div class="glass-card rounded-2xl p-6">
         <div class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div class="min-w-0">
@@ -440,13 +470,13 @@
     </div>
   </footer>
 
-  <!-- T FIX home pill: only on very wide screens, where it sits clear of the content -->
+  <!-- T FIX home pill (compact on phones) -->
   <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" aria-label="Go to T FIX Home (tfix.in)"
-     class="group fixed bottom-6 left-6 z-30 hidden items-center gap-2.5 rounded-full border border-[#d4af37]/45 bg-[#101116]/90 py-2 pl-2.5 pr-3.5 text-xs font-semibold text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(212,175,55,0.16)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#f3d97d] 2xl:inline-flex">
+     class="group fixed bottom-4 left-4 z-30 inline-flex items-center gap-2.5 rounded-full border border-[#d4af37]/45 bg-[#101116]/90 p-1.5 text-xs font-semibold text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(212,175,55,0.16)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#f3d97d] sm:bottom-6 sm:left-6 sm:py-2 sm:pl-2.5 sm:pr-3.5">
     <span class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#f3d97d] via-[#d4af37] to-[#9c7518] text-[#0b0c0e]">
       <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5M5.25 9.75V20a1 1 0 0 0 1 1h4.25v-5.5h3V21h4.25a1 1 0 0 0 1-1V9.75" /></svg>
     </span>
-    <span class="flex flex-col leading-tight">
+    <span class="hidden flex-col leading-tight sm:flex">
       <span class="font-mono-tech text-[9px] uppercase tracking-[0.14em] text-[#f3d97d]">T FIX® HOME</span>
       <span class="font-mono-tech text-[11px] text-zinc-200">tfix.in ↗</span>
     </span>
@@ -487,7 +517,7 @@
         srvOn: "AI AUTO PRINT ONLINE", srvOff: "PRINT SERVER OFFLINE", srvOffStaff: "PRINT SERVER OFFLINE — STAFF, PLEASE CHECK SHOP PC 1",
         badgeOn: "ONLINE", badgeOff: "OFFLINE", srvLabel: "SERVER:",
         studioTitle: "Instant AI Print Queue", studioSub: "PDF, DOCX, PPTX, JPG or PNG · up to 10 files, 25 MB each",
-        closedNote: "We're closed right now. Send your order anyway — it will be waiting for us when we open ({when}).",
+        closedNote: "Closed now — your order will wait for us (opens {when}).",
         fName: "Your name", namePh: "e.g. Anu", fPhone: "Mobile number", phonePh: "10-digit mobile",
         dropTitle: "Drop Your File (PDF / DOCX / JPG)", dropSub: "Click to browse from phone or laptop, or drag & drop right here",
         optInk: "Ink Mode", bw: "B&W", color: "Color", optSides: "Sides", single: "1-Sided", duplex: "Duplex", optPaper: "Paper", optCopies: "Copies",
@@ -514,7 +544,9 @@
         pPrinting: "Printing now at T FIX® CUSAT.", pReady: "Ready! Collect your pages at the counter.", pCollected: "Collected. Thank you!", pCancelled: "This order was cancelled — please contact the shop.",
         passFiles: "FILES", passTotal: "TOTAL", est: "(est.)", atShop: "priced at the shop", problem: "Problem:",
         copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your tokens",
-        phoneHelp: "Your mobile number is your CLUTCH Rewards ID — every ₹100 of prints earns ₹5 back.",
+        optAll: "Set all files", mixed: "mixed", fileInk: "Ink", privacy: "We keep your name, mobile number and order history only to run your orders and CLUTCH Rewards.",
+        srvSufOff: " · SERVER OFFLINE", rwHist: "History · verified receipts", rwChain: "Every entry is sealed to the one before it, so past rewards can't be quietly changed.",
+        rwCredit: "{code} · ₹{amt} prints", rwUsed: "Used at counter",
         rwTitle: "CLUTCH Rewards", rwAvail: "available", rwNext: "₹{n} more in prints → next ₹5",
         rwHow: "Every ₹100 of prints earns ₹5. Rewards are added when you collect, and you can use them at the T FIX® counter.",
         rwOrder: "+₹{r} from this order", rwSoon: "Collect this order to add its rewards.",
@@ -544,7 +576,7 @@
         srvOn: "AI ഓട്ടോ പ്രിന്റ് ഓൺലൈൻ", srvOff: "പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ", srvOffStaff: "പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ — സ്റ്റാഫ്, Shop PC 1 പരിശോധിക്കൂ",
         badgeOn: "ഓൺലൈൻ", badgeOff: "ഓഫ്‌ലൈൻ", srvLabel: "സെർവർ:",
         studioTitle: "ഇൻസ്റ്റന്റ് AI പ്രിന്റ് ക്യൂ", studioSub: "PDF, DOCX, PPTX, JPG, PNG · 10 ഫയലുകൾ വരെ, ഓരോന്നും 25 MB വരെ",
-        closedNote: "ഇപ്പോൾ കട അടച്ചിരിക്കുന്നു. എങ്കിലും ഓർഡർ അയയ്ക്കാം — കട തുറക്കുമ്പോൾ ({when}) ഞങ്ങൾ എടുക്കും.",
+        closedNote: "ഇപ്പോൾ അടച്ചിരിക്കുന്നു — ഓർഡർ കാത്തിരിക്കും ({when} തുറക്കും).",
         fName: "നിങ്ങളുടെ പേര്", namePh: "ഉദാ: അനു", fPhone: "മൊബൈൽ നമ്പർ", phonePh: "10 അക്ക മൊബൈൽ നമ്പർ",
         dropTitle: "ഫയൽ ഇവിടെ ഇടൂ (PDF / DOCX / JPG)", dropSub: "ഫോണിൽ നിന്നോ ലാപ്‌ടോപ്പിൽ നിന്നോ തിരഞ്ഞെടുക്കാൻ ടാപ്പ് ചെയ്യൂ, അല്ലെങ്കിൽ ഇവിടേക്ക് വലിച്ചിടൂ",
         optInk: "മഷി", bw: "B&W", color: "കളർ", optSides: "വശങ്ങൾ", single: "ഒരു വശം", duplex: "ഇരുവശം", optPaper: "പേപ്പർ", optCopies: "കോപ്പികൾ",
@@ -571,7 +603,9 @@
         pPrinting: "T FIX® CUSAT-ൽ ഇപ്പോൾ പ്രിന്റ് ചെയ്യുന്നു.", pReady: "റെഡി! കൗണ്ടറിൽ നിന്ന് പേജുകൾ വാങ്ങൂ.", pCollected: "കൈപ്പറ്റി. നന്ദി!", pCancelled: "ഈ ഓർഡർ റദ്ദാക്കി — കടയുമായി ബന്ധപ്പെടൂ.",
         passFiles: "ഫയലുകൾ", passTotal: "ആകെ", est: "(ഏകദേശം)", atShop: "തുക കടയിൽ", problem: "പ്രശ്നം:",
         copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ടോക്കണുകൾ",
-        phoneHelp: "നിങ്ങളുടെ മൊബൈൽ നമ്പറാണ് CLUTCH Rewards ID — ഓരോ ₹100 പ്രിന്റിനും ₹5 തിരികെ.",
+        optAll: "എല്ലാ ഫയലുകൾക്കും", mixed: "പലത്", fileInk: "മഷി", privacy: "നിങ്ങളുടെ പേര്, മൊബൈൽ നമ്പർ, ഓർഡർ വിവരങ്ങൾ ഓർഡറുകൾക്കും CLUTCH Rewards-നും മാത്രം സൂക്ഷിക്കുന്നു.",
+        srvSufOff: " · സെർവർ ഓഫ്‌ലൈൻ", rwHist: "ചരിത്രം · സ്ഥിരീകരിച്ച രസീതുകൾ", rwChain: "ഓരോ എൻട്രിയും മുമ്പത്തേതുമായി സീൽ ചെയ്തിരിക്കുന്നു — പഴയ റിവാർഡുകൾ രഹസ്യമായി മാറ്റാനാവില്ല.",
+        rwCredit: "{code} · ₹{amt} പ്രിന്റ്", rwUsed: "കൗണ്ടറിൽ ഉപയോഗിച്ചു",
         rwTitle: "CLUTCH Rewards", rwAvail: "ലഭ്യം", rwNext: "അടുത്ത ₹5-ന് ₹{n} കൂടി പ്രിന്റ് ചെയ്യൂ",
         rwHow: "ഓരോ ₹100 പ്രിന്റിനും ₹5 റിവാർഡ്. പ്രിന്റ് വാങ്ങുമ്പോൾ റിവാർഡ് ചേർക്കും; T FIX® കൗണ്ടറിൽ ഉപയോഗിക്കാം.",
         rwOrder: "ഈ ഓർഡറിൽ നിന്ന് +₹{r}", rwSoon: "ഈ ഓർഡർ വാങ്ങുമ്പോൾ റിവാർഡ് ചേർക്കും.",
@@ -687,17 +721,15 @@
       renderServer(); renderPass();
     }
     function renderServer() {
-      const wrap = $("#srv-pill-wrap"), dot = $("#srv-dot"), txt = $("#srv-pill"), badge = $("#srv-badge");
-      wrap.hidden = srvOnline === null;
-      wrap.classList.toggle("border-red-500/40", srvOnline === false && shopOpen);
-      if (srvOnline) {
-        dot.className = "live-dot h-2 w-2 shrink-0 rounded-full bg-[#34d399] shadow-[0_0_8px_#34d399]";
-        txt.textContent = t("srvOn"); badge.textContent = t("badgeOn"); badge.className = "text-emerald-300";
-      } else if (srvOnline === false) {
-        dot.className = "h-2 w-2 shrink-0 rounded-full " + (shopOpen ? "live-dot bg-red-400 shadow-[0_0_8px_#f87171]" : "bg-zinc-500");
-        txt.textContent = shopOpen ? t("srvOffStaff") : t("srvOff");
-        badge.textContent = t("badgeOff"); badge.className = shopOpen ? "text-red-300" : "text-zinc-400";
-      } else { badge.textContent = "…"; badge.className = "text-zinc-400"; }
+      const badge = $("#srv-badge"), suf = $("#srv-pill"), dot = $("#shop-dot");
+      const offWhileOpen = srvOnline === false && shopOpen;
+      suf.textContent = offWhileOpen ? (lang === "en" ? t("srvSufOff").toUpperCase() : t("srvSufOff")) : "";
+      suf.className = offWhileOpen ? "text-red-300" : "text-zinc-400";
+      $("#status-pill").classList.toggle("!border-red-500/40", offWhileOpen);
+      if (offWhileOpen) dot.className = "live-dot h-2 w-2 shrink-0 rounded-full bg-red-400 shadow-[0_0_8px_#f87171]";
+      if (srvOnline) { badge.textContent = t("badgeOn"); badge.className = "text-emerald-300"; }
+      else if (srvOnline === false) { badge.textContent = t("badgeOff"); badge.className = shopOpen ? "text-red-300" : "text-zinc-400"; }
+      else { badge.textContent = "…"; badge.className = "text-zinc-400"; }
     }
 
     /* ============ order builder ============ */
@@ -744,7 +776,8 @@
         if (!ALLOWED_EXT.includes(ext)) { showError(t("errType", { f: file.name })); continue; }
         if (file.size > MAX_FILE_MB * 1048576) { showError(t("errBig", { f: file.name })); continue; }
         if (files.length >= MAX_FILES) { showError(t("errMany")); break; }
-        const f = { id: nextId++, file, name: file.name, ext, pages: null, counting: false, range: "", rangeOpen: false };
+        const f = { id: nextId++, file, name: file.name, ext, pages: null, counting: false, range: "", rangeOpen: false,
+                    color: opts.color, doubleside: opts.doubleside, copies: opts.copies };
         files.push(f); countPages(f);
       }
       renderFiles();
@@ -757,7 +790,9 @@
       range.hidden = !f.rangeOpen;
       const err = el("p", { class: "mt-1 text-[11px] text-red-300", hidden: "" });
       const check = () => { const bad = f.range && !parseRange(f.range, f.pages); err.hidden = !bad; err.textContent = f.pages ? t("rangeErr", { n: f.pages }) : t("rangeErrU"); };
-      range.addEventListener("input", () => { f.range = range.value.trim(); check(); renderSummary(); });
+      const fileCost = () => { const n = selectedPages(f); return n == null ? "" : rupee(tprintCost(n, f.color, f.doubleside, f.copies, opts.paper_size, opts.pps, files[0] === f).total); };
+      const price = el("span", { class: "font-mono-tech text-[11px] text-zinc-300" });
+      range.addEventListener("input", () => { f.range = range.value.trim(); check(); price.textContent = fileCost(); renderSummary(); });
       check();
       const pagesBtn = el("button", { type: "button", class: "rounded border px-2 py-1 text-[11px] " + (f.rangeOpen ? "border-[#d4af37] text-[#f3d97d]" : "border-white/10 text-zinc-300 hover:border-[#d4af37]/50"), text: f.rangeOpen ? t("choosePages") : t("allPages") });
       pagesBtn.addEventListener("click", () => {
@@ -765,14 +800,26 @@
         renderFiles();
         if (f.rangeOpen) { const i = $('#file-list [data-fid="' + f.id + '"] input'); if (i) i.focus(); }
       });
+      // This file's own settings: ink, sides, copies (pages: button above)
+      const seg = (key, a, b) => el("div", { class: "inline-flex overflow-hidden rounded-md border border-white/10", role: "group" },
+        ...[[false, a], [true, b]].map(([v, label]) => el("button", { type: "button", class: "px-2 py-1 text-[11px] " + (f[key] === v ? "bg-[#d4af37]/20 font-semibold text-[#f3d97d]" : "bg-white/[0.03] text-zinc-400 hover:text-zinc-200"),
+          "aria-pressed": String(f[key] === v), text: label, onclick: () => { f[key] = v; renderFiles(); } })));
+      const step = d => () => { f.copies = Math.max(1, Math.min(500, f.copies + d)); renderFiles(); };
+      const copies = el("div", { class: "inline-flex items-center rounded-md border border-white/10 bg-white/[0.03]" },
+        el("button", { type: "button", class: "px-2 py-1 text-[11px] text-zinc-300 hover:text-white", "aria-label": t("optCopies") + " −", text: "−", onclick: step(-1) }),
+        el("span", { class: "min-w-[2.2rem] text-center font-mono-tech text-[11px] text-white", text: "×" + f.copies }),
+        el("button", { type: "button", class: "px-2 py-1 text-[11px] text-zinc-300 hover:text-white", "aria-label": t("optCopies") + " +", text: "+", onclick: step(1) }));
+      price.textContent = fileCost();
       return el("li", { class: "rounded-lg border border-[#d4af37]/40 bg-[#181712] px-3.5 py-2.5", "data-fid": String(f.id) },
         el("div", { class: "flex items-center justify-between gap-3" },
           el("div", { class: "min-w-0" },
             el("p", { class: "truncate font-mono-tech text-xs font-semibold text-[#f3d97d]", text: f.name }),
             el("p", { class: "font-mono-tech text-[11px] text-zinc-400", text: f.ext.toUpperCase() + " · " + size + " · " + meta })),
-          el("div", { class: "flex shrink-0 items-center gap-1" }, pagesBtn,
+          el("div", { class: "flex shrink-0 items-center gap-1" },
+            price,
             el("button", { type: "button", class: "rounded px-2 py-1 font-mono-tech text-[11px] text-zinc-400 hover:bg-white/10 hover:text-white", "aria-label": t("remove") + " " + f.name, text: "✕",
               onclick: () => { files = files.filter(x => x.id !== f.id); renderFiles(); } }))),
+        el("div", { class: "mt-2 flex flex-wrap items-center gap-1.5" }, seg("color", t("bw"), t("color")), seg("doubleside", t("single"), t("duplex")), copies, pagesBtn),
         range, err);
     }
     function renderFiles() { $("#file-list").replaceChildren(...files.map(fileRow)); renderSummary(); }
@@ -782,18 +829,19 @@
       files.forEach((f, i) => {
         const p = selectedPages(f);
         if (p == null) { unknown++; return; }
-        const q = tprintCost(p, opts.color, opts.doubleside, opts.copies, opts.paper_size, opts.pps, i === 0);
-        total += q.total; pages += p * opts.copies; sheets += q.sheets;
+        const q = tprintCost(p, f.color, f.doubleside, f.copies, opts.paper_size, opts.pps, i === 0);
+        total += q.total; pages += p * f.copies; sheets += q.sheets;
       });
       return { total, pages, sheets, unknown };
     }
     function renderSummary() {
       $$(".opt").forEach(b => {
         const key = b.dataset.opt, v = b.dataset.val;
-        const on = key === "paper_size" ? opts.paper_size === v : String(Number(opts[key])) === v;
+        const on = key === "paper_size" ? opts.paper_size === v
+          : files.length ? files.every(f => String(Number(f[key])) === v) : String(Number(opts[key])) === v;
         b.classList.toggle("opt-on", on); b.setAttribute("aria-pressed", String(on));
       });
-      $("#copies-count").textContent = String(opts.copies);
+      $("#copies-count").textContent = files.length && files.some(f => f.copies !== files[0].copies) ? t("mixed") : String(files.length ? files[0].copies : opts.copies);
       const e = estimate();
       $("#stat-pages").textContent = files.length ? e.pages + (e.unknown ? "+" : "") + " " + t("pgs") : "—";
       $("#stat-sheets").textContent = files.length ? e.sheets + (e.unknown ? "+" : "") + " " + opts.paper_size : "—";
@@ -822,7 +870,7 @@
       const e = estimate(), fd = new FormData();
       fd.append("name", name); fd.append("phone", phone); fd.append("notes", $("#notes").value.trim());
       if (!e.unknown) fd.append("est_total", String(e.total));
-      fd.append("options", JSON.stringify(files.map(f => ({ color: opts.color, doubleside: opts.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: opts.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages }))));
+      fd.append("options", JSON.stringify(files.map(f => ({ color: f.color, doubleside: f.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: f.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages }))));
       files.forEach(f => fd.append("files[]", f.file, f.name));
 
       const btn = $("#send-btn"), bar = $("#progress");
@@ -1011,6 +1059,13 @@
       }
       $("#rw-next").textContent = bits.join(" · ");
       $("#rw-next").hidden = !bits.length;
+      const hist = (r && r.history) || [];
+      $("#rw-hist-wrap").hidden = !hist.length;
+      const day = iso => new Date(iso).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", { day: "numeric", month: "short" });
+      $("#rw-hist").replaceChildren(...hist.map(h => el("li", { class: "flex items-baseline justify-between gap-2" },
+        el("span", { class: "min-w-0 truncate text-zinc-300", text: day(h.at) + " · " + (h.kind === "credit" ? t("rwCredit", { code: h.code || "", amt: h.amount }) : t("rwUsed")) }),
+        el("span", { class: "shrink-0 " + (h.points > 0 ? "text-emerald-300" : h.points < 0 ? "text-red-300" : "text-zinc-500"), text: (h.points > 0 ? "+" : h.points < 0 ? "−" : "") + rupee(Math.abs(h.points)) }),
+        el("span", { class: "shrink-0 text-[10px] text-zinc-600", title: "Receipt", text: "#" + h.receipt.slice(0, 6) }))));
     }
 
     /* ============ rates ============ */
@@ -1043,10 +1098,13 @@
     input.addEventListener("change", () => { addFiles([...input.files]); input.value = ""; });
 
     $$(".opt").forEach(b => b.addEventListener("click", () => {
-      const k = b.dataset.opt; opts[k] = k === "paper_size" ? b.dataset.val : b.dataset.val === "1"; renderSummary();
+      const k = b.dataset.opt; opts[k] = k === "paper_size" ? b.dataset.val : b.dataset.val === "1";
+      if (k !== "paper_size") files.forEach(f => { f[k] = opts[k]; });
+      renderFiles();
     }));
-    $("#copies-minus").addEventListener("click", () => { if (opts.copies > 1) { opts.copies--; renderSummary(); } });
-    $("#copies-plus").addEventListener("click", () => { if (opts.copies < 500) { opts.copies++; renderSummary(); } });
+    const allCopies = d => () => { opts.copies = Math.max(1, Math.min(500, opts.copies + d)); files.forEach(f => { f.copies = opts.copies; }); renderFiles(); };
+    $("#copies-minus").addEventListener("click", allCopies(-1));
+    $("#copies-plus").addEventListener("click", allCopies(1));
     $("#pps").addEventListener("change", e => { opts.pps = +e.target.value; renderSummary(); });
     $("#send-btn").addEventListener("click", send);
     { const me = loadMe(); if (me) { $("#phone").value = me.phone; if (me.name) $("#name").value = me.name; } }
@@ -1055,6 +1113,20 @@
       try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
       applyLang();
     });
+
+    // Background follows the scroll (--sy: pixels, --sp: 0..1 of the page); sections rise in once.
+    const root = document.documentElement, still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!still) {
+      let ticking = false;
+      const onScroll = () => { if (ticking) return; ticking = true; requestAnimationFrame(() => {
+        const y = window.scrollY, h = Math.max(1, root.scrollHeight - innerHeight);
+        root.style.setProperty("--sy", y.toFixed(1)); root.style.setProperty("--sp", (y / h).toFixed(3)); ticking = false; }); };
+      addEventListener("scroll", onScroll, { passive: true }); onScroll();
+    }
+    if ("IntersectionObserver" in window && !still) {
+      const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.08 });
+      $$(".reveal").forEach(n => io.observe(n));
+    } else $$(".reveal").forEach(n => n.classList.add("in"));
 
     applyLang();
     refreshOrders(); checkServer();

@@ -25,5 +25,8 @@ if (!$order || !hash_equals($order['token_hash'], hash('sha256', $token))) {
 }
 
 $out = public_order($order, order_files((int)$order['id']));
-$out['rewards'] = rewards_for($order['phone']) + ['order_reward' => order_reward((int)$order['id'])];
+$out['rewards'] = rewards_for($order['phone']) + [
+    'order_reward' => order_reward((int)$order['id']),
+    'history' => array_map(fn($e) => array_diff_key($e, ['note' => 1]), ledger_for($order['phone'], 10)),
+];
 send_json(200, $out);
