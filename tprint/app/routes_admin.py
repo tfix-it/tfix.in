@@ -199,29 +199,47 @@ async def admin_run_cleanup_now():
     return {"ok": True}
 
 
-@router.post(
-    "/api/admin/cloud/reset-pin",
-    dependencies=[Depends(require_admin), Depends(check_login_rate_limit)],
-)
-async def admin_reset_customer_pin(phone: str = Form(...)):
-    """Forgotten CLUTCHPRINT PIN: ask print.tfix.in for a new temporary 4-digit
-    PIN for this mobile number, for staff to tell the customer at the counter."""
-    import asyncio
+def _cloud_client():
     from . import cloud_sync
 
     if not cloud_sync.is_configured():
         raise HTTPException(status_code=400, detail="Online orders are not set up on this PC (PRINTSHOP_CLOUD_URL / TOKEN).")
-    client = cloud_sync.CloudClient(cloud_sync.cloud_url(), cloud_sync.cloud_token(), timeout=20)
+    return cloud_sync, cloud_sync.CloudClient(cloud_sync.cloud_url(), cloud_sync.cloud_token(), timeout=20)
+
+
+def _cloud_error(e) -> HTTPException:
+    msg = str(e)
+    if "HTTP 400" in msg:
+        return HTTPException(status_code=400, detail="Not a valid 10-digit mobile number or amount.")
+    if "HTTP 409" in msg:
+        return HTTPException(status_code=409, detail="Not enough rewards for this number.")
+    return HTTPException(status_code=502, detail=f"Could not reach print.tfix.in: {msg}")
+
+
+@router.get("/api/admin/cloud/rewards", dependencies=[Depends(require_admin)])
+async def admin_customer_rewards(phone: str):
+    """CLUTCH Rewards of an online customer (mobile number): ₹5 per ₹100 of collected prints."""
+    import asyncio
+
+    cloud_sync, client = _cloud_client()
     try:
-        result = await asyncio.to_thread(client.reset_pin, phone.strip())
+        return await asyncio.to_thread(client.rewards, phone.strip())
     except cloud_sync.CloudError as e:
-        msg = str(e)
-        if "HTTP 404" in msg:
-            raise HTTPException(status_code=404, detail="No CLUTCHPRINT account for this mobile number.")
-        if "HTTP 400" in msg:
-            raise HTTPException(status_code=400, detail="Not a valid 10-digit mobile number.")
-        raise HTTPException(status_code=502, detail=f"Could not reach print.tfix.in: {msg}")
-    return {"phone": result.get("phone"), "pin": result.get("pin")}
+        raise _cloud_error(e)
+
+
+@router.post("/api/admin/cloud/redeem", dependencies=[Depends(require_admin)])
+async def admin_redeem_rewards(phone: str = Form(...), amount: float = Form(...), note: str = Form("")):
+    """Use a customer's CLUTCH Rewards at the counter (take this much off their bill)."""
+    import asyncio
+
+    if amount <= 0 or amount > 100000:
+        raise HTTPException(status_code=400, detail="Enter an amount in rupees.")
+    cloud_sync, client = _cloud_client()
+    try:
+        return await asyncio.to_thread(client.redeem, phone.strip(), round(amount, 2), note.strip()[:100])
+    except cloud_sync.CloudError as e:
+        raise _cloud_error(e)
 
 
 @router.websocket("/ws/admin")

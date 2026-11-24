@@ -1,6 +1,7 @@
 <?php
 /**
- * GET /api/status.php?code=TPXXXXXX&t=TOKEN — a customer checks their order.
+ * GET /api/status.php?code=CP-105&t=TOKEN — a customer checks their order
+ * (and the CLUTCH Rewards of the mobile number on it).
  * Both the code and the secret token from the order confirmation are needed,
  * so order codes can't be guessed to look up other people's orders.
  */
@@ -23,4 +24,6 @@ if (!$order || !hash_equals($order['token_hash'], hash('sha256', $token))) {
     fail(404, 'Order not found.');
 }
 
-send_json(200, public_order($order, order_files((int)$order['id'])));
+$out = public_order($order, order_files((int)$order['id']));
+$out['rewards'] = rewards_for($order['phone']) + ['order_reward' => order_reward((int)$order['id'])];
+send_json(200, $out);

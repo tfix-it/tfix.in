@@ -40,3 +40,13 @@
   (Reset PIN). Security: file names and customer names are now HTML-escaped in the job table —
   online orders come from the internet, and an unescaped name could have run script in the admin page.
 - tests: account, lockout, session, PIN reset, change PIN, escaping (45 tests).
+
+# CLUTCH Rewards replace PINs
+- No PIN or sign-in. The mobile number (mandatory) is the customer's CLUTCH Rewards ID.
+- Rewards: ₹5 for every ₹100 of online prints (cumulative), credited once per order when it is
+  collected; the website's status shows the balance and what each order added.
+- app/cloud_sync.py: status push now includes each job's final cost (staff price corrections
+  count); CloudClient.rewards() / redeem() replace reset_pin().
+- app/routes_admin.py: GET /api/admin/cloud/rewards, POST /api/admin/cloud/redeem (admin only);
+  the reset-pin endpoint is gone.
+- static/admin/index.html: CLUTCH Rewards panel (check balance + history, use rewards).

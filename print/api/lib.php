@@ -22,10 +22,9 @@ const ORDERS_PER_IP_PER_HOUR = 6;
 const ALLOWED_PPS = [1, 2, 4, 6, 9, 16];
 const ORDER_STATUSES = ['pending', 'received', 'paid', 'printing', 'ready', 'collected', 'cancelled'];
 const JOB_STATUSES = ['queued', 'printing', 'ready', 'collected', 'failed'];
-const PIN_MAX_TRIES = 5;              // wrong PINs per mobile before a lock
-const PIN_LOCK_MINUTES = 15;
-const PIN_FAILS_PER_IP_PER_HOUR = 20; // wrong PINs per device/network per hour
-const SESSION_DAYS = 60;
+// CLUTCH Rewards: every ₹100 of collected (paid) online prints earns ₹5, per mobile number.
+const REWARD_STEP = 100;
+const REWARD_PER_STEP = 5;
 
 function cfg(): array
 {
@@ -68,7 +67,7 @@ function db(): PDO
 
 function ensure_schema(PDO $pdo): void
 {
-    $flag = data_dir() . '/.schema-v2';
+    $flag = data_dir() . '/.schema-v3';
     if (is_file($flag)) {
         return;
     }
@@ -113,27 +112,30 @@ function ensure_schema(PDO $pdo): void
         error VARCHAR(200) NULL,
         file_deleted TINYINT NOT NULL DEFAULT 0
     )$tail");
-    // v2: CLUTCHPRINT customer accounts — mobile number = username, 4-digit PIN = password.
-    $pdo->exec("CREATE TABLE IF NOT EXISTS customers (
-        phone VARCHAR(15) NOT NULL PRIMARY KEY,
-        name VARCHAR(60) NOT NULL DEFAULT '',
-        pin_hash VARCHAR(255) NOT NULL,
-        failed_attempts INT NOT NULL DEFAULT 0,
-        locked_until DATETIME NULL,
-        created_at DATETIME NOT NULL,
-        updated_at DATETIME NOT NULL
-    )$tail");
-    $pdo->exec("CREATE TABLE IF NOT EXISTS client_sessions (
-        token_hash CHAR(64) NOT NULL PRIMARY KEY,
+    // v3: CLUTCH Rewards ledger. The mobile number is the customer's rewards ID.
+    // One credit per collected order (order_id is the key, so it is never counted twice).
+    $pdo->exec("CREATE TABLE IF NOT EXISTS reward_credits (
+        order_id INT NOT NULL PRIMARY KEY,
         phone VARCHAR(15) NOT NULL,
-        created_at DATETIME NOT NULL,
-        expires_at DATETIME NOT NULL
-    )$tail");
-    $pdo->exec("CREATE TABLE IF NOT EXISTS login_failures (
-        id $pk,
-        ip VARCHAR(45) NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        reward DECIMAL(10,2) NOT NULL,
         created_at DATETIME NOT NULL
     )$tail");
+    // Rewards used at the counter (entered by staff in T Print admin).
+    $pdo->exec("CREATE TABLE IF NOT EXISTS reward_redemptions (
+        id $pk,
+        phone VARCHAR(15) NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        note VARCHAR(100) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL
+    )$tail");
+    foreach (['CREATE INDEX idx_credit_phone ON reward_credits (phone)', 'CREATE INDEX idx_redeem_phone ON reward_redemptions (phone)'] as $sql) {
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // already there
+        }
+    }
     $pdo->exec("CREATE TABLE IF NOT EXISTS rate_events (
         id $pk,
         ip VARCHAR(45) NOT NULL,
@@ -281,85 +283,87 @@ function delete_stored_file(array $f): void
 }
 
 
-/* ---------------- CLUTCHPRINT customer accounts ---------------- */
+/* ---------------- CLUTCH Rewards (mobile number = rewards ID, no password) ---------------- */
 
-function valid_pin(string $pin): bool
+/** ₹5 for every full ₹100 of total spend. */
+function rewards_earned_for(float $spent): float
 {
-    return preg_match('/^\d{4}$/', $pin) === 1;
+    return floor(round($spent, 2) / REWARD_STEP + 1e-9) * REWARD_PER_STEP;
 }
 
-function find_customer(string $phone): ?array
+function rewards_for(string $phone): array
 {
-    $st = db()->prepare('SELECT * FROM customers WHERE phone = ?');
+    $pdo = db();
+    $st = $pdo->prepare('SELECT COALESCE(SUM(amount), 0), COALESCE(SUM(reward), 0) FROM reward_credits WHERE phone = ?');
     $st->execute([$phone]);
-    $c = $st->fetch();
-    return $c ?: null;
+    [$spent, $earned] = array_map('floatval', $st->fetch(PDO::FETCH_NUM));
+    $st = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM reward_redemptions WHERE phone = ?');
+    $st->execute([$phone]);
+    $redeemed = (float)$st->fetchColumn();
+    $into = fmod(round($spent, 2), REWARD_STEP);
+    return [
+        'phone' => masked_phone($phone),
+        'spent' => round($spent, 2),
+        'earned' => round($earned, 2),
+        'redeemed' => round($redeemed, 2),
+        'balance' => round(max(0, $earned - $redeemed), 2),
+        'step' => REWARD_STEP,
+        'per_step' => REWARD_PER_STEP,
+        'next_in' => round(REWARD_STEP - $into, 2),
+    ];
+}
+
+/** Reward added by one order (0 until it is collected). */
+function order_reward(int $orderId): float
+{
+    $st = db()->prepare('SELECT reward FROM reward_credits WHERE order_id = ?');
+    $st->execute([$orderId]);
+    $r = $st->fetchColumn();
+    return $r === false ? 0.0 : (float)$r;
 }
 
 /**
- * Check a mobile + PIN. A mobile number seen for the first time gets this PIN
- * (account created). Wrong PINs count towards a per-mobile lock and a per-IP
- * limit. Calls fail() with a customer-facing message when the PIN is not accepted.
- * Returns true when a new account was created.
+ * Credit a collected order's paid print cost to the customer's rewards.
+ * Safe to call repeatedly: each order is credited once.
  */
-function require_pin(string $phone, string $pin, string $name = ''): bool
+function credit_order(int $orderId): void
 {
     $pdo = db();
-    $ip = client_ip();
-    $pdo->prepare('DELETE FROM login_failures WHERE created_at < ?')->execute([gmdate('Y-m-d H:i:s', time() - 3600)]);
-    $st = $pdo->prepare('SELECT COUNT(*) FROM login_failures WHERE ip = ?');
-    $st->execute([$ip]);
-    if ((int)$st->fetchColumn() >= PIN_FAILS_PER_IP_PER_HOUR) {
-        fail(429, 'Too many wrong PINs from this device. Please try again later or ask at the T FIX® counter.');
+    $st = $pdo->prepare('SELECT * FROM orders WHERE id = ?');
+    $st->execute([$orderId]);
+    $o = $st->fetch();
+    if (!$o || $o['status'] !== 'collected') {
+        return;
     }
-    if (!valid_pin($pin)) {
-        fail(400, 'Enter your 4-digit CLUTCHPRINT PIN.');
+    $amount = 0.0;
+    foreach (order_files($orderId) as $f) {
+        if ((int)$f['paid'] === 1 && $f['error'] === null && $f['cost'] !== null) {
+            $amount += (float)$f['cost'];
+        }
     }
-
-    $c = find_customer($phone);
-    if ($c === null) {
-        $pdo->prepare('INSERT INTO customers (phone, name, pin_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
-            ->execute([$phone, $name, password_hash($pin, PASSWORD_DEFAULT), now(), now()]);
-        return true;
+    $amount = round($amount, 2);
+    if ($amount <= 0) {
+        return;
     }
-    if ($c['locked_until'] !== null && $c['locked_until'] > now()) {
-        fail(429, 'Too many wrong PINs for this mobile number. Try again in ' . PIN_LOCK_MINUTES . ' minutes, or ask at the T FIX® counter to reset your PIN.');
+    $pdo->beginTransaction();
+    try {
+        $chk = $pdo->prepare('SELECT 1 FROM reward_credits WHERE order_id = ?');
+        $chk->execute([$orderId]);
+        if (!$chk->fetchColumn()) {
+            $sum = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM reward_credits WHERE phone = ?');
+            $sum->execute([$o['phone']]);
+            $before = (float)$sum->fetchColumn();
+            $reward = rewards_earned_for($before + $amount) - rewards_earned_for($before);
+            $pdo->prepare('INSERT INTO reward_credits (order_id, phone, amount, reward, created_at) VALUES (?, ?, ?, ?, ?)')
+                ->execute([$orderId, $o['phone'], $amount, $reward, now()]);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[tprint rewards] ' . $e->getMessage());
     }
-    if (!password_verify($pin, $c['pin_hash'])) {
-        $tries = (int)$c['failed_attempts'] + 1;
-        $locked = $tries >= PIN_MAX_TRIES ? gmdate('Y-m-d H:i:s', time() + PIN_LOCK_MINUTES * 60) : null;
-        $pdo->prepare('UPDATE customers SET failed_attempts = ?, locked_until = ?, updated_at = ? WHERE phone = ?')
-            ->execute([$locked ? 0 : $tries, $locked, now(), $phone]);
-        $pdo->prepare('INSERT INTO login_failures (ip, created_at) VALUES (?, ?)')->execute([$ip, now()]);
-        usleep(400000);
-        fail(401, 'Wrong PIN for this mobile number. Forgot it? Ask at the T FIX® counter to reset it.');
-    }
-    $pdo->prepare('UPDATE customers SET failed_attempts = 0, locked_until = NULL, name = CASE WHEN ? <> \'\' THEN ? ELSE name END, updated_at = ? WHERE phone = ?')
-        ->execute([$name, $name, now(), $phone]);
-    return false;
-}
-
-function create_session(string $phone): string
-{
-    $token = bin2hex(random_bytes(24));
-    $pdo = db();
-    $pdo->prepare('DELETE FROM client_sessions WHERE expires_at < ?')->execute([now()]);
-    $pdo->prepare('INSERT INTO client_sessions (token_hash, phone, created_at, expires_at) VALUES (?, ?, ?, ?)')
-        ->execute([hash('sha256', $token), $phone, now(), gmdate('Y-m-d H:i:s', time() + SESSION_DAYS * 86400)]);
-    return $token;
-}
-
-/** The signed-in customer's mobile number (header X-Client-Session), or null. */
-function session_phone(): ?string
-{
-    $token = (string)($_SERVER['HTTP_X_CLIENT_SESSION'] ?? '');
-    if (!preg_match('/^[a-f0-9]{48}$/', $token)) {
-        return null;
-    }
-    $st = db()->prepare('SELECT phone FROM client_sessions WHERE token_hash = ? AND expires_at > ?');
-    $st->execute([hash('sha256', $token), now()]);
-    $phone = $st->fetchColumn();
-    return $phone === false ? null : (string)$phone;
 }
 
 function masked_phone(string $phone): string

@@ -189,13 +189,17 @@ So the server also comes back after a power cut or a Windows update restart:
 - BIOS/UEFI of the PC: set "Restore on AC power loss" / "AC Power Recovery" to
   **Power On**, so the PC switches itself back on after a power cut.
 
-## 9. CLUTCHPRINT online customers: #CP tokens and PINs
+## 9. CLUTCHPRINT online customers: #CP tokens and CLUTCH Rewards
 
 Online orders from print.tfix.in arrive in /admin with an **ONLINE #CP-105** label. Type the token
 (e.g. `CP-105`) or the customer's mobile number in the search box to find the job at the counter.
 
-Online customers use their **mobile number as username and a 4-digit PIN** (set on their first
-online order) to see all their tokens on print.tfix.in. If a customer forgets the PIN, open
-**Online customers (CLUTCHPRINT)** in /admin, enter their mobile number and press **Reset PIN**:
-a new temporary PIN is shown once — tell it to the customer in person. This needs the online-order
-settings from section 7 (tprint.env) on this PC.
+**CLUTCH Rewards** (online customers only, no PIN or password): the mobile number on the order is
+the customer's rewards ID. Every **₹100 of prints earns ₹5**, counted on everything they have
+printed online. Rewards are added when the order is **collected** (paid + collected in /admin), and
+the customer sees the balance on their pickup pass on print.tfix.in.
+
+To use rewards at the counter: open **CLUTCH Rewards** in /admin, enter the mobile number, press
+**Check rewards**, take the amount off the bill, then enter it and press **Use rewards**. Do this
+only for the customer who is collecting an online order on that number. This needs the
+online-order settings from section 7 (tprint.env) on this PC.

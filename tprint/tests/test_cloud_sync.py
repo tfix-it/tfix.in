@@ -83,9 +83,9 @@ def pdf(tmp_path, pages, name='doc.pdf'):
     return p
 
 
-def place_order(site, files, phone='9876543210', pin='1234', expect=201):
+def place_order(site, files, phone='9876543210', expect=201):
     r = httpx.post(site.base + '/order.php', data={
-        'name': 'Anu', 'phone': phone, 'pin': pin, 'notes': 'cover in colour',
+        'name': 'Anu', 'phone': phone, 'notes': 'cover in colour',
         'options': json.dumps([o for _, o in files]),
     }, files=[('files[]', (p.name, p.read_bytes(), 'application/pdf')) for p, _ in files])
     assert r.status_code == expect, r.text
@@ -146,8 +146,12 @@ def test_order_while_closed_then_import_pay_print(site, tmp_path):
     for j in (a, b):
         db.update_job(j['id'], status='collected')
     assert cloud_sync.push_statuses(client(site)) == 1
-    assert status(site, order)['status'] == 'collected'
+    done = status(site, order)
+    assert done['status'] == 'collected'
     assert cloud_sync.push_statuses(client(site)) == 0    # finished orders aren't re-sent
+    # CLUTCH Rewards: ₹54 of prints so far -> no ₹5 yet, ₹46 to go
+    assert done['rewards'] == {'phone': '98******10', 'spent': 54, 'earned': 0, 'redeemed': 0, 'balance': 0,
+                               'step': 100, 'per_step': 5, 'next_in': 46, 'order_reward': 0}
 
 
 def test_sync_is_idempotent(site, tmp_path):
@@ -195,10 +199,10 @@ def test_website_down_changes_nothing(tmp_path):
 def test_order_validation(site, tmp_path):
     fake = tmp_path / 'fake.pdf'
     fake.write_bytes(b'hello')
-    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '9876543210', 'pin': '1234', 'options': json.dumps([BW])},
+    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '9876543210', 'options': json.dumps([BW])},
                    files=[('files[]', ('fake.pdf', fake.read_bytes(), 'application/pdf'))])
     assert r.status_code == 400
-    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '123', 'pin': '1234', 'options': json.dumps([BW])},
+    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '123', 'options': json.dumps([BW])},
                    files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
     assert r.status_code == 400
     order = place_order(site, [(pdf(tmp_path, 1), BW)])
@@ -233,95 +237,87 @@ def test_server_status_heartbeat(site, tmp_path):
     assert server()['online'] is False
 
 
-# ---------------- CLUTCHPRINT accounts: mobile number = username, 4-digit PIN ----------------
-def login(site, phone, pin):
-    return httpx.post(site.base + '/account.php?action=login', data={'phone': phone, 'pin': pin})
+# ---------------- CLUTCH Rewards: mobile number = rewards ID, ₹5 per ₹100 ----------------
+def collect(site, order, costs, pay=True):
+    """Shop PC 1 imports the order, staff set the final prices, mark paid and collected."""
+    jobs = cloud_sync.sync_once(client(site))
+    assert len(jobs) == len(costs)
+    for j, cost in zip(jobs, costs):
+        db.update_job(j['id'], cost=cost)                 # staff price correction must count
+        if pay:
+            print_service.confirm_payment(j['id'], True)
+        db.update_job(j['id'], status='collected' if pay else 'ready')
+    cloud_sync.push_statuses(client(site))
+    return status(site, order)
 
 
-def my_orders(site, session):
-    return httpx.get(site.base + '/account.php?action=orders', headers={'X-Client-Session': session or ''})
+def test_no_pin_or_sign_in(site, tmp_path):
+    assert not (SITE / 'api' / 'account.php').exists()
+    a = place_order(site, [(pdf(tmp_path, 1), BW)])
+    b = place_order(site, [(pdf(tmp_path, 1), BW)])        # same number again: no PIN asked
+    assert set(a) == {'code', 'token', 'status'} and a['code'] != b['code']
+    place_order(site, [(pdf(tmp_path, 1), BW)], phone='', expect=400)   # mobile number is mandatory
 
 
-def test_first_order_creates_account_later_orders_need_the_pin(site, tmp_path):
-    first = place_order(site, [(pdf(tmp_path, 1), BW)], pin='4321')
-    assert first['new_account'] is True and len(first['session']) == 48
-    place_order(site, [(pdf(tmp_path, 1), BW)], pin='0000', expect=401)     # someone else, wrong PIN
-    place_order(site, [(pdf(tmp_path, 1), BW)], pin='12a4', expect=400)     # not 4 digits
-    again = place_order(site, [(pdf(tmp_path, 1), BW)], pin='4321')
-    assert again['new_account'] is False
-    assert again['code'] != first['code']
+def test_rewards_5_for_every_100(site, tmp_path):
+    o1 = place_order(site, [(pdf(tmp_path, 1), BW)])
+    r = collect(site, o1, [60])['rewards']
+    assert (r['spent'], r['earned'], r['balance'], r['next_in'], r['order_reward']) == (60, 0, 0, 40, 0)
+
+    o2 = place_order(site, [(pdf(tmp_path, 1), BW)], phone='+91 98765 43210')   # same customer
+    r = collect(site, o2, [40])['rewards']
+    assert (r['spent'], r['earned'], r['balance'], r['next_in'], r['order_reward']) == (100, 5, 5, 100, 5)
+
+    o3 = place_order(site, [(pdf(tmp_path, 1), BW), (pdf(tmp_path, 2, 'b.pdf'), BW)])
+    r = collect(site, o3, [150, 100])['rewards']
+    assert (r['spent'], r['earned'], r['balance'], r['order_reward']) == (350, 15, 15, 10)
+    assert status(site, o3)['confirmed_total'] == 250
+
+    # credited once: re-pushing (or the website hearing "collected" again) adds nothing
+    with db.get_conn() as conn:
+        conn.execute('UPDATE cloud_orders SET done=0, last_pushed=NULL')
+    cloud_sync.push_statuses(client(site))
+    assert status(site, o1)['rewards']['earned'] == 15
+
+    # another number has its own rewards; an order that isn't collected earns nothing yet
+    other = place_order(site, [(pdf(tmp_path, 1), BW)], phone='9123456789')
+    s = collect(site, other, [500], pay=False)
+    assert s['status'] == 'ready' and s['rewards']['earned'] == 0 and s['rewards']['phone'] == '91******89'
 
 
-def test_sign_in_lists_only_my_tokens(site, tmp_path):
-    a = place_order(site, [(pdf(tmp_path, 1), BW)], phone='9876543210', pin='1111')
-    b = place_order(site, [(pdf(tmp_path, 2), BW)], phone='9876543210', pin='1111')
-    place_order(site, [(pdf(tmp_path, 1), BW)], phone='9123456789', pin='2222')   # another customer
-    assert login(site, '9000000000', '1111').status_code == 404                  # never ordered
-    assert login(site, '9876543210', '9999').status_code == 401
-    r = login(site, '+91 98765 43210', '1111')
-    assert r.status_code == 200 and r.json()['phone'] == '98******10'
-    body = my_orders(site, r.json()['session']).json()
-    assert [o['code'] for o in body['orders']] == [b['code'], a['code']]        # newest first
-    assert all('phone' not in o for o in body['orders'])
-    assert my_orders(site, None).status_code == 401
-    assert my_orders(site, 'f' * 48).status_code == 401
-    httpx.post(site.base + '/account.php?action=logout', headers={'X-Client-Session': r.json()['session']})
-    assert my_orders(site, r.json()['session']).status_code == 401              # signed out
-
-
-def test_wrong_pins_lock_the_number(site, tmp_path):
-    place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')
-    for _ in range(5):
-        assert login(site, '9876543210', '0000').status_code == 401
-    assert login(site, '9876543210', '1111').status_code == 429                 # locked, even with the right PIN
-
-
-def test_staff_reset_pin_via_t_print(site, tmp_path, monkeypatch):
-    first = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')
-    res = client(site).reset_pin('9876543210')
-    new_pin = res['pin']
-    assert len(new_pin) == 4 and new_pin.isdigit()
-    if new_pin != '1111':
-        assert login(site, '9876543210', '1111').status_code == 401
-    assert my_orders(site, first['session']).status_code == 401                 # old sessions signed out
-    assert login(site, '9876543210', new_pin).status_code == 200
-    with pytest.raises(cloud_sync.CloudError, match='404'):
-        client(site).reset_pin('9123456789')                                    # no account
+def test_use_rewards_at_the_counter(site, tmp_path, monkeypatch):
+    collect(site, place_order(site, [(pdf(tmp_path, 1), BW)]), [210])
+    c = client(site)
+    info = c.rewards('98765 43210')
+    assert info['phone'] == '9876543210' and info['name'] == 'Anu' and info['balance'] == 10
+    assert info['credits'][0]['code'].startswith('CP-') and info['credits'][0]['reward'] == 10
+    with pytest.raises(cloud_sync.CloudError, match='409'):
+        c.redeem('9876543210', 15)                         # more than available
+    with pytest.raises(cloud_sync.CloudError, match='400'):
+        c.redeem('9876543210', -5)
     with pytest.raises(cloud_sync.CloudError, match='401'):
-        client(site, token='x' * 40).reset_pin('9876543210')                    # wrong shop key
+        client(site, token='x' * 40).redeem('9876543210', 5)
+    assert c.redeem('9876543210', 5, 'CP-102')['balance'] == 5
+    info = c.rewards('9876543210')
+    assert (info['earned'], info['redeemed'], info['balance']) == (10, 5, 5)
+    assert info['redemptions'][0] == {'amount': 5, 'note': 'CP-102', 'at': info['redemptions'][0]['at']}
+    assert c.rewards('9000000000')['balance'] == 0          # never ordered
 
-    # the T Print admin route does the same through cloud_sync
+    # the T Print admin routes do the same through cloud_sync
     import asyncio
-    from app.routes_admin import admin_reset_customer_pin
+    from fastapi import HTTPException
+    from app.routes_admin import admin_customer_rewards, admin_redeem_rewards
     monkeypatch.setenv('PRINTSHOP_CLOUD_URL', site.base + '/shop.php')
     monkeypatch.setenv('PRINTSHOP_CLOUD_TOKEN', TOKEN)
     for name in ('CLOUD_URL', 'CLOUD_TOKEN'):
         monkeypatch.delattr(config, name, raising=False)
-    out = asyncio.run(admin_reset_customer_pin('98765 43210'))
-    assert out['phone'] == '9876543210' and login(site, '9876543210', out['pin']).status_code == 200
-
-
-def test_change_pin(site, tmp_path):
-    s = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')['session']
-    h = {'X-Client-Session': s}
-    assert httpx.post(site.base + '/account.php?action=change_pin', headers=h, data={'pin': '0000', 'new_pin': '2468'}).status_code == 401
-    assert httpx.post(site.base + '/account.php?action=change_pin', headers=h, data={'pin': '1111', 'new_pin': '2468'}).status_code == 200
-    assert login(site, '9876543210', '2468').status_code == 200
+    assert asyncio.run(admin_customer_rewards('9876543210'))['balance'] == 5
+    assert asyncio.run(admin_redeem_rewards('9876543210', 5, ''))['balance'] == 0
+    with pytest.raises(HTTPException) as e:
+        asyncio.run(admin_redeem_rewards('9876543210', 5, ''))
+    assert e.value.status_code == 409
 
 
 def test_online_job_label_is_html_escaped_in_admin():
     admin = (Path(__file__).resolve().parents[1] / 'static' / 'admin' / 'index.html').read_text()
     assert '${esc(job.original_filename)}' in admin and '${esc(truncate(job.original_filename, 16))}' in admin
-
-
-def test_signed_in_customer_orders_without_pin(site, tmp_path):
-    s = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')['session']
-    r = httpx.post(site.base + '/order.php', headers={'X-Client-Session': s},
-                   data={'name': 'Anu', 'phone': '9876543210', 'options': json.dumps([BW])},
-                   files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
-    assert r.status_code == 201, r.text
-    # the session only covers its own mobile number
-    r = httpx.post(site.base + '/order.php', headers={'X-Client-Session': s},
-                   data={'name': 'X', 'phone': '9123456789', 'options': json.dumps([BW])},
-                   files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
-    assert r.status_code == 400

@@ -134,13 +134,18 @@
 
     <div style="display:grid; gap:24px; align-content:start;">
       <section class="panel">
-        <h2>Online customers (CLUTCHPRINT)</h2>
-        <p style="font-size:12px; color:#666; margin:0 0 10px;">Online customers sign in on print.tfix.in with their mobile number and a 4-digit PIN. If they forget it, enter their number to give them a new temporary PIN (they can change it after signing in).</p>
+        <h2>CLUTCH Rewards (online customers)</h2>
+        <p style="font-size:12px; color:#666; margin:0 0 10px;">Online customers earn ₹5 for every ₹100 of prints, added when their #CP order is collected. Their mobile number is their rewards ID (no password). To use rewards, take the amount off the bill and press Use rewards. Only do this for the customer in front of you collecting an order on that number.</p>
         <div class="settings-form">
-          <div class="full"><label>Customer mobile number</label><input type="tel" id="pinPhone" inputmode="numeric" maxlength="16" placeholder="10-digit mobile"></div>
-          <div class="actions"><button id="pinResetBtn">Reset PIN</button></div>
+          <div class="full"><label>Customer mobile number</label><input type="tel" id="rwPhone" inputmode="numeric" maxlength="16" placeholder="10-digit mobile"></div>
+          <div class="actions"><button id="rwCheckBtn">Check rewards</button></div>
         </div>
-        <div id="pinResult" style="display:none; margin-top:10px; font-size:14px;"></div>
+        <div id="rwResult" style="display:none; margin-top:10px; font-size:14px;"></div>
+        <div id="rwUse" class="settings-form" style="display:none; margin-top:10px;">
+          <div><label>Use (₹)</label><input type="number" id="rwAmount" min="1" step="1" placeholder="e.g. 5"></div>
+          <div><label>Note</label><input type="text" id="rwNote" maxlength="100" placeholder="e.g. CP-105"></div>
+          <div class="actions"><button id="rwUseBtn">Use rewards</button></div>
+        </div>
       </section>
 
       <section class="panel">
@@ -425,22 +430,41 @@ function truncate(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, 
 // File names and customer names come from the internet (online orders): always escape.
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-// ---------- online customers: reset CLUTCHPRINT PIN ----------
-el('pinResetBtn').addEventListener('click', async () => {
-  const phone = el('pinPhone').value.trim(), out = el('pinResult');
+// ---------- CLUTCH Rewards: check / use at the counter ----------
+const inr = n => '₹' + (Math.round(Number(n) * 100) / 100);
+async function rwCheck() {
+  const phone = el('rwPhone').value.trim(), out = el('rwResult');
   if (!phone) return;
-  if (!confirm('Give ' + phone + ' a new temporary PIN? Their old PIN stops working and they are signed out everywhere.')) return;
-  el('pinResetBtn').disabled = true;
-  const fd = new FormData(); fd.append('phone', phone);
+  el('rwCheckBtn').disabled = true;
   try {
-    const res = await fetch('/api/admin/cloud/reset-pin', { method: 'POST', body: fd, credentials: 'include' });
-    const data = await res.json().catch(() => ({}));
+    const res = await fetch('/api/admin/cloud/rewards?phone=' + encodeURIComponent(phone), { credentials: 'include' });
+    const d = await res.json().catch(() => ({}));
     out.style.display = 'block';
     out.style.color = res.ok ? '' : 'var(--red, #c0392b)';
-    out.innerHTML = res.ok
-      ? 'New PIN for <b>' + esc(data.phone) + '</b>: <b style="font-size:20px; letter-spacing:3px;">' + esc(data.pin) + '</b><br><span style="color:#666; font-size:12px;">Tell the customer in person. It is not shown again.</span>'
-      : esc(data.detail || 'Could not reset the PIN.');
-  } finally { el('pinResetBtn').disabled = false; }
+    el('rwUse').style.display = res.ok && d.balance > 0 ? '' : 'none';
+    if (!res.ok) { out.innerHTML = esc(d.detail || 'Could not check rewards.'); return; }
+    const hist = (d.credits || []).slice(0, 5).map(c => '<li>' + esc(c.code || '') + ' · ' + inr(c.amount) + ' prints → <b>+' + inr(c.reward) + '</b></li>')
+      .concat((d.redemptions || []).slice(0, 5).map(r => '<li>Used <b>−' + inr(r.amount) + '</b>' + (r.note ? ' · ' + esc(r.note) : '') + '</li>')).join('');
+    out.innerHTML = '<b>' + esc(d.name || '') + '</b> ' + esc(d.phone) + '<br>Available: <b style="font-size:20px;">' + inr(d.balance) + '</b>'
+      + '<br><span style="color:#666; font-size:12px;">Prints ' + inr(d.spent) + ' · earned ' + inr(d.earned) + ' · used ' + inr(d.redeemed) + ' · ' + inr(d.next_in) + ' more to the next ₹' + esc(d.per_step) + '</span>'
+      + (hist ? '<ul style="margin:6px 0 0 18px; padding:0; font-size:12px;">' + hist + '</ul>' : '');
+    el('rwAmount').max = d.balance;
+  } finally { el('rwCheckBtn').disabled = false; }
+}
+el('rwCheckBtn').addEventListener('click', rwCheck);
+el('rwUseBtn').addEventListener('click', async () => {
+  const phone = el('rwPhone').value.trim(), amount = el('rwAmount').value.trim();
+  if (!phone || !(Number(amount) > 0)) return;
+  if (!confirm('Use ' + inr(amount) + ' of rewards for ' + phone + '? Take this off their bill.')) return;
+  el('rwUseBtn').disabled = true;
+  const fd = new FormData(); fd.append('phone', phone); fd.append('amount', amount); fd.append('note', el('rwNote').value.trim());
+  try {
+    const res = await fetch('/api/admin/cloud/redeem', { method: 'POST', body: fd, credentials: 'include' });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { alert(d.detail || 'Could not use rewards.'); return; }
+    el('rwAmount').value = ''; el('rwNote').value = '';
+    await rwCheck();
+  } finally { el('rwUseBtn').disabled = false; }
 });
 
 function attachRowHandlers() {

@@ -38,17 +38,16 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
 ## Pickup tokens
 - Every online order gets a token **#CP-<number>** (CP-101, CP-102, …) — issued by
   `api/order.php`, shown on the pickup pass and in T Print admin as `[CP-105 · Name] file.pdf`.
-- Tracking an order still needs the customer's private link (code + secret), so numbers can't be guessed to see other orders.
+- Tracking an order needs the customer's private link (code + secret, saved on the phone that ordered), so numbers can't be guessed to see other orders.
 
-## CLUTCHPRINT accounts (online customers only)
-- **Mobile number = username**, a **4-digit CLUTCHPRINT PIN = password**. Mobile is mandatory on every online order.
-- The first online order from a mobile number sets its PIN; later orders need the PIN (or the customer is
-  already signed in on that phone).
-- Signed in (any phone), the pickup pass lists **all #CP tokens** for that number with live status and UPI pay.
-- 5 wrong PINs lock the number for 15 minutes; max 20 wrong PINs per device per hour. PINs are stored hashed.
-- Forgot PIN: staff press **Reset PIN** in T Print admin (Online customers panel) → a new temporary PIN to tell
-  the customer at the counter; the customer can change it after signing in.
-- In-shop (walk-in) T Print jobs don't use accounts or #CP tokens.
+## CLUTCH Rewards (online customers only)
+- **Mobile number is mandatory** on every online order and is the customer's **rewards ID**. No PIN, no password.
+- **Every ₹100 of prints earns ₹5** (counted on the customer's total online spend, so ₹60 + ₹40 also earns ₹5).
+- Rewards are added when the order is **collected** (paid at the counter or by UPI), using T Print's final price.
+- The pickup pass shows the balance, a progress bar to the next ₹5, and what this order added.
+- Using rewards: at the T FIX® counter. Staff check and use them in T Print admin (CLUTCH Rewards panel),
+  only for the customer collecting an online order on that number.
+- In-shop (walk-in) T Print jobs don't earn rewards and don't use #CP tokens.
 
 ## Search appearance
 - Google site name: **ClutchPrint AI** (WebSite structured data + og:site_name in `index.html`), page title
@@ -56,7 +55,7 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
 
 ## Languages
 - English and Malayalam (toggle in the header). All text lives in the `T` dictionary in `index.html`.
-- Brand words stay in English in both: T FIX®, CUSAT, CLUTCHPRINT, AI, #CP tokens, UPI.
+- Brand words stay in English in both: T FIX®, CUSAT, CLUTCHPRINT, CLUTCH Rewards, AI, #CP tokens, UPI.
 
 ## Launch assets already prepared (by the owner)
 - 16:9 dark-and-gold banner

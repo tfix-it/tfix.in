@@ -117,9 +117,13 @@ class CloudClient:
     def push_status(self, orders: list) -> None:
         self._json("POST", "status", body={"orders": orders})
 
-    def reset_pin(self, phone: str) -> dict:
-        """Staff reset of an online customer's CLUTCHPRINT PIN; returns {pin, phone}."""
-        return self._json("POST", "reset_pin", body={"phone": phone})
+    def rewards(self, phone: str) -> dict:
+        """CLUTCH Rewards of a mobile number: balance, spend, recent credits/uses."""
+        return self._json("GET", "rewards", {"phone": phone})
+
+    def redeem(self, phone: str, amount: float, note: str = "") -> dict:
+        """Use a customer's rewards at the counter; returns {used, balance}."""
+        return self._json("POST", "redeem", body={"phone": phone, "amount": amount, "note": note})
 
 
 def initialize():
@@ -279,7 +283,8 @@ def push_statuses(client: CloudClient) -> int:
             job = db.get_job(imp["job_id"])
             if job:
                 jobs.append(job)
-                files.append({"file_id": imp["cloud_file_id"], "job_status": job["status"], "paid": bool(job["paid"])})
+                files.append({"file_id": imp["cloud_file_id"], "job_status": job["status"],
+                              "paid": bool(job["paid"]), "cost": round(float(job["cost"]), 2)})
         status = order_status(jobs)
         update = {"order_id": o["cloud_order_id"], "status": status, "files": files}
         snapshot = json.dumps(update, sort_keys=True)
