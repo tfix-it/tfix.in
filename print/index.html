@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;600;800&display=swap" rel="stylesheet" />
   <!-- Tailwind is compiled ahead of time into assets/app.css (no runtime CDN). -->
   <link rel="stylesheet" href="assets/app.css" />
   <style>
@@ -42,7 +42,11 @@
         radial-gradient(circle at 50% 20%, var(--bg-radial) 0%, #0d0e12 52%, var(--bg-deep) 100%);
     }
     section[id] { scroll-margin-top: 84px; }
-    .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, 'Noto Sans Malayalam', monospace; }
+    /* Malayalam: proper font; letter-spacing breaks conjunct letters, so turn it off */
+    html[lang="ml"] { font-family: 'Inter', 'Noto Sans Malayalam', system-ui, sans-serif; }
+    html[lang="ml"] [class*="tracking-"] { letter-spacing: normal !important; }
+    html[lang="ml"] h1, html[lang="ml"] h2 { line-height: 1.3; }
     .bg-grid-pattern {
       background-image: linear-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
       background-size: 48px 48px;
@@ -113,14 +117,17 @@
 
       <nav class="hidden items-center gap-6 text-sm text-zinc-300 md:flex" aria-label="Main">
         <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 transition hover:text-[#f3d97d]">
-          <span>Home</span><span class="font-mono-tech text-[10px] text-[#d4af37]">↗</span>
+          <span data-i18n="navHome">Home</span><span class="font-mono-tech text-[10px] text-[#d4af37]">↗</span>
         </a>
-        <a href="#upload-studio" class="transition hover:text-[#f3d97d]">Auto-Print</a>
-        <a href="#how-it-works" class="transition hover:text-[#f3d97d]">3-Step Flow</a>
-        <a href="#location" class="transition hover:text-[#f3d97d]">Pipeline Rd · <span data-close-time>9:30 PM</span></a>
+        <a href="#upload-studio" class="transition hover:text-[#f3d97d]" data-i18n="navAuto">Auto-Print</a>
+        <a href="#how-it-works" class="transition hover:text-[#f3d97d]" data-i18n="navFlow">3-Step Flow</a>
+        <a href="#location" class="transition hover:text-[#f3d97d]" data-i18n="navVisit">Pipeline Rd · 9:30 PM</a>
       </nav>
 
-      <a href="#upload-studio" class="gold-btn shrink-0 rounded-lg px-3.5 py-2 text-xs font-bold tracking-wide sm:px-4 sm:text-sm">Drop File</a>
+      <div class="flex shrink-0 items-center gap-2">
+        <button id="lang-btn" type="button" class="rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-xs font-bold text-zinc-200 transition hover:border-[#d4af37]/60 hover:text-[#f3d97d]" aria-label="മലയാളം">മല</button>
+        <a href="#upload-studio" class="gold-btn rounded-lg px-3 py-2 text-xs font-bold tracking-wide sm:px-4 sm:text-sm" data-i18n="dropBtn">Drop File</a>
+      </div>
     </div>
   </header>
 
@@ -148,14 +155,12 @@
       </div>
 
       <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
-        Last-minute print? <span class="gold-gradient-text">You're covered.</span>
+        <span data-i18n="h1a">Last-minute print?</span> <span class="gold-gradient-text" data-i18n="h1b">You're covered.</span>
       </h1>
-      <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
+      <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg" data-i18n-html="heroSub">
         Upload from your hostel, class, or bus. Our AI handles the queue—just walk into <strong class="whitespace-nowrap font-semibold text-white">T FIX® CUSAT</strong> and grab your pages.
       </p>
-      <p class="mt-3 font-mono-tech text-xs tracking-wide text-[#d4af37]/90 sm:text-sm">
-        No queue. No panic. Upload anytime — even at night.
-      </p>
+      <p class="mt-3 font-mono-tech text-xs tracking-wide text-[#d4af37]/90 sm:text-sm" data-i18n="tagline">No queue. No panic. Upload anytime — grab your prints in seconds.</p>
     </section>
 
     <!-- Upload studio -->
@@ -165,11 +170,11 @@
       <form id="order-form" class="glass-card rounded-2xl p-5 sm:p-6 lg:col-span-7" novalidate onsubmit="return false">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
           <div>
-            <h2 class="text-base font-bold text-white sm:text-lg">Instant AI Print Queue</h2>
-            <p class="text-xs text-zinc-400">PDF, DOCX, PPTX, JPG or PNG · up to 10 files, 25 MB each</p>
+            <h2 class="text-base font-bold text-white sm:text-lg" data-i18n="studioTitle">Instant AI Print Queue</h2>
+            <p class="text-xs text-zinc-400" data-i18n="studioSub">PDF, DOCX, PPTX, JPG or PNG · up to 10 files, 25 MB each</p>
           </div>
           <span class="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 font-mono-tech text-xs text-zinc-300">
-            SERVER: <span id="srv-badge" class="text-zinc-400">…</span>
+            <span data-i18n="srvLabel">SERVER:</span> <span id="srv-badge" class="text-zinc-400">…</span>
           </span>
         </div>
 
@@ -178,17 +183,17 @@
         <!-- Customer details -->
         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label class="block">
-            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Your name</span>
-            <input id="name" class="field mt-1.5" type="text" autocomplete="name" maxlength="60" placeholder="e.g. Anu" required />
+            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fName">Your name</span>
+            <input id="name" class="field mt-1.5" type="text" autocomplete="name" maxlength="60" placeholder="e.g. Anu" data-i18n-ph="namePh" required />
           </label>
           <label class="block">
-            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Mobile number</span>
-            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" required />
+            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fPhone">Mobile number</span>
+            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" data-i18n-ph="phonePh" required />
           </label>
         </div>
 
         <!-- Dropzone -->
-        <div id="dropzone" tabindex="0" role="button" aria-label="Drop your files: PDF, DOCX, PPTX, JPG or PNG"
+        <div id="dropzone" tabindex="0" role="button" aria-label="Drop Your File (PDF / DOCX / JPG)"
              class="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d4af37]/40 bg-[#0d0e12]/80 px-4 py-7 text-center transition hover:border-[#f3d97d] hover:bg-[#15140f]/80 focus:outline-none focus:ring-2 focus:ring-[#d4af37]">
           <input id="file-input" type="file" multiple accept=".pdf,.docx,.pptx,.ppt,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" class="hidden" />
           <div class="flex h-12 w-12 items-center justify-center rounded-full border border-[#d4af37]/40 bg-[#d4af37]/10 text-[#f3d97d]">
@@ -196,8 +201,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
             </svg>
           </div>
-          <p class="mt-3 text-base font-bold text-white sm:text-lg">Drop Your Files (PDF / DOCX / JPG)</p>
-          <p class="mt-1 text-xs text-zinc-400">Tap to browse from phone or laptop, or drag &amp; drop right here</p>
+          <p class="mt-3 text-base font-bold text-white sm:text-lg" data-i18n="dropTitle">Drop Your File (PDF / DOCX / JPG)</p>
+          <p class="mt-1 text-xs text-zinc-400" data-i18n="dropSub">Click to browse from phone or laptop, or drag &amp; drop right here</p>
         </div>
 
         <!-- Selected files -->
@@ -206,28 +211,28 @@
         <!-- Print options -->
         <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
-            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Ink Mode</span>
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="optInk">Ink Mode</span>
             <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Ink mode">
-              <button type="button" data-opt="color" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">B&amp;W</button>
-              <button type="button" data-opt="color" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">Color</button>
+              <button type="button" data-opt="color" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300" data-i18n="bw">B&amp;W</button>
+              <button type="button" data-opt="color" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300" data-i18n="color">Color</button>
             </div>
           </div>
           <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
-            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Sides</span>
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="optSides">Sides</span>
             <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Sides">
-              <button type="button" data-opt="doubleside" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">1-Sided</button>
-              <button type="button" data-opt="doubleside" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">Duplex</button>
+              <button type="button" data-opt="doubleside" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300" data-i18n="single">1-Sided</button>
+              <button type="button" data-opt="doubleside" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300" data-i18n="duplex">Duplex</button>
             </div>
           </div>
           <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
-            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Paper</span>
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="optPaper">Paper</span>
             <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Paper size">
               <button type="button" data-opt="paper_size" data-val="A4" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">A4</button>
               <button type="button" data-opt="paper_size" data-val="A3" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">A3</button>
             </div>
           </div>
           <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
-            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Copies</span>
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="optCopies">Copies</span>
             <div class="mt-2 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-1.5 py-1">
               <button type="button" id="copies-minus" class="flex h-7 w-7 items-center justify-center rounded text-zinc-300 hover:bg-white/10 hover:text-white" aria-label="Fewer copies">−</button>
               <span id="copies-count" class="font-mono-tech text-sm font-bold text-white" aria-live="polite">1</span>
@@ -237,32 +242,32 @@
         </div>
 
         <details class="mt-3 rounded-xl border border-white/10 bg-[#0d0e12]/50 px-3.5 py-2.5">
-          <summary class="cursor-pointer font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">More options · pages per sheet · note</summary>
+          <summary class="cursor-pointer font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="moreOpts">More options · pages per sheet · note</summary>
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label class="block">
-              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Pages per sheet</span>
+              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fPps">Pages per sheet</span>
               <select id="pps" class="field mt-1.5">
-                <option value="1">1 (normal)</option><option value="2">2</option><option value="4">4</option>
+                <option value="1" data-i18n="pps1">1 (normal)</option><option value="2">2</option><option value="4">4</option>
               </select>
             </label>
             <label class="block">
-              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Note for the shop</span>
-              <input id="notes" class="field mt-1.5" type="text" maxlength="400" placeholder="e.g. spiral binding, colour cover" />
+              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fNote">Note for the shop</span>
+              <input id="notes" class="field mt-1.5" type="text" maxlength="400" placeholder="e.g. spiral binding, colour cover" data-i18n-ph="notePh" />
             </label>
           </div>
-          <p class="mt-2 text-[11px] text-zinc-500">To print only some pages of a file, tap “All pages” next to the file.</p>
+          <p class="mt-2 text-[11px] text-zinc-500" data-i18n="rangeHelp">To print only some pages of a file, tap “All pages” next to the file.</p>
         </details>
 
         <!-- Estimate + send -->
         <div class="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#0b0c10] px-4 py-3.5">
           <div class="flex flex-wrap items-center gap-5 font-mono-tech text-xs">
-            <div><span class="block text-[10px] uppercase text-zinc-500">Pages</span><span id="stat-pages" class="text-sm font-bold text-white">—</span></div>
+            <div><span class="block text-[10px] uppercase text-zinc-500" data-i18n="stPages">Pages</span><span id="stat-pages" class="text-sm font-bold text-white">—</span></div>
             <div class="h-6 w-px bg-white/10"></div>
-            <div><span class="block text-[10px] uppercase text-zinc-500">Sheets</span><span id="stat-sheets" class="text-sm font-bold text-white">—</span></div>
+            <div><span class="block text-[10px] uppercase text-zinc-500" data-i18n="stSheets">Sheets</span><span id="stat-sheets" class="text-sm font-bold text-white">—</span></div>
             <div class="h-6 w-px bg-white/10"></div>
-            <div><span class="block text-[10px] uppercase text-zinc-500">Est. Total</span><span id="stat-price" class="text-sm font-bold text-[#f3d97d]">₹0</span></div>
+            <div><span class="block text-[10px] uppercase text-zinc-500" data-i18n="stTotal">Est. Total</span><span id="stat-price" class="text-sm font-bold text-[#f3d97d]">₹0</span></div>
           </div>
-          <button id="send-btn" type="button" class="gold-btn w-full rounded-xl px-5 py-3 text-sm font-extrabold tracking-wide sm:w-auto">Send to CLUTCHPRINT AI</button>
+          <button id="send-btn" type="button" class="gold-btn w-full rounded-xl px-5 py-3 text-sm font-extrabold tracking-wide sm:w-auto" data-i18n="send">Send to CLUTCHPRINT AI</button>
         </div>
         <div id="progress" hidden class="relative mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full w-0 rounded-full bg-gradient-to-r from-[#b5891d] via-[#d4af37] to-[#f3d97d] transition-all duration-200"></div></div>
         <p id="form-error" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
@@ -274,7 +279,7 @@
 
         <div class="glass-card rounded-2xl p-5">
           <div class="flex items-center justify-between gap-2">
-            <span class="font-mono-tech text-xs font-semibold uppercase tracking-wider text-[#f3d97d]">CLUTCHPRINT AI Engine</span>
+            <span class="font-mono-tech text-xs font-semibold uppercase tracking-wider text-[#f3d97d]" data-i18n="engineTitle">CLUTCHPRINT AI Engine</span>
             <span id="engine-state" class="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono-tech text-[11px] text-zinc-300">READY</span>
           </div>
           <div class="relative mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
@@ -283,15 +288,15 @@
           <ol class="mt-5 space-y-3.5">
             <li id="step-1" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
               <span id="step-1-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">1</span>
-              <div class="min-w-0 flex-1"><p id="step-1-title" class="text-sm font-semibold text-zinc-300">Reading pages…</p><p id="step-1-sub" class="font-mono-tech text-[11px] text-zinc-500">Waiting for your files</p></div>
+              <div class="min-w-0 flex-1"><p id="step-1-title" class="text-sm font-semibold text-zinc-300">Reading pages…</p><p id="step-1-sub" class="font-mono-tech text-[11px] text-zinc-500">Waiting for document upload</p></div>
             </li>
             <li id="step-2" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
               <span id="step-2-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">2</span>
-              <div class="min-w-0 flex-1"><p id="step-2-title" class="text-sm font-semibold text-zinc-300">Queued at T FIX…</p><p id="step-2-sub" class="font-mono-tech text-[11px] text-zinc-500">The shop server checks &amp; prices every file</p></div>
+              <div class="min-w-0 flex-1"><p id="step-2-title" class="text-sm font-semibold text-zinc-300">Setting layout…</p><p id="step-2-sub" class="font-mono-tech text-[11px] text-zinc-500">A4 margin fit, orientation &amp; duplex check</p></div>
             </li>
             <li id="step-3" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
               <span id="step-3-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">3</span>
-              <div class="min-w-0 flex-1"><p id="step-3-title" class="text-sm font-semibold text-zinc-300">Locked in. Ready at T FIX.</p><p id="step-3-sub" class="font-mono-tech text-[11px] text-zinc-500">Printed after payment is confirmed</p></div>
+              <div class="min-w-0 flex-1"><p id="step-3-title" class="text-sm font-semibold text-zinc-300">Locked in. Ready at T FIX.</p><p id="step-3-sub" class="font-mono-tech text-[11px] text-zinc-500">Token minted for zero-wait pickup</p></div>
             </li>
           </ol>
         </div>
@@ -300,9 +305,9 @@
         <div id="token-card" class="glass-card-gold rounded-2xl p-5">
           <div class="flex items-start justify-between gap-3 border-b border-[#d4af37]/25 pb-3.5">
             <div class="min-w-0">
-              <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-[#d4af37]">T FIX® CUSAT PICKUP PASS</span>
+              <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="passLabel">T FIX® CUSAT PICKUP PASS</span>
               <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span id="token-number" class="whitespace-nowrap font-mono-tech text-[1.7rem] font-bold leading-tight tracking-tight text-white sm:text-3xl">#TP······</span>
+                <span id="token-number" class="whitespace-nowrap font-mono-tech text-[1.7rem] font-bold leading-tight tracking-tight text-white sm:text-3xl">#CP-···</span>
                 <span id="token-badge" class="whitespace-nowrap rounded bg-[#d4af37]/20 px-2 py-0.5 font-mono-tech text-[10px] font-semibold text-[#f3d97d]">PREVIEW</span>
               </div>
             </div>
@@ -316,22 +321,23 @@
             </div>
           </div>
 
-          <p id="pass-line" class="mt-3.5 text-sm font-medium text-zinc-100">Send your files and your pickup token appears here.</p>
+          <p id="pass-line" class="mt-3.5 text-sm font-medium text-zinc-100">Send your file and your pickup token appears here.</p>
+          <p id="pass-status" class="mt-1 text-xs leading-relaxed text-zinc-400"></p>
 
           <div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-black/35 p-3 font-mono-tech text-[11px]">
-            <div class="min-w-0"><span class="block text-zinc-500">FILES</span><span id="pass-files" class="block truncate text-zinc-200">—</span></div>
-            <div class="min-w-0"><span class="block text-zinc-500">TOTAL</span><span id="pass-total" class="block truncate text-[#f3d97d]">—</span></div>
+            <div class="min-w-0"><span class="block text-zinc-500" data-i18n="passFiles">FILES</span><span id="pass-files" class="block truncate text-zinc-200">—</span></div>
+            <div class="min-w-0"><span class="block text-zinc-500" data-i18n="passTotal">TOTAL</span><span id="pass-total" class="block truncate text-[#f3d97d]">—</span></div>
           </div>
 
           <ul id="pass-file-list" class="mt-3 space-y-1 font-mono-tech text-[11px]"></ul>
           <div id="pay-box"></div>
 
           <div class="mt-4 flex gap-2">
-            <button id="copy-token-btn" type="button" disabled class="flex-1 rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 font-mono-tech text-xs font-semibold text-[#f3d97d] transition hover:bg-[#d4af37]/25 disabled:opacity-40">Copy Token</button>
-            <button id="copy-link-btn" type="button" disabled class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono-tech text-xs text-zinc-300 transition hover:bg-white/10 hover:text-white disabled:opacity-40">Copy Link</button>
+            <button id="copy-token-btn" type="button" disabled class="flex-1 rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 font-mono-tech text-xs font-semibold text-[#f3d97d] transition hover:bg-[#d4af37]/25 disabled:opacity-40" data-i18n="copyToken">Copy Token</button>
+            <button id="copy-link-btn" type="button" disabled class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono-tech text-xs text-zinc-300 transition hover:bg-white/10 hover:text-white disabled:opacity-40" data-i18n="copyLink">Copy Link</button>
           </div>
           <div id="my-orders" hidden class="mt-4 border-t border-[#d4af37]/20 pt-3">
-            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-500">Your recent orders</span>
+            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-500" data-i18n="recent">Your recent orders</span>
             <div id="my-orders-list" class="mt-2 flex flex-wrap gap-2"></div>
           </div>
         </div>
@@ -342,26 +348,26 @@
     <section id="how-it-works" class="mt-16">
       <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
         <div>
-          <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]">HOW CLUTCHPRINT WORKS</span>
-          <h2 class="mt-1 text-2xl font-extrabold text-white">1. UPLOAD · 2. AUTO-PRINT · 3. GRAB &amp; GO</h2>
+          <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="howEyebrow">HOW CLUTCHPRINT WORKS</span>
+          <h2 class="mt-1 text-2xl font-extrabold text-white" data-i18n="howTitle">1. UPLOAD · 2. AUTO-PRINT · 3. GRAB &amp; GO</h2>
         </div>
-        <span class="font-mono-tech text-xs text-zinc-400">Built for CUSAT deadlines</span>
+        <span class="font-mono-tech text-xs text-zinc-400" data-i18n="built">Built for CUSAT deadlines</span>
       </div>
       <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="glass-card rounded-2xl p-5">
-          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">01 / UPLOAD</span>
-          <h3 class="mt-2 text-lg font-bold text-white">Drop from anywhere</h3>
-          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">Send PDFs, DOCX assignments, or JPG hall tickets from your hostel, classroom, or bus straight to <span class="font-mono-tech text-zinc-200">print.tfix.in</span> — any time, even when we're closed.</p>
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]" data-i18n="c1l">01 / UPLOAD</span>
+          <h3 class="mt-2 text-lg font-bold text-white" data-i18n="c1h">Drop from anywhere</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400" data-i18n-html="c1p"></p>
         </div>
         <div class="glass-card rounded-2xl p-5">
-          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">02 / AUTO-PRINT</span>
-          <h3 class="mt-2 text-lg font-bold text-white">AI counts, prices &amp; queues</h3>
-          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">CLUTCHPRINT AI reads every page, prices it at the shop's rates and queues it at T FIX automatically — no pen drives or WhatsApp forwarding. Pay by UPI right here or at the counter.</p>
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]" data-i18n="c2l">02 / AUTO-PRINT</span>
+          <h3 class="mt-2 text-lg font-bold text-white" data-i18n="c2h">AI locks your layout</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400" data-i18n-html="c2p"></p>
         </div>
         <div class="glass-card rounded-2xl p-5">
-          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">03 / GRAB &amp; GO</span>
-          <h3 class="mt-2 text-lg font-bold text-white">Flash token, skip the queue</h3>
-          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">Walk into <strong class="text-white">T FIX® CUSAT</strong> on Pipeline Road, show your <span class="font-mono-tech text-[#f3d97d]">#TP</span> token, and collect your pages.</p>
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]" data-i18n="c3l">03 / GRAB &amp; GO</span>
+          <h3 class="mt-2 text-lg font-bold text-white" data-i18n="c3h">Flash token, zero queue</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400" data-i18n-html="c3p"></p>
         </div>
       </div>
 
@@ -379,19 +385,19 @@
               <span class="text-sm font-extrabold tracking-[0.16em] text-[#f3d97d]">T FIX® CUSAT</span>
               <span class="rounded bg-white/5 px-2 py-0.5 font-mono-tech text-[10px] text-zinc-400">T = Trouble &amp; Tech</span>
             </div>
-            <h3 class="mt-2 text-xl font-bold text-white">Pipeline Road, Kalamassery</h3>
-            <p class="mt-1 text-sm text-zinc-400">South Pipeline Road, CUSAT PO, Kalamassery 682022 · Direct counter pickup for <span class="font-mono-tech text-[#f3d97d]">print.tfix.in</span> orders.</p>
+            <h3 class="mt-2 text-xl font-bold text-white" data-i18n="locH">Pipeline Road, Kalamassery</h3>
+            <p class="mt-1 text-sm text-zinc-400" data-i18n-html="locP"></p>
             <dl class="mt-3 grid max-w-sm grid-cols-2 gap-x-6 gap-y-1 font-mono-tech text-xs">
-              <dt class="text-zinc-500" data-day="1,2,3,4,5,6">Mon – Sat</dt><dd class="text-right text-zinc-200" data-day="1,2,3,4,5,6">08:30 – 21:30</dd>
-              <dt class="text-zinc-500" data-day="0">Sunday</dt><dd class="text-right text-zinc-200" data-day="0">09:30 – 21:30</dd>
+              <dt class="text-zinc-500" data-day="1,2,3,4,5,6" data-i18n="monSat">Mon – Sat</dt><dd class="text-right text-zinc-200" data-day="1,2,3,4,5,6">08:30 – 21:30</dd>
+              <dt class="text-zinc-500" data-day="0" data-i18n="sun">Sunday</dt><dd class="text-right text-zinc-200" data-day="0">09:30 – 21:30</dd>
             </dl>
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <span id="counter-pill" class="whitespace-nowrap rounded-xl border border-[#d4af37]/30 bg-[#14130f] px-4 py-2.5 font-mono-tech text-xs text-[#f3d97d]">● …</span>
-            <a id="map-link" href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50">Directions</a>
-            <a id="call-link" href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50">Call</a>
+            <a id="map-link" href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50" data-i18n="directions">Directions</a>
+            <a id="call-link" href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50" data-i18n="call">Call</a>
             <a data-wa href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-emerald-400/50"><span class="text-emerald-400">●</span> WhatsApp</a>
-            <a href="#upload-studio" class="gold-btn rounded-xl px-4 py-2.5 text-xs font-extrabold tracking-wide">Start New Print</a>
+            <a href="#upload-studio" class="gold-btn rounded-xl px-4 py-2.5 text-xs font-extrabold tracking-wide" data-i18n="startNew">Start New Print</a>
           </div>
         </div>
       </div>
@@ -400,8 +406,8 @@
 
   <footer class="border-t border-white/10 bg-[#060709] py-6">
     <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-center text-xs text-zinc-500 sm:flex-row sm:px-6 sm:text-left">
-      <p>© <span id="year">2026</span> <strong class="text-zinc-300">T FIX® CUSAT</strong> · CLUTCHPRINT AI. T FIX® is a registered trademark.</p>
-      <p class="font-mono-tech text-[11px] text-zinc-500"><a href="https://tfix.in" target="_blank" rel="noopener" class="hover:text-[#f3d97d]">tfix.in ↗</a> · print.tfix.in · Pipeline Road, Kalamassery</p>
+      <p data-i18n-html="footer">© 2026 <strong class="text-zinc-300">T FIX® CUSAT</strong> · CLUTCHPRINT AI. T FIX® is a registered trademark.</p>
+      <p class="font-mono-tech text-[11px] text-zinc-500"><a href="https://tfix.in" target="_blank" rel="noopener" class="hover:text-[#f3d97d]">tfix.in ↗</a> · print.tfix.in · <span data-i18n="footer2">Pipeline Road, Kalamassery</span></p>
     </div>
   </footer>
 
@@ -438,11 +444,128 @@
     const API = "api/", MAX_FILES = 10, MAX_FILE_MB = 25, MAX_ORDER_MB = 60;
     const ALLOWED_EXT = ["pdf", "jpg", "jpeg", "png", "docx", "pptx", "ppt"];
     const STORE = "tprint-orders";
+    const CODE_RE = /^(CP-\d{3,9}|TP[A-Z0-9]{6})$/;
+
+    /* ============ Text — English & Malayalam (brand words stay in English) ============ */
+    const T = {
+      en: {
+        navHome: "Home", navAuto: "Auto-Print", navFlow: "3-Step Flow", navVisit: "Pipeline Rd · {close}", dropBtn: "Drop File", langBtn: "മല",
+        h1a: "Last-minute print?", h1b: "You're covered.",
+        heroSub: "Upload from your hostel, class, or bus. Our AI handles the queue—just walk into <strong class=\"whitespace-nowrap font-semibold text-white\">T FIX® CUSAT</strong> and grab your pages.",
+        tagline: "No queue. No panic. Upload anytime — grab your prints in seconds.",
+        pillOpen: "CLUTCHPRINT LIVE · OPEN DAILY TILL {close}", pillClosed: "CLUTCHPRINT · CLOSED NOW · OPENS {when}",
+        today: "today", tomorrow: "tomorrow",
+        srvOn: "AI AUTO PRINT ONLINE", srvOff: "PRINT SERVER OFFLINE", srvOffStaff: "PRINT SERVER OFFLINE — STAFF, PLEASE CHECK SHOP PC 1",
+        badgeOn: "ONLINE", badgeOff: "OFFLINE", srvLabel: "SERVER:",
+        studioTitle: "Instant AI Print Queue", studioSub: "PDF, DOCX, PPTX, JPG or PNG · up to 10 files, 25 MB each",
+        closedNote: "We're closed right now. Send your order anyway — it will be waiting for us when we open ({when}).",
+        fName: "Your name", namePh: "e.g. Anu", fPhone: "Mobile number", phonePh: "10-digit mobile",
+        dropTitle: "Drop Your File (PDF / DOCX / JPG)", dropSub: "Click to browse from phone or laptop, or drag & drop right here",
+        optInk: "Ink Mode", bw: "B&W", color: "Color", optSides: "Sides", single: "1-Sided", duplex: "Duplex", optPaper: "Paper", optCopies: "Copies",
+        moreOpts: "More options · pages per sheet · note", fPps: "Pages per sheet", pps1: "1 (normal)", fNote: "Note for the shop", notePh: "e.g. spiral binding, colour cover",
+        rangeHelp: "To print only some pages of a file, tap “All pages” next to the file.",
+        stPages: "Pages", stSheets: "Sheets", stTotal: "Est. Total", pgs: "pgs", send: "Send to CLUTCHPRINT AI", uploading: "Uploading… {p}%",
+        errName: "Please enter your name.", errPhone: "Please enter a valid 10-digit mobile number.", errFiles: "Please add at least one file.",
+        errRange: "Please fix the page selection.", errTotal: "Files are too large together (max 60 MB).", errType: "“{f}” is not supported. Use PDF, DOCX, PPTX, JPG or PNG.",
+        errBig: "“{f}” is larger than 25 MB.", errMany: "You can send up to 10 files in one order.", errNet: "Could not send your order. Check your connection and try again.",
+        counting: "counting pages…", atShopPages: "pages counted at the shop", pagesN: "{n} pages", page1: "1 page",
+        allPages: "All pages", choosePages: "Choose pages", rangePh: "Pages to print, e.g. 1-5, 8", rangeErr: "Use pages within 1–{n}, e.g. 1-5, 8", rangeErrU: "Use page numbers like 1-5, 8", remove: "Remove",
+        rateLine: "{size} · B&W ₹{a}/sheet 1-sided or ₹{b} duplex (₹{m} min on your first order of the day) · Color ₹{c} 1-sided or ₹{d} duplex", rateDoc: " · Word/PowerPoint priced at the shop",
+        engineTitle: "CLUTCHPRINT AI Engine",
+        eReady: "READY", eUploading: "UPLOADING", eSrvOff: "SERVER OFFLINE", eQueued: "QUEUED", eWaiting: "WAITING", eCancelled: "CANCELLED", ePay: "PAY TO PRINT", ePaid: "PAID", ePrinting: "PRINTING", eLocked: "LOCKED IN", eCollected: "COLLECTED",
+        s1: "Reading pages…", s2: "Setting layout…", s3: "Locked in. Ready at T FIX.",
+        s1Idle: "Waiting for document upload", s2Idle: "A4 margin fit, orientation & duplex check", s3Idle: "Token minted for zero-wait pickup",
+        s1Up: "Uploading {n} file(s)…", s1Done: "{n} file(s) received · token {tok}", s2Wait: "Waiting for the shop server to check & price it", s2Off: "Shop server offline — your order waits safely",
+        s2Done: "Layout checked · priced by T Print: {amt}", s2Cancel: "Cancelled by the shop", s3Pay: "Pay {amt} by UPI or at the counter", s3Paid: "Paid — printing next",
+        s3Printing: "On the printer now", s3Ready: "Token {tok} active at the Pipeline Road counter", s3Collected: "Collected — thank you!",
+        passLabel: "T FIX® CUSAT PICKUP PASS", bPreview: "PREVIEW", bPending: "WAITING FOR SHOP", bReceived: "PRICE CONFIRMED", bPaid: "PAID · IN QUEUE", bPrinting: "PRINTING", bReady: "READY AT T FIX", bCollected: "COLLECTED", bCancelled: "CANCELLED",
+        passBrand: "Show token {tok} at the T FIX counter—zero waiting.", passEmpty: "Send your file and your pickup token appears here.",
+        pPendingOn: "The shop server is online — it will check & price your order within a minute.", pPendingOff: "Your order is saved — the shop server picks it up as soon as it's online.",
+        pReceived: "Price confirmed: {amt}. Pay by UPI below or at the counter — we print once payment is confirmed.", pPaid: "Paid — your order is in the print queue.",
+        pPrinting: "Printing now at T FIX® CUSAT.", pReady: "Ready! Collect your pages at the counter.", pCollected: "Collected. Thank you!", pCancelled: "This order was cancelled — please contact the shop.",
+        passFiles: "FILES", passTotal: "TOTAL", est: "(est.)", atShop: "priced at the shop", problem: "Problem:",
+        copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your recent orders",
+        tTok: "Copied token {tok}", tLink: "Link copied — open it on any phone to track this order", tLocked: "Locked in! Token {tok} sent to T FIX® CUSAT.", tUpi: "UPI ID copied",
+        payUpi: "Pay {amt} by UPI", showQr: "Show UPI QR code", upiId: "UPI ID:", copy: "Copy", upiNote: "Write {tok} in the payment note. The shop marks your order paid after checking the payment.",
+        howEyebrow: "HOW CLUTCHPRINT WORKS", howTitle: "1. UPLOAD · 2. AUTO-PRINT · 3. GRAB & GO", built: "Built for CUSAT deadlines",
+        c1l: "01 / UPLOAD", c1h: "Drop from anywhere", c1p: "Send PDFs, DOCX assignments, or JPG hall tickets from your hostel, classroom, or bus straight to <span class=\"font-mono-tech text-zinc-200\">print.tfix.in</span>.",
+        c2l: "02 / AUTO-PRINT", c2h: "AI locks your layout", c2p: "CLUTCHPRINT AI reads page count, aligns A4 margins, and queues your print automatically without pen drives or WhatsApp forwarding.",
+        c3l: "03 / GRAB & GO", c3h: "Flash token, zero queue", c3p: "Walk into <strong class=\"text-white\">T FIX® CUSAT</strong> on Pipeline Road, show your <span class=\"font-mono-tech text-[#f3d97d]\">#CP</span> token, and collect your pages in seconds.",
+        rBw: "B&W", rColor: "Color", r1: " 1-sided", r2: "{p} duplex",
+        rateNote: "Per sheet. B&W minimum ₹{a4} (A4) / ₹{a3} (A3) on your first order of the day. Binding, lamination & passport photos: ask at the counter.",
+        locH: "Pipeline Road, Kalamassery", locP: "South Pipeline Road, CUSAT PO, Kalamassery 682022 · Open daily till 9:30 PM · Direct counter pickup for <span class=\"font-mono-tech text-[#f3d97d]\">print.tfix.in</span> orders.",
+        monSat: "Mon – Sat", sun: "Sunday", counterOpen: "● COUNTER OPEN · TILL {c}", counterClosed: "● CLOSED · OPENS {when}",
+        directions: "Directions", call: "Call", startNew: "Start New Print",
+        footer: "© {y} <strong class=\"text-zinc-300\">T FIX® CUSAT</strong> · CLUTCHPRINT AI. T FIX® is a registered trademark.",
+        footer2: "Pipeline Road, Kalamassery",
+        waMsg: "Hi T FIX® CUSAT, I have a question about CLUTCHPRINT."
+      },
+      ml: {
+        navHome: "ഹോം", navAuto: "ഓട്ടോ-പ്രിന്റ്", navFlow: "3 ഘട്ടങ്ങൾ", navVisit: "പൈപ്പ്‌ലൈൻ റോഡ് · {close}", dropBtn: "ഫയൽ ഇടൂ", langBtn: "EN",
+        h1a: "അവസാന നിമിഷം പ്രിന്റ് വേണോ?", h1b: "ഞങ്ങളുണ്ട്.",
+        heroSub: "ഹോസ്റ്റലിൽ നിന്നോ ക്ലാസിൽ നിന്നോ ബസിൽ നിന്നോ അപ്‌ലോഡ് ചെയ്യൂ. ക്യൂ ഞങ്ങളുടെ AI നോക്കിക്കോളും—<strong class=\"whitespace-nowrap font-semibold text-white\">T FIX® CUSAT</strong>-ൽ വന്ന് പേജുകൾ വാങ്ങിക്കോളൂ.",
+        tagline: "ക്യൂ ഇല്ല. ടെൻഷൻ ഇല്ല. എപ്പോൾ വേണമെങ്കിലും അപ്‌ലോഡ് ചെയ്യൂ — സെക്കൻഡുകൾക്കുള്ളിൽ പ്രിന്റുകൾ വാങ്ങൂ.",
+        pillOpen: "CLUTCHPRINT ലൈവ് · ദിവസവും {close} വരെ", pillClosed: "CLUTCHPRINT · ഇപ്പോൾ അടച്ചിരിക്കുന്നു · {when} തുറക്കും",
+        today: "ഇന്ന്", tomorrow: "നാളെ",
+        srvOn: "AI ഓട്ടോ പ്രിന്റ് ഓൺലൈൻ", srvOff: "പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ", srvOffStaff: "പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ — സ്റ്റാഫ്, Shop PC 1 പരിശോധിക്കൂ",
+        badgeOn: "ഓൺലൈൻ", badgeOff: "ഓഫ്‌ലൈൻ", srvLabel: "സെർവർ:",
+        studioTitle: "ഇൻസ്റ്റന്റ് AI പ്രിന്റ് ക്യൂ", studioSub: "PDF, DOCX, PPTX, JPG, PNG · 10 ഫയലുകൾ വരെ, ഓരോന്നും 25 MB വരെ",
+        closedNote: "ഇപ്പോൾ കട അടച്ചിരിക്കുന്നു. എങ്കിലും ഓർഡർ അയയ്ക്കാം — കട തുറക്കുമ്പോൾ ({when}) ഞങ്ങൾ എടുക്കും.",
+        fName: "നിങ്ങളുടെ പേര്", namePh: "ഉദാ: അനു", fPhone: "മൊബൈൽ നമ്പർ", phonePh: "10 അക്ക മൊബൈൽ നമ്പർ",
+        dropTitle: "ഫയൽ ഇവിടെ ഇടൂ (PDF / DOCX / JPG)", dropSub: "ഫോണിൽ നിന്നോ ലാപ്‌ടോപ്പിൽ നിന്നോ തിരഞ്ഞെടുക്കാൻ ടാപ്പ് ചെയ്യൂ, അല്ലെങ്കിൽ ഇവിടേക്ക് വലിച്ചിടൂ",
+        optInk: "മഷി", bw: "B&W", color: "കളർ", optSides: "വശങ്ങൾ", single: "ഒരു വശം", duplex: "ഇരുവശം", optPaper: "പേപ്പർ", optCopies: "കോപ്പികൾ",
+        moreOpts: "കൂടുതൽ ഓപ്ഷനുകൾ · ഒരു ഷീറ്റിൽ പേജുകൾ · കുറിപ്പ്", fPps: "ഒരു ഷീറ്റിൽ പേജുകൾ", pps1: "1 (സാധാരണ)", fNote: "കടയ്ക്കുള്ള കുറിപ്പ്", notePh: "ഉദാ: സ്പൈറൽ ബൈൻഡിംഗ്, കളർ കവർ",
+        rangeHelp: "ഫയലിലെ ചില പേജുകൾ മാത്രം വേണമെങ്കിൽ, ഫയലിനടുത്തുള്ള “എല്ലാ പേജും” ടാപ്പ് ചെയ്യൂ.",
+        stPages: "പേജുകൾ", stSheets: "ഷീറ്റുകൾ", stTotal: "ഏകദേശ തുക", pgs: "പേജ്", send: "CLUTCHPRINT AI-ലേക്ക് അയയ്ക്കൂ", uploading: "അപ്‌ലോഡ് ചെയ്യുന്നു… {p}%",
+        errName: "പേര് നൽകൂ.", errPhone: "ശരിയായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകൂ.", errFiles: "കുറഞ്ഞത് ഒരു ഫയൽ ചേർക്കൂ.",
+        errRange: "പേജ് തിരഞ്ഞെടുപ്പ് ശരിയാക്കൂ.", errTotal: "ഫയലുകൾ മൊത്തം വളരെ വലുതാണ് (പരമാവധി 60 MB).", errType: "“{f}” പിന്തുണയ്ക്കുന്നില്ല. PDF, DOCX, PPTX, JPG, PNG ഉപയോഗിക്കൂ.",
+        errBig: "“{f}” 25 MB-യിൽ കൂടുതലാണ്.", errMany: "ഒരു ഓർഡറിൽ 10 ഫയലുകൾ വരെ മാത്രം.", errNet: "ഓർഡർ അയയ്ക്കാനായില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.",
+        counting: "പേജുകൾ എണ്ണുന്നു…", atShopPages: "പേജുകൾ കടയിൽ എണ്ണും", pagesN: "{n} പേജ്", page1: "1 പേജ്",
+        allPages: "എല്ലാ പേജും", choosePages: "പേജുകൾ തിരഞ്ഞെടുക്കൂ", rangePh: "പ്രിന്റ് ചെയ്യേണ്ട പേജുകൾ, ഉദാ: 1-5, 8", rangeErr: "1–{n} നുള്ളിലെ പേജുകൾ നൽകൂ, ഉദാ: 1-5, 8", rangeErrU: "ഉദാ: 1-5, 8 എന്ന രീതിയിൽ നൽകൂ", remove: "നീക്കം ചെയ്യൂ",
+        rateLine: "{size} · B&W ഷീറ്റിന് ₹{a} ഒരു വശം, ₹{b} ഇരുവശം (ദിവസത്തെ ആദ്യ ഓർഡറിന് മിനിമം ₹{m}) · കളർ ₹{c} ഒരു വശം, ₹{d} ഇരുവശം", rateDoc: " · Word/PowerPoint തുക കടയിൽ",
+        engineTitle: "CLUTCHPRINT AI എഞ്ചിൻ",
+        eReady: "റെഡി", eUploading: "അപ്‌ലോഡ്", eSrvOff: "സെർവർ ഓഫ്‌ലൈൻ", eQueued: "ക്യൂവിൽ", eWaiting: "കാത്തിരിക്കുന്നു", eCancelled: "റദ്ദാക്കി", ePay: "പണമടയ്ക്കൂ", ePaid: "പണം ലഭിച്ചു", ePrinting: "പ്രിന്റിംഗ്", eLocked: "ലോക്ക്ഡ് ഇൻ", eCollected: "കൈപ്പറ്റി",
+        s1: "പേജുകൾ വായിക്കുന്നു…", s2: "ലേഔട്ട് സെറ്റ് ചെയ്യുന്നു…", s3: "ലോക്ക്ഡ് ഇൻ. T FIX-ൽ റെഡി.",
+        s1Idle: "ഡോക്യുമെന്റ് അപ്‌ലോഡിനായി കാത്തിരിക്കുന്നു", s2Idle: "A4 മാർജിൻ, ഓറിയന്റേഷൻ, ഡ്യൂപ്ലെക്സ് പരിശോധന", s3Idle: "കാത്തുനിൽക്കാതെ വാങ്ങാൻ ടോക്കൺ",
+        s1Up: "{n} ഫയൽ അപ്‌ലോഡ് ചെയ്യുന്നു…", s1Done: "{n} ഫയൽ ലഭിച്ചു · ടോക്കൺ {tok}", s2Wait: "കടയിലെ സെർവർ പരിശോധിച്ച് തുക കണക്കാക്കാൻ കാത്തിരിക്കുന്നു", s2Off: "കടയിലെ സെർവർ ഓഫ്‌ലൈൻ — ഓർഡർ സുരക്ഷിതമായി കാത്തിരിക്കുന്നു",
+        s2Done: "ലേഔട്ട് പരിശോധിച്ചു · T Print തുക: {amt}", s2Cancel: "കട റദ്ദാക്കി", s3Pay: "{amt} UPI വഴിയോ കൗണ്ടറിലോ അടയ്ക്കൂ", s3Paid: "പണം ലഭിച്ചു — ഉടൻ പ്രിന്റ്",
+        s3Printing: "ഇപ്പോൾ പ്രിന്ററിൽ", s3Ready: "ടോക്കൺ {tok} പൈപ്പ്‌ലൈൻ റോഡ് കൗണ്ടറിൽ റെഡി", s3Collected: "കൈപ്പറ്റി — നന്ദി!",
+        passLabel: "T FIX® CUSAT പിക്കപ്പ് പാസ്", bPreview: "പ്രിവ്യൂ", bPending: "കടയ്ക്കായി കാത്തിരിക്കുന്നു", bReceived: "തുക ഉറപ്പിച്ചു", bPaid: "പണം ലഭിച്ചു · ക്യൂവിൽ", bPrinting: "പ്രിന്റിംഗ്", bReady: "T FIX-ൽ റെഡി", bCollected: "കൈപ്പറ്റി", bCancelled: "റദ്ദാക്കി",
+        passBrand: "T FIX കൗണ്ടറിൽ ടോക്കൺ {tok} കാണിക്കൂ—കാത്തിരിപ്പില്ല.", passEmpty: "ഫയൽ അയച്ചാൽ പിക്കപ്പ് ടോക്കൺ ഇവിടെ കാണാം.",
+        pPendingOn: "കടയിലെ സെർവർ ഓൺലൈനാണ് — ഒരു മിനിറ്റിനുള്ളിൽ ഓർഡർ പരിശോധിച്ച് തുക കണക്കാക്കും.", pPendingOff: "ഓർഡർ സേവ് ചെയ്തു — സെർവർ ഓൺലൈനാകുമ്പോൾ എടുക്കും.",
+        pReceived: "തുക ഉറപ്പിച്ചു: {amt}. താഴെ UPI വഴിയോ കൗണ്ടറിലോ അടയ്ക്കൂ — പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.", pPaid: "പണം ലഭിച്ചു — ഓർഡർ പ്രിന്റ് ക്യൂവിലാണ്.",
+        pPrinting: "T FIX® CUSAT-ൽ ഇപ്പോൾ പ്രിന്റ് ചെയ്യുന്നു.", pReady: "റെഡി! കൗണ്ടറിൽ നിന്ന് പേജുകൾ വാങ്ങൂ.", pCollected: "കൈപ്പറ്റി. നന്ദി!", pCancelled: "ഈ ഓർഡർ റദ്ദാക്കി — കടയുമായി ബന്ധപ്പെടൂ.",
+        passFiles: "ഫയലുകൾ", passTotal: "ആകെ", est: "(ഏകദേശം)", atShop: "തുക കടയിൽ", problem: "പ്രശ്നം:",
+        copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ഓർഡറുകൾ",
+        tTok: "ടോക്കൺ {tok} കോപ്പി ചെയ്തു", tLink: "ലിങ്ക് കോപ്പി ചെയ്തു — ഏത് ഫോണിലും തുറന്ന് ഓർഡർ നോക്കാം", tLocked: "ലോക്ക്ഡ് ഇൻ! ടോക്കൺ {tok} T FIX® CUSAT-ലേക്ക് അയച്ചു.", tUpi: "UPI ID കോപ്പി ചെയ്തു",
+        payUpi: "{amt} UPI വഴി അടയ്ക്കൂ", showQr: "UPI QR കോഡ് കാണിക്കൂ", upiId: "UPI ID:", copy: "കോപ്പി", upiNote: "പേയ്‌മെന്റ് കുറിപ്പിൽ {tok} എഴുതൂ. പേയ്‌മെന്റ് പരിശോധിച്ച ശേഷം കട ഓർഡർ 'പണം ലഭിച്ചു' ആക്കും.",
+        howEyebrow: "CLUTCHPRINT എങ്ങനെ", howTitle: "1. അപ്‌ലോഡ് · 2. ഓട്ടോ-പ്രിന്റ് · 3. വാങ്ങി പോകൂ", built: "CUSAT ഡെഡ്‌ലൈനുകൾക്കായി",
+        c1l: "01 / അപ്‌ലോഡ്", c1h: "എവിടെ നിന്നും അയയ്ക്കാം", c1p: "ഹോസ്റ്റലിൽ നിന്നോ ക്ലാസ്‌മുറിയിൽ നിന്നോ ബസിൽ നിന്നോ PDF, DOCX അസൈൻമെന്റുകൾ, JPG ഹാൾ ടിക്കറ്റുകൾ നേരിട്ട് <span class=\"font-mono-tech text-zinc-200\">print.tfix.in</span>-ലേക്ക് അയയ്ക്കൂ.",
+        c2l: "02 / ഓട്ടോ-പ്രിന്റ്", c2h: "AI നിങ്ങളുടെ ലേഔട്ട് ലോക്ക് ചെയ്യും", c2p: "CLUTCHPRINT AI പേജുകൾ എണ്ണി, A4 മാർജിനുകൾ ശരിയാക്കി, പെൻഡ്രൈവോ WhatsApp ഫോർവേഡോ ഇല്ലാതെ പ്രിന്റ് സ്വയം ക്യൂവിലാക്കും.",
+        c3l: "03 / വാങ്ങി പോകൂ", c3h: "ടോക്കൺ കാണിക്കൂ, ക്യൂ ഇല്ല", c3p: "പൈപ്പ്‌ലൈൻ റോഡിലെ <strong class=\"text-white\">T FIX® CUSAT</strong>-ൽ വന്ന് <span class=\"font-mono-tech text-[#f3d97d]\">#CP</span> ടോക്കൺ കാണിച്ച് സെക്കൻഡുകൾക്കുള്ളിൽ പേജുകൾ വാങ്ങൂ.",
+        rBw: "B&W", rColor: "കളർ", r1: " ഒരു വശം", r2: "{p} ഇരുവശം",
+        rateNote: "ഓരോ ഷീറ്റിനും. ദിവസത്തെ ആദ്യ ഓർഡറിന് B&W മിനിമം ₹{a4} (A4) / ₹{a3} (A3). ബൈൻഡിംഗ്, ലാമിനേഷൻ, പാസ്പോർട്ട് ഫോട്ടോ: കൗണ്ടറിൽ ചോദിക്കൂ.",
+        locH: "പൈപ്പ്‌ലൈൻ റോഡ്, കളമശ്ശേരി", locP: "സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡ്, CUSAT PO, കളമശ്ശേരി 682022 · ദിവസവും രാത്രി 9:30 വരെ · <span class=\"font-mono-tech text-[#f3d97d]\">print.tfix.in</span> ഓർഡറുകൾ കൗണ്ടറിൽ നിന്ന് നേരിട്ട് വാങ്ങാം.",
+        monSat: "തിങ്കൾ – ശനി", sun: "ഞായർ", counterOpen: "● കൗണ്ടർ തുറന്നിരിക്കുന്നു · {c} വരെ", counterClosed: "● അടച്ചിരിക്കുന്നു · {when} തുറക്കും",
+        directions: "വഴി കാണാം", call: "വിളിക്കൂ", startNew: "പുതിയ പ്രിന്റ്",
+        footer: "© {y} <strong class=\"text-zinc-300\">T FIX® CUSAT</strong> · CLUTCHPRINT AI. T FIX® ഒരു രജിസ്റ്റർ ചെയ്ത ട്രേഡ്‌മാർക്കാണ്.",
+        footer2: "പൈപ്പ്‌ലൈൻ റോഡ്, കളമശ്ശേരി",
+        waMsg: "ഹായ് T FIX® CUSAT, CLUTCHPRINT-നെക്കുറിച്ച് ഒരു സംശയം."
+      }
+    };
+    let lang = "en";
+    try { const s = localStorage.getItem("tfix-print-lang"); if (s === "ml" || s === "en") lang = s; } catch (e) {}
+    const t = (k, vars) => {
+      let s = (T[lang] && T[lang][k]) || T.en[k] || k;
+      if (vars) for (const [a, b] of Object.entries(vars)) s = s.split("{" + a + "}").join(b);
+      return s;
+    };
 
     /* ============ helpers ============ */
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
+    const tok = code => "#" + code;
     const el = (tag, props = {}, ...kids) => {
       const n = document.createElement(tag);
       for (const [k, v] of Object.entries(props)) {
@@ -454,10 +577,10 @@
     };
     let toastTimer = null;
     function toast(msg) {
-      const t = $("#toast"); t.textContent = msg;
-      t.classList.remove("opacity-0", "translate-y-4"); t.classList.add("opacity-100", "translate-y-0");
+      const x = $("#toast"); x.textContent = msg;
+      x.classList.remove("opacity-0", "translate-y-4"); x.classList.add("opacity-100", "translate-y-0");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { t.classList.add("opacity-0", "translate-y-4"); t.classList.remove("opacity-100", "translate-y-0"); }, 2400);
+      toastTimer = setTimeout(() => { x.classList.add("opacity-0", "translate-y-4"); x.classList.remove("opacity-100", "translate-y-0"); }, 2400);
     }
     async function copy(text, okMsg) {
       try { await navigator.clipboard.writeText(text); toast(okMsg); }
@@ -477,34 +600,45 @@
       return { total, sheets: (sheets + odd) * copies };
     }
 
+    /* ============ static text ============ */
+    function applyLang() {
+      document.documentElement.lang = lang;
+      const closeToday = fmt12(SHOP.hours[nowIST().day][1]);
+      $$("[data-i18n]").forEach(n => { n.textContent = t(n.dataset.i18n, { close: closeToday }); });
+      $$("[data-i18n-html]").forEach(n => { n.innerHTML = t(n.dataset.i18nHtml, { y: String(new Date().getFullYear()) }); });   // trusted strings from T only
+      $$("[data-i18n-ph]").forEach(n => { n.placeholder = t(n.dataset.i18nPh); });
+      $("#lang-btn").textContent = t("langBtn");
+      $("#lang-btn").setAttribute("aria-label", lang === "en" ? "മലയാളം" : "English");
+      $$("[data-wa]").forEach(a => a.href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(t("waMsg")));
+      renderRates(); updateHours(); renderFiles(); renderPass();
+    }
+
     /* ============ shop hours + print server status ============ */
     function nowIST() {
       const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
-      const get = t => parts.find(p => p.type === t).value;
+      const get = x => parts.find(p => p.type === x).value;
       return { day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday")), mins: (+get("hour") % 24) * 60 + +get("minute") };
     }
     const toMins = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
-    const fmt12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; };
+    function fmt12(s) { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; }
     let shopOpen = false, srvOnline = null;
 
     function updateHours() {
       const { day, mins } = nowIST(), [o, c] = SHOP.hours[day];
       shopOpen = mins >= toMins(o) && mins < toMins(c);
-      let pill, when = "";
-      if (shopOpen) pill = "CLUTCHPRINT LIVE · OPEN TILL " + fmt12(c);
-      else {
+      let when = "";
+      if (!shopOpen) {
         const before = mins < toMins(o), nd = before ? day : (day + 1) % 7;
-        when = (before ? "today " : "tomorrow ") + fmt12(SHOP.hours[nd][0]);
-        pill = "CLOSED · OPENS " + when.toUpperCase();
+        when = (before ? t("today") : t("tomorrow")) + " " + fmt12(SHOP.hours[nd][0]);
       }
-      $("#shop-pill").textContent = pill;
+      const up = s => lang === "en" ? s.toUpperCase() : s;
+      $("#shop-pill").textContent = shopOpen ? t("pillOpen", { close: fmt12(c) }) : up(t("pillClosed", { when }));
       $("#shop-dot").className = "h-2 w-2 shrink-0 rounded-full " + (shopOpen ? "live-dot bg-[#34d399] shadow-[0_0_8px_#34d399]" : "bg-zinc-500");
-      $("#counter-pill").textContent = shopOpen ? "● COUNTER OPEN · TILL " + c : "● CLOSED · OPENS " + when.toUpperCase();
-      $$("[data-close-time]").forEach(n => n.textContent = fmt12(c));
+      $("#counter-pill").textContent = shopOpen ? t("counterOpen", { c }) : up(t("counterClosed", { when }));
       $$("[data-day]").forEach(n => n.classList.toggle("!text-[#f3d97d]", n.dataset.day.split(",").includes(String(day))));
       const note = $("#closed-note");
       note.hidden = shopOpen;
-      if (!shopOpen) note.textContent = "We're closed right now. Send your order anyway — it will be waiting for us when we open (" + when + ").";
+      if (!shopOpen) note.textContent = t("closedNote", { when });
       renderServer();
     }
 
@@ -519,12 +653,11 @@
       wrap.classList.toggle("border-red-500/40", srvOnline === false && shopOpen);
       if (srvOnline) {
         dot.className = "live-dot h-2 w-2 shrink-0 rounded-full bg-[#34d399] shadow-[0_0_8px_#34d399]";
-        txt.textContent = "AI AUTO PRINT ONLINE";
-        badge.textContent = "ONLINE"; badge.className = "text-emerald-300";
+        txt.textContent = t("srvOn"); badge.textContent = t("badgeOn"); badge.className = "text-emerald-300";
       } else if (srvOnline === false) {
         dot.className = "h-2 w-2 shrink-0 rounded-full " + (shopOpen ? "live-dot bg-red-400 shadow-[0_0_8px_#f87171]" : "bg-zinc-500");
-        txt.textContent = shopOpen ? "PRINT SERVER OFFLINE — STAFF, PLEASE CHECK SHOP PC 1" : "PRINT SERVER OFFLINE";
-        badge.textContent = "OFFLINE"; badge.className = shopOpen ? "text-red-300" : "text-zinc-400";
+        txt.textContent = shopOpen ? t("srvOffStaff") : t("srvOff");
+        badge.textContent = t("badgeOff"); badge.className = shopOpen ? "text-red-300" : "text-zinc-400";
       } else { badge.textContent = "…"; badge.className = "text-zinc-400"; }
     }
 
@@ -569,9 +702,9 @@
       hideError();
       for (const file of list) {
         const ext = extOf(file.name);
-        if (!ALLOWED_EXT.includes(ext)) { showError("“" + file.name + "” is not supported. Use PDF, DOCX, PPTX, JPG or PNG."); continue; }
-        if (file.size > MAX_FILE_MB * 1048576) { showError("“" + file.name + "” is larger than 25 MB."); continue; }
-        if (files.length >= MAX_FILES) { showError("You can send up to 10 files in one order."); break; }
+        if (!ALLOWED_EXT.includes(ext)) { showError(t("errType", { f: file.name })); continue; }
+        if (file.size > MAX_FILE_MB * 1048576) { showError(t("errBig", { f: file.name })); continue; }
+        if (files.length >= MAX_FILES) { showError(t("errMany")); break; }
         const f = { id: nextId++, file, name: file.name, ext, pages: null, counting: false, range: "", rangeOpen: false };
         files.push(f); countPages(f);
       }
@@ -579,15 +712,15 @@
     }
 
     function fileRow(f) {
-      const meta = f.counting ? "counting pages…" : f.pages == null ? "pages counted at the shop" : f.pages + (f.pages === 1 ? " page" : " pages");
+      const meta = f.counting ? t("counting") : f.pages == null ? t("atShopPages") : f.pages === 1 ? t("page1") : t("pagesN", { n: f.pages });
       const size = f.file.size >= 1048576 ? (f.file.size / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(f.file.size / 1024)) + " KB";
-      const range = el("input", { class: "field mt-2 !min-h-[38px] !text-sm", type: "text", inputmode: "numeric", placeholder: "Pages to print, e.g. 1-5, 8", value: f.range, "aria-label": "Pages to print for " + f.name });
+      const range = el("input", { class: "field mt-2 !min-h-[38px] !text-sm", type: "text", inputmode: "numeric", placeholder: t("rangePh"), value: f.range, "aria-label": t("choosePages") + " — " + f.name });
       range.hidden = !f.rangeOpen;
       const err = el("p", { class: "mt-1 text-[11px] text-red-300", hidden: "" });
-      const check = () => { const bad = f.range && !parseRange(f.range, f.pages); err.hidden = !bad; err.textContent = f.pages ? "Use pages within 1–" + f.pages + ", e.g. 1-5, 8" : "Use page numbers like 1-5, 8"; };
+      const check = () => { const bad = f.range && !parseRange(f.range, f.pages); err.hidden = !bad; err.textContent = f.pages ? t("rangeErr", { n: f.pages }) : t("rangeErrU"); };
       range.addEventListener("input", () => { f.range = range.value.trim(); check(); renderSummary(); });
       check();
-      const pagesBtn = el("button", { type: "button", class: "rounded border px-2 py-1 text-[11px] " + (f.rangeOpen ? "border-[#d4af37] text-[#f3d97d]" : "border-white/10 text-zinc-300 hover:border-[#d4af37]/50"), text: f.rangeOpen ? "Choose pages" : "All pages" });
+      const pagesBtn = el("button", { type: "button", class: "rounded border px-2 py-1 text-[11px] " + (f.rangeOpen ? "border-[#d4af37] text-[#f3d97d]" : "border-white/10 text-zinc-300 hover:border-[#d4af37]/50"), text: f.rangeOpen ? t("choosePages") : t("allPages") });
       pagesBtn.addEventListener("click", () => {
         f.rangeOpen = !f.rangeOpen; if (!f.rangeOpen) f.range = "";
         renderFiles();
@@ -599,7 +732,7 @@
             el("p", { class: "truncate font-mono-tech text-xs font-semibold text-[#f3d97d]", text: f.name }),
             el("p", { class: "font-mono-tech text-[11px] text-zinc-400", text: f.ext.toUpperCase() + " · " + size + " · " + meta })),
           el("div", { class: "flex shrink-0 items-center gap-1" }, pagesBtn,
-            el("button", { type: "button", class: "rounded px-2 py-1 font-mono-tech text-[11px] text-zinc-400 hover:bg-white/10 hover:text-white", "aria-label": "Remove " + f.name, text: "✕",
+            el("button", { type: "button", class: "rounded px-2 py-1 font-mono-tech text-[11px] text-zinc-400 hover:bg-white/10 hover:text-white", "aria-label": t("remove") + " " + f.name, text: "✕",
               onclick: () => { files = files.filter(x => x.id !== f.id); renderFiles(); } }))),
         range, err);
     }
@@ -623,11 +756,11 @@
       });
       $("#copies-count").textContent = String(opts.copies);
       const e = estimate();
-      $("#stat-pages").textContent = files.length ? e.pages + (e.unknown ? "+" : "") + " pgs" : "—";
+      $("#stat-pages").textContent = files.length ? e.pages + (e.unknown ? "+" : "") + " " + t("pgs") : "—";
       $("#stat-sheets").textContent = files.length ? e.sheets + (e.unknown ? "+" : "") + " " + opts.paper_size : "—";
       $("#stat-price").textContent = rupee(e.total) + (e.unknown ? " +" : "");
       const r = RATES[opts.paper_size];
-      $("#rate-breakdown").textContent = opts.paper_size + " · B&W ₹" + r.bw.single + "/sheet 1-sided or ₹" + r.bw.double + " duplex (₹" + r.bw.min + " min on your first order of the day) · Color ₹" + r.colour.single + " 1-sided or ₹" + r.colour.double + " duplex" + (e.unknown ? " · Word/PowerPoint priced at the shop" : "");
+      $("#rate-breakdown").textContent = t("rateLine", { size: opts.paper_size, a: r.bw.single, b: r.bw.double, m: r.bw.min, c: r.colour.single, d: r.colour.double }) + (e.unknown ? t("rateDoc") : "");
     }
 
     function showError(m) { const e = $("#form-error"); e.textContent = m; e.hidden = false; }
@@ -638,14 +771,15 @@
       return /^[6-9]\d{9}$/.test(d) ? d : null;
     }
 
+    let sending = false;
     function send() {
       hideError();
       const name = $("#name").value.trim(), phone = validPhone($("#phone").value);
-      if (!name) { showError("Please enter your name."); $("#name").focus(); return; }
-      if (!phone) { showError("Please enter a valid 10-digit mobile number."); $("#phone").focus(); return; }
-      if (!files.length) { showError("Please add at least one file."); return; }
-      if (files.some(f => f.range && !parseRange(f.range, f.pages))) { showError("Please fix the page selection."); return; }
-      if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError("Files are too large together (max 60 MB)."); return; }
+      if (!name) { showError(t("errName")); $("#name").focus(); return; }
+      if (!phone) { showError(t("errPhone")); $("#phone").focus(); return; }
+      if (!files.length) { showError(t("errFiles")); return; }
+      if (files.some(f => f.range && !parseRange(f.range, f.pages))) { showError(t("errRange")); return; }
+      if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError(t("errTotal")); return; }
       const e = estimate(), fd = new FormData();
       fd.append("name", name); fd.append("phone", phone); fd.append("notes", $("#notes").value.trim());
       if (!e.unknown) fd.append("est_total", String(e.total));
@@ -653,21 +787,21 @@
       files.forEach(f => fd.append("files[]", f.file, f.name));
 
       const btn = $("#send-btn"), bar = $("#progress");
-      btn.disabled = true; bar.hidden = false; bar.firstElementChild.style.width = "0";
-      setStep(1, "active", "Uploading " + files.length + (files.length === 1 ? " file" : " files") + "…"); setStep(2, "idle"); setStep(3, "idle");
-      engine("UPLOADING", "gold", 15, true);
+      sending = true; btn.disabled = true; bar.hidden = false; bar.firstElementChild.style.width = "0";
+      setStep(1, "active", t("s1Up", { n: files.length })); setStep(2, "idle"); setStep(3, "idle");
+      engine(t("eUploading"), "gold", 15, true);
       const xhr = new XMLHttpRequest();
       xhr.open("POST", API + "order.php");
-      xhr.upload.onprogress = ev => { if (!ev.lengthComputable) return; const p = Math.round(ev.loaded / ev.total * 100); bar.firstElementChild.style.width = p + "%"; btn.textContent = "Uploading… " + p + "%"; };
-      const done = () => { btn.disabled = false; bar.hidden = true; btn.textContent = "Send to CLUTCHPRINT AI"; };
-      xhr.onerror = () => { done(); showError("Could not send your order. Check your connection and try again."); renderPass(); };
+      xhr.upload.onprogress = ev => { if (!ev.lengthComputable) return; const p = Math.round(ev.loaded / ev.total * 100); bar.firstElementChild.style.width = p + "%"; btn.textContent = t("uploading", { p }); };
+      const done = () => { sending = false; btn.disabled = false; bar.hidden = true; btn.textContent = t("send"); };
+      xhr.onerror = () => { done(); showError(t("errNet")); renderPass(); };
       xhr.onload = () => {
         done(); let data = {};
         try { data = JSON.parse(xhr.responseText); } catch (err) {}
-        if (xhr.status !== 201 || !data.code) { showError(data.error || "Could not send your order. Please try again."); renderPass(); return; }
+        if (xhr.status !== 201 || !data.code) { showError(data.error || t("errNet")); renderPass(); return; }
         saveOrder({ code: data.code, token: data.token, at: Date.now() });
         current = data.code; files = []; $("#notes").value = ""; renderFiles();
-        toast("Locked in! Token #" + data.code + " sent to T FIX® CUSAT.");
+        toast(t("tLocked", { tok: tok(data.code) }));
         refreshOrders();
         $("#token-card").scrollIntoView({ behavior: "smooth", block: "center" });
       };
@@ -679,7 +813,7 @@
     const loadOrders = () => { try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const saveOrders = l => { try { localStorage.setItem(STORE, JSON.stringify(l.slice(0, 20))); } catch (e) {} };
     const saveOrder = o => saveOrders([o, ...loadOrders().filter(x => x.code !== o.code)]);
-    const orderLink = o => location.origin + location.pathname + "?order=" + o.code + "&t=" + o.token;
+    const orderLink = o => location.origin + location.pathname + "?order=" + encodeURIComponent(o.code) + "&t=" + o.token;
 
     async function refreshOrders() {
       const list = loadOrders();
@@ -697,13 +831,13 @@
       done: ["flex items-start gap-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 font-mono-tech text-xs font-bold text-emerald-300", "text-sm font-semibold text-white", "font-mono-tech text-[11px] text-emerald-300/90"],
       warn: ["flex items-start gap-3 rounded-xl border border-red-500/35 bg-red-500/10 p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/20 font-mono-tech text-xs font-bold text-red-300", "text-sm font-semibold text-white", "font-mono-tech text-[11px] text-red-300"]
     };
-    const STEP_DEFAULT = [["Reading pages…", "Waiting for your files"], ["Queued at T FIX…", "The shop server checks & prices every file"], ["Locked in. Ready at T FIX.", "Printed after payment is confirmed"]];
-    function setStep(n, mode, sub, title) {
+    // Step titles are the brand's: Reading pages… → Setting layout… → Locked in. Ready at T FIX.
+    function setStep(n, mode, sub) {
       const c = STEP_CLS[mode];
       $("#step-" + n).className = c[0]; $("#step-" + n + "-icon").className = c[1]; $("#step-" + n + "-title").className = c[2]; $("#step-" + n + "-sub").className = c[3];
       $("#step-" + n + "-icon").textContent = mode === "done" ? "✓" : mode === "active" ? "●" : mode === "warn" ? "!" : String(n);
-      $("#step-" + n + "-title").textContent = title || STEP_DEFAULT[n - 1][0];
-      $("#step-" + n + "-sub").textContent = sub || STEP_DEFAULT[n - 1][1];
+      $("#step-" + n + "-title").textContent = t("s" + n);
+      $("#step-" + n + "-sub").textContent = sub || t("s" + n + "Idle");
     }
     function engine(label, tone, pct, shimmer) {
       const s = $("#engine-state");
@@ -713,75 +847,72 @@
     }
 
     const BADGE = {
-      pending: ["WAITING FOR SHOP", "bg-white/10 text-zinc-300"], received: ["PRICE CONFIRMED", "bg-[#d4af37]/20 text-[#f3d97d]"],
-      paid: ["PAID · IN QUEUE", "bg-[#d4af37]/20 text-[#f3d97d]"], printing: ["PRINTING", "bg-[#d4af37]/25 text-[#f3d97d]"],
-      ready: ["READY AT T FIX", "bg-emerald-500/20 text-emerald-300"], collected: ["COLLECTED", "bg-emerald-500/20 text-emerald-300"],
-      cancelled: ["CANCELLED", "bg-red-500/20 text-red-300"]
+      pending: ["bPending", "bg-white/10 text-zinc-300"], received: ["bReceived", "bg-[#d4af37]/20 text-[#f3d97d]"],
+      paid: ["bPaid", "bg-[#d4af37]/20 text-[#f3d97d]"], printing: ["bPrinting", "bg-[#d4af37]/25 text-[#f3d97d]"],
+      ready: ["bReady", "bg-emerald-500/20 text-emerald-300"], collected: ["bCollected", "bg-emerald-500/20 text-emerald-300"],
+      cancelled: ["bCancelled", "bg-red-500/20 text-red-300"]
     };
-    function badge(text, cls) { const b = $("#token-badge"); b.textContent = text; b.className = "whitespace-nowrap rounded px-2 py-0.5 font-mono-tech text-[10px] font-semibold " + cls; }
+    function badge(key, cls) { const b = $("#token-badge"); b.textContent = t(key); b.className = "whitespace-nowrap rounded px-2 py-0.5 font-mono-tech text-[10px] font-semibold " + cls; }
 
     function renderPass() {
       const list = loadOrders();
       const o = list.find(x => x.code === current) || list[0];
       $("#my-orders").hidden = list.length < 2;
       $("#my-orders-list").replaceChildren(...list.slice(0, 6).map(x => {
-        const st = cache[x.code] ? (BADGE[cache[x.code].status] || BADGE.pending)[0] : "…";
+        const st = cache[x.code] ? t((BADGE[cache[x.code].status] || BADGE.pending)[0]) : "…";
         return el("button", { type: "button", class: "rounded-lg border px-2.5 py-1 font-mono-tech text-[11px] " + (o && x.code === o.code ? "border-[#d4af37] bg-[#d4af37]/15 text-[#f3d97d]" : "border-white/10 bg-white/5 text-zinc-300 hover:border-white/25"),
-          text: "#" + x.code + " · " + st, onclick: () => { current = x.code; renderPass(); } });
+          text: tok(x.code) + " · " + st, onclick: () => { current = x.code; renderPass(); } });
       }));
       const btnTok = $("#copy-token-btn"), btnLink = $("#copy-link-btn");
       if (!o) {
-        $("#token-number").textContent = "#TP······";
-        badge("PREVIEW", "bg-[#d4af37]/20 text-[#f3d97d]");
-        $("#pass-line").textContent = "Send your files and your pickup token appears here.";
+        $("#token-number").textContent = "#CP-···";
+        badge("bPreview", "bg-[#d4af37]/20 text-[#f3d97d]");
+        $("#pass-line").textContent = t("passEmpty"); $("#pass-status").textContent = "";
         $("#pass-files").textContent = "—"; $("#pass-total").textContent = "—";
         $("#pass-file-list").replaceChildren(); $("#pay-box").replaceChildren();
         btnTok.disabled = btnLink.disabled = true;
-        if (!$("#send-btn").disabled) { setStep(1, "idle"); setStep(2, "idle"); setStep(3, "idle"); engine(srvOnline === false ? "SERVER OFFLINE" : "READY", srvOnline === false ? "red" : "", 0, false); }
+        if (!sending) { setStep(1, "idle"); setStep(2, "idle"); setStep(3, "idle"); engine(srvOnline === false ? t("eSrvOff") : t("eReady"), srvOnline === false ? "red" : "", 0, false); }
         return;
       }
-      const s = cache[o.code], status = s ? s.status : "pending";
-      $("#token-number").textContent = "#" + o.code;
+      const s = cache[o.code], status = s ? s.status : "pending", T0 = tok(o.code);
+      $("#token-number").textContent = T0;
       badge(...(BADGE[status] || BADGE.pending));
       btnTok.disabled = btnLink.disabled = false;
-      btnTok.onclick = () => copy(o.code, "Copied token #" + o.code);
-      btnLink.onclick = () => copy(orderLink(o), "Link copied — open it on any phone to track this order");
+      btnTok.onclick = () => copy(T0, t("tTok", { tok: T0 }));
+      btnLink.onclick = () => copy(orderLink(o), t("tLink"));
       renderQR(orderLink(o));
       const amount = s && s.confirmed_total != null ? s.confirmed_total : s && s.est_total;
       const confirmed = !!(s && s.confirmed_total != null);
+      const amt = amount != null ? rupee(amount) : "";
       $("#pass-files").textContent = s && s.files ? s.files[0].name + (s.files.length > 1 ? " +" + (s.files.length - 1) : "") : "…";
-      $("#pass-total").textContent = amount != null ? rupee(amount) + (confirmed ? "" : " (est.)") : "priced at the shop";
+      $("#pass-total").textContent = amount != null ? amt + (confirmed ? "" : " " + t("est")) : t("atShop");
       $("#pass-file-list").replaceChildren(...(s && s.files ? s.files.map(f => f.error
         ? el("li", { class: "min-w-0" },
             el("span", { class: "block truncate text-zinc-300", text: f.name }),
-            el("span", { class: "block break-words text-red-300", text: "Problem: " + f.error }))
+            el("span", { class: "block break-words text-red-300", text: t("problem") + " " + f.error }))
         : el("li", { class: "flex justify-between gap-3" },
             el("span", { class: "min-w-0 truncate text-zinc-300", text: f.name + (f.pages ? " · " + f.pages + "p × " + f.copies : "") }),
             el("span", { class: "shrink-0 text-zinc-400", text: f.cost != null ? rupee(f.cost) : "" }))) : []));
 
-      const lines = {
-        pending: "Show token #" + o.code + " at the T FIX counter. " + (srvOnline ? "The shop server is online — it will price your order within a minute." : "The shop server picks it up as soon as it's online."),
-        received: "Price confirmed: " + (amount != null ? rupee(amount) : "") + ". Pay by UPI below or at the counter — we print once payment is confirmed.",
-        paid: "Paid — your order is in the print queue.", printing: "Printing now at T FIX® CUSAT.",
-        ready: "Ready! Show token #" + o.code + " at the T FIX counter to collect.", collected: "Collected. Thank you!", cancelled: "This order was cancelled — please contact the shop."
-      };
-      $("#pass-line").textContent = lines[status] || lines.pending;
+      const lines = { pending: srvOnline ? "pPendingOn" : "pPendingOff", received: "pReceived", paid: "pPaid", printing: "pPrinting", ready: "pReady", collected: "pCollected", cancelled: "pCancelled" };
+      $("#pass-line").textContent = t("passBrand", { tok: T0 });
+      $("#pass-status").textContent = t(lines[status] || lines.pending, { amt });
       $("#pay-box").replaceChildren(status === "received" && confirmed && amount > 0 ? upiBlock(o, amount) : "");
 
       // AI engine steps follow the real order status
       const nFiles = s && s.files ? s.files.length : 0;
-      setStep(1, "done", nFiles ? nFiles + (nFiles === 1 ? " file" : " files") + " received · order #" + o.code : "Order #" + o.code + " saved", "Files received");
+      setStep(1, "done", t("s1Done", { n: nFiles || 1, tok: T0 }));
       if (status === "pending") {
-        setStep(2, srvOnline === false ? "warn" : "active", srvOnline === false ? "Shop server offline — your order waits safely" : "Waiting for the shop server to price it", "Queued at T FIX…");
-        setStep(3, "idle"); engine(srvOnline === false ? "WAITING" : "QUEUED", srvOnline === false ? "red" : "gold", 40, srvOnline !== false);
+        setStep(2, srvOnline === false ? "warn" : "active", srvOnline === false ? t("s2Off") : t("s2Wait"));
+        setStep(3, "idle"); engine(srvOnline === false ? t("eWaiting") : t("eQueued"), srvOnline === false ? "red" : "gold", 40, srvOnline !== false);
       } else if (status === "cancelled") {
-        setStep(2, "warn", "Cancelled by the shop", "Cancelled"); setStep(3, "idle"); engine("CANCELLED", "red", 100, false);
+        setStep(2, "warn", t("s2Cancel")); setStep(3, "idle"); engine(t("eCancelled"), "red", 100, false);
       } else {
-        setStep(2, "done", "Priced by T Print" + (amount != null ? ": " + rupee(amount) : ""), "Checked & priced");
-        if (status === "received") { setStep(3, "active", "Pay " + (amount != null ? rupee(amount) : "") + " by UPI or at the counter", "Waiting for payment"); engine("PAY TO PRINT", "gold", 66, false); }
-        else if (status === "paid") { setStep(3, "active", "Paid — printing next", "In the print queue"); engine("PAID", "gold", 80, true); }
-        else if (status === "printing") { setStep(3, "active", "On the printer now", "Printing…"); engine("PRINTING", "gold", 90, true); }
-        else { setStep(3, "done", status === "collected" ? "Collected — thank you!" : "Token #" + o.code + " ready at the Pipeline Road counter", "Locked in. Ready at T FIX."); engine(status === "collected" ? "COLLECTED" : "LOCKED IN", "green", 100, false); }
+        setStep(2, "done", t("s2Done", { amt }));
+        if (status === "received") { setStep(3, "active", t("s3Pay", { amt })); engine(t("ePay"), "gold", 66, false); }
+        else if (status === "paid") { setStep(3, "active", t("s3Paid")); engine(t("ePaid"), "gold", 80, true); }
+        else if (status === "printing") { setStep(3, "active", t("s3Printing")); engine(t("ePrinting"), "gold", 90, true); }
+        else { setStep(3, "done", status === "collected" ? t("s3Collected") : t("s3Ready", { tok: T0 })); engine(status === "collected" ? t("eCollected") : t("eLocked"), "green", 100, false); }
       }
     }
 
@@ -792,7 +923,6 @@
       qrLoaded.then(() => {
         const box = $("#qr-box"); box.replaceChildren(); box.classList.add("bg-white");
         new window.QRCode(box, { text: url, width: 120, height: 120, colorDark: "#0b0c0e", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
-        box.title = "Scan to open this order on another phone";
       }).catch(() => {});
     }
 
@@ -803,41 +933,39 @@
     const openQr = new Set();
     function upiBlock(o, amount) {
       const mobile = window.matchMedia("(pointer: coarse)").matches;
-      const details = el("details", { class: "mt-3" }, el("summary", { class: "cursor-pointer font-mono-tech text-[11px] text-zinc-300", text: "Show UPI QR code" }),
-        el("img", { class: "upi-qr", src: "upi-qr.png", alt: "UPI QR code — " + SHOP.upi.id, width: "688", height: "1045", loading: "lazy" }));
+      const details = el("details", { class: "mt-3" }, el("summary", { class: "cursor-pointer font-mono-tech text-[11px] text-zinc-300", text: t("showQr") }),
+        el("img", { class: "upi-qr", src: "upi-qr.png", alt: "UPI QR — " + SHOP.upi.id, width: "688", height: "1045", loading: "lazy" }));
       details.open = !mobile || openQr.has(o.code);
       details.addEventListener("toggle", () => { details.open ? openQr.add(o.code) : openQr.delete(o.code); });
       return el("div", { class: "mt-3 rounded-xl border border-[#d4af37]/40 bg-[#d4af37]/10 p-3" },
-        mobile ? el("a", { class: "gold-btn block rounded-lg px-4 py-2.5 text-center text-sm font-extrabold", href: upiLink(o, amount), text: "Pay " + rupee(amount) + " by UPI" }) : null,
+        mobile ? el("a", { class: "gold-btn block rounded-lg px-4 py-2.5 text-center text-sm font-extrabold", href: upiLink(o, amount), text: t("payUpi", { amt: rupee(amount) }) }) : null,
         details,
         el("div", { class: "mt-2 flex flex-wrap items-center gap-2 font-mono-tech text-[11px]" },
-          el("span", { class: "text-zinc-400", text: "UPI ID:" }), el("span", { class: "font-bold text-white", text: SHOP.upi.id }),
-          el("button", { type: "button", class: "rounded border border-white/15 px-2 py-0.5 text-zinc-300 hover:bg-white/10", text: "Copy", onclick: () => copy(SHOP.upi.id, "UPI ID copied") })),
-        el("p", { class: "mt-1.5 text-[11px] leading-relaxed text-zinc-400", text: "Write " + o.code + " in the payment note. The shop marks your order paid after checking the payment." }));
+          el("span", { class: "text-zinc-400", text: t("upiId") }), el("span", { class: "font-bold text-white", text: SHOP.upi.id }),
+          el("button", { type: "button", class: "rounded border border-white/15 px-2 py-0.5 text-zinc-300 hover:bg-white/10", text: t("copy"), onclick: () => copy(SHOP.upi.id, t("tUpi")) })),
+        el("p", { class: "mt-1.5 text-[11px] leading-relaxed text-zinc-400", text: t("upiNote", { tok: tok(o.code) }) }));
     }
 
     /* ============ rates ============ */
     function renderRates() {
-      const cards = [["B&W · A4", RATES.A4.bw], ["Color · A4", RATES.A4.colour], ["B&W · A3", RATES.A3.bw], ["Color · A3", RATES.A3.colour]];
-      $("#rate-cards").replaceChildren(...cards.map(([t, r]) => el("div", { class: "glass-card rounded-xl p-3.5" },
-        el("span", { class: "font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400", text: t }),
-        el("p", { class: "mt-1 text-lg font-extrabold text-white" }, rupee(r.single), el("span", { class: "text-xs font-medium text-zinc-400", text: " 1-sided" })),
-        el("p", { class: "font-mono-tech text-xs text-[#f3d97d]", text: rupee(r.double) + " duplex" }))));
-      $("#rate-note").textContent = "Per sheet. B&W minimum ₹" + RATES.A4.bw.min + " (A4) / ₹" + RATES.A3.bw.min + " (A3) on your first order of the day. Binding, lamination & passport photos: ask at the counter.";
+      const cards = [[t("rBw") + " · A4", RATES.A4.bw], [t("rColor") + " · A4", RATES.A4.colour], [t("rBw") + " · A3", RATES.A3.bw], [t("rColor") + " · A3", RATES.A3.colour]];
+      $("#rate-cards").replaceChildren(...cards.map(([title, r]) => el("div", { class: "glass-card rounded-xl p-3.5" },
+        el("span", { class: "font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400", text: title }),
+        el("p", { class: "mt-1 text-lg font-extrabold text-white" }, rupee(r.single), el("span", { class: "text-xs font-medium text-zinc-400", text: t("r1") })),
+        el("p", { class: "font-mono-tech text-xs text-[#f3d97d]", text: t("r2", { p: rupee(r.double) }) }))));
+      $("#rate-note").textContent = t("rateNote", { a4: RATES.A4.bw.min, a3: RATES.A3.bw.min });
     }
 
     /* ============ wire up ============ */
     const q = new URLSearchParams(location.search);
     const linkCode = (q.get("order") || "").toUpperCase(), linkTok = q.get("t") || "";
-    if (/^TP[A-Z0-9]{6}$/.test(linkCode) && /^[a-f0-9]{32}$/.test(linkTok)) {
+    if (CODE_RE.test(linkCode) && /^[a-f0-9]{32}$/.test(linkTok)) {
       if (!loadOrders().some(o => o.code === linkCode)) saveOrder({ code: linkCode, token: linkTok, at: Date.now() });
       current = linkCode; history.replaceState(null, "", location.pathname + "#upload-studio");
     }
 
-    $$("[data-wa]").forEach(a => a.href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent("Hi T FIX CUSAT, I have a question about printing."));
     $("#map-link").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
     $("#call-link").href = "tel:" + SHOP.phone;
-    $("#year").textContent = new Date().getFullYear();
 
     const dz = $("#dropzone"), input = $("#file-input");
     dz.addEventListener("click", () => input.click());
@@ -854,8 +982,13 @@
     $("#copies-plus").addEventListener("click", () => { if (opts.copies < 500) { opts.copies++; renderSummary(); } });
     $("#pps").addEventListener("change", e => { opts.pps = +e.target.value; renderSummary(); });
     $("#send-btn").addEventListener("click", send);
+    $("#lang-btn").addEventListener("click", () => {
+      lang = lang === "en" ? "ml" : "en";
+      try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
+      applyLang();
+    });
 
-    renderRates(); renderSummary(); updateHours(); renderPass();
+    applyLang();
     refreshOrders(); checkServer();
     setInterval(updateHours, 60000);
     setInterval(() => { if (!document.hidden) { checkServer(); if (loadOrders().length) refreshOrders(); } }, 30000);

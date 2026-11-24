@@ -180,7 +180,7 @@ function random_code(): string
     for ($i = 0; $i < 6; $i++) {
         $out .= $alphabet[random_int(0, strlen($alphabet) - 1)];
     }
-    return 'TP' . $out;
+    return 'TMP' . $out;   // placeholder until the order id is known (see order.php)
 }
 
 /** Check the first bytes so a renamed file can't pass as a PDF/image/document. */

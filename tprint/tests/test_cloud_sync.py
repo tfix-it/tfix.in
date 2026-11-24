@@ -4,6 +4,7 @@ installed (e.g. on the shop PC)."""
 import hashlib
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -106,6 +107,7 @@ def test_order_while_closed_then_import_pay_print(site, tmp_path):
     order = place_order(site, [(pdf(tmp_path, 3), BW),
                                (pdf(tmp_path, 4, 'b.pdf'), {**BW, 'color': True, 'copies': 2, 'pages_range': '1-2'})])
     assert status(site, order)['status'] == 'pending'
+    assert re.fullmatch(r'CP-\d{3,}', order['code'])      # pickup token, e.g. CP-101
 
     created = cloud_sync.sync_once(client(site))          # shop PC comes online
     assert len(created) == 2

@@ -9,9 +9,10 @@ require __DIR__ . '/lib.php';
 
 require_method('GET');
 
-$code = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($_GET['code'] ?? '')) ?? '');
+$code = strtoupper(preg_replace('/[^A-Za-z0-9-]/', '', (string)($_GET['code'] ?? '')) ?? '');
 $token = (string)($_GET['t'] ?? '');
-if (!preg_match('/^TP[A-Z0-9]{6}$/', $code) || !preg_match('/^[a-f0-9]{32}$/', $token)) {
+// CP-104 style tokens (current) or TPXXXXXX codes (orders placed before the CLUTCHPRINT launch)
+if (!preg_match('/^(CP-\d{3,9}|TP[A-Z0-9]{6})$/', $code) || !preg_match('/^[a-f0-9]{32}$/', $token)) {
     fail(404, 'Order not found.');
 }
 

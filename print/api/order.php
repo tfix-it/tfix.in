@@ -128,6 +128,10 @@ try {
                    VALUES (?, ?, ?, ?, ?, \'pending\', ?, ?, ?)')
         ->execute([$code, hash('sha256', $token), $phone, $name, $notes, $estTotal, $now, $now]);
     $orderId = (int)$pdo->lastInsertId();
+    // Pickup token shown to the customer and staff: #CP-104, #CP-105, ...
+    // (short enough to say at the counter; status lookups still need the secret token)
+    $code = 'CP-' . ($orderId + 100);
+    $pdo->prepare('UPDATE orders SET code = ? WHERE id = ?')->execute([$code, $orderId]);
 
     $ins = $pdo->prepare('INSERT INTO order_files (order_id, original_name, ext, stored_name, size_bytes, color, doubleside,
         duplex_edge, paper_size, orientation, pages_per_sheet, copies, pages_range, est_pages)
