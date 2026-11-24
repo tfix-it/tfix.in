@@ -9,6 +9,7 @@
  *   POST ?action=ack     (JSON)       {order_id, files:[{file_id, job_id, pages, cost, error}]}
  *                                     marks the order received and deletes the files here
  *   POST ?action=status  (JSON)       {orders:[{order_id, status, files:[{file_id, job_status, paid}]}]}
+ *   POST ?action=reset_pin (JSON)     {phone} -> {pin} new temporary CLUTCHPRINT PIN (staff use)
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -146,6 +147,24 @@ switch ($action) {
             $n++;
         }
         send_json(200, ['ok' => true, 'updated' => $n]);
+
+    case 'reset_pin':
+        // Staff (T Print admin) reset a forgotten CLUTCHPRINT PIN: a new random
+        // 4-digit PIN is returned for staff to tell the customer at the counter.
+        require_method('POST');
+        $body = json_body();
+        $phone = normalize_phone((string)($body['phone'] ?? ''));
+        if ($phone === null) {
+            fail(400, 'Not a valid 10-digit mobile number.');
+        }
+        if (find_customer($phone) === null) {
+            fail(404, 'No CLUTCHPRINT account for this mobile number.');
+        }
+        $pin = sprintf('%04d', random_int(0, 9999));
+        $pdo->prepare('UPDATE customers SET pin_hash = ?, failed_attempts = 0, locked_until = NULL, updated_at = ? WHERE phone = ?')
+            ->execute([password_hash($pin, PASSWORD_DEFAULT), now(), $phone]);
+        $pdo->prepare('DELETE FROM client_sessions WHERE phone = ?')->execute([$phone]);   // sign out everywhere
+        send_json(200, ['ok' => true, 'pin' => $pin, 'phone' => $phone]);
 
     default:
         fail(404, 'Unknown action.');

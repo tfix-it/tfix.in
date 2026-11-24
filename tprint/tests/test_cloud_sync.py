@@ -83,12 +83,12 @@ def pdf(tmp_path, pages, name='doc.pdf'):
     return p
 
 
-def place_order(site, files, phone='9876543210'):
+def place_order(site, files, phone='9876543210', pin='1234', expect=201):
     r = httpx.post(site.base + '/order.php', data={
-        'name': 'Anu', 'phone': phone, 'notes': 'cover in colour',
+        'name': 'Anu', 'phone': phone, 'pin': pin, 'notes': 'cover in colour',
         'options': json.dumps([o for _, o in files]),
     }, files=[('files[]', (p.name, p.read_bytes(), 'application/pdf')) for p, _ in files])
-    assert r.status_code == 201, r.text
+    assert r.status_code == expect, r.text
     return r.json()
 
 
@@ -195,10 +195,10 @@ def test_website_down_changes_nothing(tmp_path):
 def test_order_validation(site, tmp_path):
     fake = tmp_path / 'fake.pdf'
     fake.write_bytes(b'hello')
-    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '9876543210', 'options': json.dumps([BW])},
+    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '9876543210', 'pin': '1234', 'options': json.dumps([BW])},
                    files=[('files[]', ('fake.pdf', fake.read_bytes(), 'application/pdf'))])
     assert r.status_code == 400
-    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '123', 'options': json.dumps([BW])},
+    r = httpx.post(site.base + '/order.php', data={'name': 'A', 'phone': '123', 'pin': '1234', 'options': json.dumps([BW])},
                    files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
     assert r.status_code == 400
     order = place_order(site, [(pdf(tmp_path, 1), BW)])
@@ -231,3 +231,97 @@ def test_server_status_heartbeat(site, tmp_path):
     assert s['online'] is True and s['seconds_ago'] <= 5
     (site.data / 'heartbeat').write_text(str(int(time.time()) - 600))       # 10 minutes silent
     assert server()['online'] is False
+
+
+# ---------------- CLUTCHPRINT accounts: mobile number = username, 4-digit PIN ----------------
+def login(site, phone, pin):
+    return httpx.post(site.base + '/account.php?action=login', data={'phone': phone, 'pin': pin})
+
+
+def my_orders(site, session):
+    return httpx.get(site.base + '/account.php?action=orders', headers={'X-Client-Session': session or ''})
+
+
+def test_first_order_creates_account_later_orders_need_the_pin(site, tmp_path):
+    first = place_order(site, [(pdf(tmp_path, 1), BW)], pin='4321')
+    assert first['new_account'] is True and len(first['session']) == 48
+    place_order(site, [(pdf(tmp_path, 1), BW)], pin='0000', expect=401)     # someone else, wrong PIN
+    place_order(site, [(pdf(tmp_path, 1), BW)], pin='12a4', expect=400)     # not 4 digits
+    again = place_order(site, [(pdf(tmp_path, 1), BW)], pin='4321')
+    assert again['new_account'] is False
+    assert again['code'] != first['code']
+
+
+def test_sign_in_lists_only_my_tokens(site, tmp_path):
+    a = place_order(site, [(pdf(tmp_path, 1), BW)], phone='9876543210', pin='1111')
+    b = place_order(site, [(pdf(tmp_path, 2), BW)], phone='9876543210', pin='1111')
+    place_order(site, [(pdf(tmp_path, 1), BW)], phone='9123456789', pin='2222')   # another customer
+    assert login(site, '9000000000', '1111').status_code == 404                  # never ordered
+    assert login(site, '9876543210', '9999').status_code == 401
+    r = login(site, '+91 98765 43210', '1111')
+    assert r.status_code == 200 and r.json()['phone'] == '98******10'
+    body = my_orders(site, r.json()['session']).json()
+    assert [o['code'] for o in body['orders']] == [b['code'], a['code']]        # newest first
+    assert all('phone' not in o for o in body['orders'])
+    assert my_orders(site, None).status_code == 401
+    assert my_orders(site, 'f' * 48).status_code == 401
+    httpx.post(site.base + '/account.php?action=logout', headers={'X-Client-Session': r.json()['session']})
+    assert my_orders(site, r.json()['session']).status_code == 401              # signed out
+
+
+def test_wrong_pins_lock_the_number(site, tmp_path):
+    place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')
+    for _ in range(5):
+        assert login(site, '9876543210', '0000').status_code == 401
+    assert login(site, '9876543210', '1111').status_code == 429                 # locked, even with the right PIN
+
+
+def test_staff_reset_pin_via_t_print(site, tmp_path, monkeypatch):
+    first = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')
+    res = client(site).reset_pin('9876543210')
+    new_pin = res['pin']
+    assert len(new_pin) == 4 and new_pin.isdigit()
+    if new_pin != '1111':
+        assert login(site, '9876543210', '1111').status_code == 401
+    assert my_orders(site, first['session']).status_code == 401                 # old sessions signed out
+    assert login(site, '9876543210', new_pin).status_code == 200
+    with pytest.raises(cloud_sync.CloudError, match='404'):
+        client(site).reset_pin('9123456789')                                    # no account
+    with pytest.raises(cloud_sync.CloudError, match='401'):
+        client(site, token='x' * 40).reset_pin('9876543210')                    # wrong shop key
+
+    # the T Print admin route does the same through cloud_sync
+    import asyncio
+    from app.routes_admin import admin_reset_customer_pin
+    monkeypatch.setenv('PRINTSHOP_CLOUD_URL', site.base + '/shop.php')
+    monkeypatch.setenv('PRINTSHOP_CLOUD_TOKEN', TOKEN)
+    for name in ('CLOUD_URL', 'CLOUD_TOKEN'):
+        monkeypatch.delattr(config, name, raising=False)
+    out = asyncio.run(admin_reset_customer_pin('98765 43210'))
+    assert out['phone'] == '9876543210' and login(site, '9876543210', out['pin']).status_code == 200
+
+
+def test_change_pin(site, tmp_path):
+    s = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')['session']
+    h = {'X-Client-Session': s}
+    assert httpx.post(site.base + '/account.php?action=change_pin', headers=h, data={'pin': '0000', 'new_pin': '2468'}).status_code == 401
+    assert httpx.post(site.base + '/account.php?action=change_pin', headers=h, data={'pin': '1111', 'new_pin': '2468'}).status_code == 200
+    assert login(site, '9876543210', '2468').status_code == 200
+
+
+def test_online_job_label_is_html_escaped_in_admin():
+    admin = (Path(__file__).resolve().parents[1] / 'static' / 'admin' / 'index.html').read_text()
+    assert '${esc(job.original_filename)}' in admin and '${esc(truncate(job.original_filename, 16))}' in admin
+
+
+def test_signed_in_customer_orders_without_pin(site, tmp_path):
+    s = place_order(site, [(pdf(tmp_path, 1), BW)], pin='1111')['session']
+    r = httpx.post(site.base + '/order.php', headers={'X-Client-Session': s},
+                   data={'name': 'Anu', 'phone': '9876543210', 'options': json.dumps([BW])},
+                   files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
+    assert r.status_code == 201, r.text
+    # the session only covers its own mobile number
+    r = httpx.post(site.base + '/order.php', headers={'X-Client-Session': s},
+                   data={'name': 'X', 'phone': '9123456789', 'options': json.dumps([BW])},
+                   files=[('files[]', ('a.pdf', pdf(tmp_path, 1).read_bytes(), 'application/pdf'))])
+    assert r.status_code == 400

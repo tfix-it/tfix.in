@@ -22,6 +22,10 @@ const ORDERS_PER_IP_PER_HOUR = 6;
 const ALLOWED_PPS = [1, 2, 4, 6, 9, 16];
 const ORDER_STATUSES = ['pending', 'received', 'paid', 'printing', 'ready', 'collected', 'cancelled'];
 const JOB_STATUSES = ['queued', 'printing', 'ready', 'collected', 'failed'];
+const PIN_MAX_TRIES = 5;              // wrong PINs per mobile before a lock
+const PIN_LOCK_MINUTES = 15;
+const PIN_FAILS_PER_IP_PER_HOUR = 20; // wrong PINs per device/network per hour
+const SESSION_DAYS = 60;
 
 function cfg(): array
 {
@@ -64,7 +68,7 @@ function db(): PDO
 
 function ensure_schema(PDO $pdo): void
 {
-    $flag = data_dir() . '/.schema-v1';
+    $flag = data_dir() . '/.schema-v2';
     if (is_file($flag)) {
         return;
     }
@@ -108,6 +112,27 @@ function ensure_schema(PDO $pdo): void
         paid TINYINT NOT NULL DEFAULT 0,
         error VARCHAR(200) NULL,
         file_deleted TINYINT NOT NULL DEFAULT 0
+    )$tail");
+    // v2: CLUTCHPRINT customer accounts — mobile number = username, 4-digit PIN = password.
+    $pdo->exec("CREATE TABLE IF NOT EXISTS customers (
+        phone VARCHAR(15) NOT NULL PRIMARY KEY,
+        name VARCHAR(60) NOT NULL DEFAULT '',
+        pin_hash VARCHAR(255) NOT NULL,
+        failed_attempts INT NOT NULL DEFAULT 0,
+        locked_until DATETIME NULL,
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL
+    )$tail");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS client_sessions (
+        token_hash CHAR(64) NOT NULL PRIMARY KEY,
+        phone VARCHAR(15) NOT NULL,
+        created_at DATETIME NOT NULL,
+        expires_at DATETIME NOT NULL
+    )$tail");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_failures (
+        id $pk,
+        ip VARCHAR(45) NOT NULL,
+        created_at DATETIME NOT NULL
     )$tail");
     $pdo->exec("CREATE TABLE IF NOT EXISTS rate_events (
         id $pk,
@@ -253,4 +278,91 @@ function delete_stored_file(array $f): void
         @unlink($path);
     }
     db()->prepare('UPDATE order_files SET file_deleted = 1 WHERE id = ?')->execute([$f['id']]);
+}
+
+
+/* ---------------- CLUTCHPRINT customer accounts ---------------- */
+
+function valid_pin(string $pin): bool
+{
+    return preg_match('/^\d{4}$/', $pin) === 1;
+}
+
+function find_customer(string $phone): ?array
+{
+    $st = db()->prepare('SELECT * FROM customers WHERE phone = ?');
+    $st->execute([$phone]);
+    $c = $st->fetch();
+    return $c ?: null;
+}
+
+/**
+ * Check a mobile + PIN. A mobile number seen for the first time gets this PIN
+ * (account created). Wrong PINs count towards a per-mobile lock and a per-IP
+ * limit. Calls fail() with a customer-facing message when the PIN is not accepted.
+ * Returns true when a new account was created.
+ */
+function require_pin(string $phone, string $pin, string $name = ''): bool
+{
+    $pdo = db();
+    $ip = client_ip();
+    $pdo->prepare('DELETE FROM login_failures WHERE created_at < ?')->execute([gmdate('Y-m-d H:i:s', time() - 3600)]);
+    $st = $pdo->prepare('SELECT COUNT(*) FROM login_failures WHERE ip = ?');
+    $st->execute([$ip]);
+    if ((int)$st->fetchColumn() >= PIN_FAILS_PER_IP_PER_HOUR) {
+        fail(429, 'Too many wrong PINs from this device. Please try again later or ask at the T FIX® counter.');
+    }
+    if (!valid_pin($pin)) {
+        fail(400, 'Enter your 4-digit CLUTCHPRINT PIN.');
+    }
+
+    $c = find_customer($phone);
+    if ($c === null) {
+        $pdo->prepare('INSERT INTO customers (phone, name, pin_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+            ->execute([$phone, $name, password_hash($pin, PASSWORD_DEFAULT), now(), now()]);
+        return true;
+    }
+    if ($c['locked_until'] !== null && $c['locked_until'] > now()) {
+        fail(429, 'Too many wrong PINs for this mobile number. Try again in ' . PIN_LOCK_MINUTES . ' minutes, or ask at the T FIX® counter to reset your PIN.');
+    }
+    if (!password_verify($pin, $c['pin_hash'])) {
+        $tries = (int)$c['failed_attempts'] + 1;
+        $locked = $tries >= PIN_MAX_TRIES ? gmdate('Y-m-d H:i:s', time() + PIN_LOCK_MINUTES * 60) : null;
+        $pdo->prepare('UPDATE customers SET failed_attempts = ?, locked_until = ?, updated_at = ? WHERE phone = ?')
+            ->execute([$locked ? 0 : $tries, $locked, now(), $phone]);
+        $pdo->prepare('INSERT INTO login_failures (ip, created_at) VALUES (?, ?)')->execute([$ip, now()]);
+        usleep(400000);
+        fail(401, 'Wrong PIN for this mobile number. Forgot it? Ask at the T FIX® counter to reset it.');
+    }
+    $pdo->prepare('UPDATE customers SET failed_attempts = 0, locked_until = NULL, name = CASE WHEN ? <> \'\' THEN ? ELSE name END, updated_at = ? WHERE phone = ?')
+        ->execute([$name, $name, now(), $phone]);
+    return false;
+}
+
+function create_session(string $phone): string
+{
+    $token = bin2hex(random_bytes(24));
+    $pdo = db();
+    $pdo->prepare('DELETE FROM client_sessions WHERE expires_at < ?')->execute([now()]);
+    $pdo->prepare('INSERT INTO client_sessions (token_hash, phone, created_at, expires_at) VALUES (?, ?, ?, ?)')
+        ->execute([hash('sha256', $token), $phone, now(), gmdate('Y-m-d H:i:s', time() + SESSION_DAYS * 86400)]);
+    return $token;
+}
+
+/** The signed-in customer's mobile number (header X-Client-Session), or null. */
+function session_phone(): ?string
+{
+    $token = (string)($_SERVER['HTTP_X_CLIENT_SESSION'] ?? '');
+    if (!preg_match('/^[a-f0-9]{48}$/', $token)) {
+        return null;
+    }
+    $st = db()->prepare('SELECT phone FROM client_sessions WHERE token_hash = ? AND expires_at > ?');
+    $st->execute([hash('sha256', $token), now()]);
+    $phone = $st->fetchColumn();
+    return $phone === false ? null : (string)$phone;
+}
+
+function masked_phone(string $phone): string
+{
+    return substr($phone, 0, 2) . '******' . substr($phone, -2);
 }

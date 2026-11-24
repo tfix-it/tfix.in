@@ -30,3 +30,13 @@
 - app/config.py: PRINTSHOP_CLOUD_URL / PRINTSHOP_CLOUD_TOKEN / ..._SYNC_INTERVAL_SEC.
 - app/main.py: starts/stops the sync loop (off unless configured).
 - tests/test_cloud_sync.py: end-to-end with the real PHP inbox (php -S + SQLite).
+
+# CLUTCHPRINT accounts and #CP tokens
+- Website: online customers sign in with mobile number (username) + 4-digit PIN; the first order
+  sets the PIN; signed-in customers see all their #CP tokens; lockouts; PIN reset by staff.
+- app/cloud_sync.py: CloudClient.reset_pin(); app/routes_admin.py: POST /api/admin/cloud/reset-pin
+  (admin session + login rate limit).
+- static/admin/index.html: ONLINE #CP label, search by token/customer name, Online customers panel
+  (Reset PIN). Security: file names and customer names are now HTML-escaped in the job table —
+  online orders come from the internet, and an unescaped name could have run script in the admin page.
+- tests: account, lockout, session, PIN reset, change PIN, escaping (45 tests).

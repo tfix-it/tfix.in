@@ -40,6 +40,20 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
   `api/order.php`, shown on the pickup pass and in T Print admin as `[CP-105 · Name] file.pdf`.
 - Tracking an order still needs the customer's private link (code + secret), so numbers can't be guessed to see other orders.
 
+## CLUTCHPRINT accounts (online customers only)
+- **Mobile number = username**, a **4-digit CLUTCHPRINT PIN = password**. Mobile is mandatory on every online order.
+- The first online order from a mobile number sets its PIN; later orders need the PIN (or the customer is
+  already signed in on that phone).
+- Signed in (any phone), the pickup pass lists **all #CP tokens** for that number with live status and UPI pay.
+- 5 wrong PINs lock the number for 15 minutes; max 20 wrong PINs per device per hour. PINs are stored hashed.
+- Forgot PIN: staff press **Reset PIN** in T Print admin (Online customers panel) → a new temporary PIN to tell
+  the customer at the counter; the customer can change it after signing in.
+- In-shop (walk-in) T Print jobs don't use accounts or #CP tokens.
+
+## Search appearance
+- Google site name: **ClutchPrint AI** (WebSite structured data + og:site_name in `index.html`), page title
+  "CLUTCHPRINT AI — T FIX® CUSAT | print.tfix.in", 192 px icon for search results.
+
 ## Languages
 - English and Malayalam (toggle in the header). All text lives in the `T` dictionary in `index.html`.
 - Brand words stay in English in both: T FIX®, CUSAT, CLUTCHPRINT, AI, #CP tokens, UPI.

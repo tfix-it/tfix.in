@@ -199,6 +199,31 @@ async def admin_run_cleanup_now():
     return {"ok": True}
 
 
+@router.post(
+    "/api/admin/cloud/reset-pin",
+    dependencies=[Depends(require_admin), Depends(check_login_rate_limit)],
+)
+async def admin_reset_customer_pin(phone: str = Form(...)):
+    """Forgotten CLUTCHPRINT PIN: ask print.tfix.in for a new temporary 4-digit
+    PIN for this mobile number, for staff to tell the customer at the counter."""
+    import asyncio
+    from . import cloud_sync
+
+    if not cloud_sync.is_configured():
+        raise HTTPException(status_code=400, detail="Online orders are not set up on this PC (PRINTSHOP_CLOUD_URL / TOKEN).")
+    client = cloud_sync.CloudClient(cloud_sync.cloud_url(), cloud_sync.cloud_token(), timeout=20)
+    try:
+        result = await asyncio.to_thread(client.reset_pin, phone.strip())
+    except cloud_sync.CloudError as e:
+        msg = str(e)
+        if "HTTP 404" in msg:
+            raise HTTPException(status_code=404, detail="No CLUTCHPRINT account for this mobile number.")
+        if "HTTP 400" in msg:
+            raise HTTPException(status_code=400, detail="Not a valid 10-digit mobile number.")
+        raise HTTPException(status_code=502, detail=f"Could not reach print.tfix.in: {msg}")
+    return {"phone": result.get("phone"), "pin": result.get("pin")}
+
+
 @router.websocket("/ws/admin")
 async def ws_admin(websocket: WebSocket):
     # Same session check as require_admin, done manually: FastAPI's

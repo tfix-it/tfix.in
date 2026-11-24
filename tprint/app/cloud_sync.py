@@ -117,6 +117,10 @@ class CloudClient:
     def push_status(self, orders: list) -> None:
         self._json("POST", "status", body={"orders": orders})
 
+    def reset_pin(self, phone: str) -> dict:
+        """Staff reset of an online customer's CLUTCHPRINT PIN; returns {pin, phone}."""
+        return self._json("POST", "reset_pin", body={"phone": phone})
+
 
 def initialize():
     with db.get_conn() as conn:

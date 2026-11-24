@@ -13,8 +13,21 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:site_name" content="ClutchPrint AI" />
+  <link rel="canonical" href="https://print.tfix.in/" />
+  <!-- Site name Google shows above the search result (instead of "print.tfix.in") -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ClutchPrint AI",
+    "alternateName": ["ClutchPrintAI", "CLUTCHPRINT AI", "ClutchPrint AI by T FIX® CUSAT"],
+    "url": "https://print.tfix.in/"
+  }
+  </script>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -188,9 +201,18 @@
           </label>
           <label class="block">
             <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fPhone">Mobile number</span>
-            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" data-i18n-ph="phonePh" required />
+            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="username tel" maxlength="16" placeholder="10-digit mobile" data-i18n-ph="phonePh" required />
           </label>
         </div>
+        <!-- CLUTCHPRINT account: mobile number = username, 4-digit PIN = password -->
+        <div id="pin-row" class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="block">
+            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fPin">CLUTCHPRINT PIN (4 digits)</span>
+            <input id="pin" class="field mt-1.5 font-mono-tech !tracking-[0.5em]" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" pattern="[0-9]{4}" placeholder="••••" />
+          </label>
+          <p class="self-end text-[11px] leading-relaxed text-zinc-400 sm:pb-1" data-i18n="pinHelp">First order? Choose any 4 digits. Your mobile number is your username — mobile + PIN show all your #CP tokens on any phone.</p>
+        </div>
+        <p id="signed-note" hidden class="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200"></p>
 
         <!-- Dropzone -->
         <div id="dropzone" tabindex="0" role="button" aria-label="Drop Your File (PDF / DOCX / JPG)"
@@ -337,8 +359,33 @@
             <button id="copy-link-btn" type="button" disabled class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono-tech text-xs text-zinc-300 transition hover:bg-white/10 hover:text-white disabled:opacity-40" data-i18n="copyLink">Copy Link</button>
           </div>
           <div id="my-orders" hidden class="mt-4 border-t border-[#d4af37]/20 pt-3">
-            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-500" data-i18n="recent">Your recent orders</span>
+            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-500" data-i18n="recent">Your tokens</span>
             <div id="my-orders-list" class="mt-2 flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Sign in: see every #CP token for this mobile number on any phone -->
+          <div id="acct-out" class="mt-4 border-t border-[#d4af37]/20 pt-3">
+            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-400" data-i18n="acctTitle">See all your #CP tokens</span>
+            <div class="mt-2 flex gap-2">
+              <input id="login-phone" class="field min-w-0 flex-1 !min-h-[40px] !text-sm" type="tel" inputmode="numeric" autocomplete="username tel" maxlength="16" placeholder="10-digit mobile" data-i18n-ph="phonePh" aria-label="Mobile number" />
+              <input id="login-pin" class="field !min-h-[40px] w-[5.5rem] shrink-0 font-mono-tech !text-sm !tracking-[0.35em]" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" placeholder="PIN" aria-label="PIN" />
+            </div>
+            <button id="login-btn" type="button" class="mt-2 w-full rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 text-xs font-bold text-[#f3d97d] transition hover:bg-[#d4af37]/25" data-i18n="signIn">Sign in</button>
+            <p id="login-err" hidden class="mt-2 text-[11px] text-red-300"></p>
+          </div>
+          <div id="acct-in" hidden class="mt-4 border-t border-[#d4af37]/20 pt-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span id="acct-who" class="font-mono-tech text-[11px] text-emerald-300"></span>
+              <button id="logout-btn" type="button" class="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 font-mono-tech text-[11px] text-zinc-300 hover:bg-white/10" data-i18n="signOut">Sign out</button>
+            </div>
+            <details class="mt-2">
+              <summary class="cursor-pointer font-mono-tech text-[11px] text-zinc-400" data-i18n="changePin">Change PIN</summary>
+              <div class="mt-2 flex gap-2">
+                <input id="cur-pin" class="field !min-h-[38px] min-w-0 flex-1 font-mono-tech !text-sm" type="password" inputmode="numeric" maxlength="4" placeholder="Current PIN" data-i18n-ph="curPin" autocomplete="current-password" />
+                <input id="new-pin" class="field !min-h-[38px] min-w-0 flex-1 font-mono-tech !text-sm" type="password" inputmode="numeric" maxlength="4" placeholder="New PIN" data-i18n-ph="newPin" autocomplete="new-password" />
+                <button id="chg-pin-btn" type="button" class="shrink-0 rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 text-xs font-bold text-[#f3d97d]" data-i18n="save">Save</button>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -484,7 +531,14 @@
         pReceived: "Price confirmed: {amt}. Pay by UPI below or at the counter — we print once payment is confirmed.", pPaid: "Paid — your order is in the print queue.",
         pPrinting: "Printing now at T FIX® CUSAT.", pReady: "Ready! Collect your pages at the counter.", pCollected: "Collected. Thank you!", pCancelled: "This order was cancelled — please contact the shop.",
         passFiles: "FILES", passTotal: "TOTAL", est: "(est.)", atShop: "priced at the shop", problem: "Problem:",
-        copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your recent orders",
+        copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your tokens",
+        fPin: "CLUTCHPRINT PIN (4 digits)", pinHelp: "First order? Choose any 4 digits. Your mobile number is your username — mobile + PIN show all your #CP tokens on any phone.",
+        signedNote: "Signed in as {p} — no PIN needed for this number.", errPin: "Enter your 4-digit CLUTCHPRINT PIN.",
+        errPinWrong: "Wrong PIN for this mobile number. Forgot it? Ask at the T FIX® counter to reset it.", errLocked: "Too many wrong PINs. Try again in 15 minutes, or ask at the T FIX® counter.",
+        errNoAcct: "No CLUTCHPRINT orders for this mobile number yet. Your first order creates your PIN.",
+        acctTitle: "See all your #CP tokens", signIn: "Sign in", signOut: "Sign out", signedAs: "Signed in · {p}", changePin: "Change PIN",
+        curPin: "Current PIN", newPin: "New PIN", save: "Save", pinChanged: "PIN changed", errNewPin: "The new PIN must be 4 digits.",
+        newAcct: "Your CLUTCHPRINT PIN is set — use mobile + PIN to see your tokens on any phone.", tLinkSite: "Link copied — sign in with your mobile + PIN to track this token",
         tTok: "Copied token {tok}", tLink: "Link copied — open it on any phone to track this order", tLocked: "Locked in! Token {tok} sent to T FIX® CUSAT.", tUpi: "UPI ID copied",
         payUpi: "Pay {amt} by UPI", showQr: "Show UPI QR code", upiId: "UPI ID:", copy: "Copy", upiNote: "Write {tok} in the payment note. The shop marks your order paid after checking the payment.",
         howEyebrow: "HOW CLUTCHPRINT WORKS", howTitle: "1. UPLOAD · 2. AUTO-PRINT · 3. GRAB & GO", built: "Built for CUSAT deadlines",
@@ -536,7 +590,14 @@
         pReceived: "തുക ഉറപ്പിച്ചു: {amt}. താഴെ UPI വഴിയോ കൗണ്ടറിലോ അടയ്ക്കൂ — പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.", pPaid: "പണം ലഭിച്ചു — ഓർഡർ പ്രിന്റ് ക്യൂവിലാണ്.",
         pPrinting: "T FIX® CUSAT-ൽ ഇപ്പോൾ പ്രിന്റ് ചെയ്യുന്നു.", pReady: "റെഡി! കൗണ്ടറിൽ നിന്ന് പേജുകൾ വാങ്ങൂ.", pCollected: "കൈപ്പറ്റി. നന്ദി!", pCancelled: "ഈ ഓർഡർ റദ്ദാക്കി — കടയുമായി ബന്ധപ്പെടൂ.",
         passFiles: "ഫയലുകൾ", passTotal: "ആകെ", est: "(ഏകദേശം)", atShop: "തുക കടയിൽ", problem: "പ്രശ്നം:",
-        copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ഓർഡറുകൾ",
+        copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ടോക്കണുകൾ",
+        fPin: "CLUTCHPRINT PIN (4 അക്കം)", pinHelp: "ആദ്യ ഓർഡറാണോ? ഏതെങ്കിലും 4 അക്കം തിരഞ്ഞെടുക്കൂ. മൊബൈൽ നമ്പറാണ് നിങ്ങളുടെ യൂസർനെയിം — മൊബൈലും PIN-ഉം ഉപയോഗിച്ച് ഏത് ഫോണിലും #CP ടോക്കണുകൾ കാണാം.",
+        signedNote: "{p} ആയി സൈൻ ഇൻ ചെയ്തു — ഈ നമ്പറിന് PIN വേണ്ട.", errPin: "4 അക്ക CLUTCHPRINT PIN നൽകൂ.",
+        errPinWrong: "ഈ മൊബൈൽ നമ്പറിന് തെറ്റായ PIN. മറന്നോ? T FIX® കൗണ്ടറിൽ റീസെറ്റ് ചെയ്യാം.", errLocked: "തെറ്റായ PIN പലതവണ. 15 മിനിറ്റ് കഴിഞ്ഞ് ശ്രമിക്കൂ, അല്ലെങ്കിൽ T FIX® കൗണ്ടറിൽ ചോദിക്കൂ.",
+        errNoAcct: "ഈ നമ്പറിൽ ഇതുവരെ CLUTCHPRINT ഓർഡറുകളില്ല. ആദ്യ ഓർഡറിൽ PIN ഉണ്ടാക്കാം.",
+        acctTitle: "നിങ്ങളുടെ എല്ലാ #CP ടോക്കണുകളും കാണൂ", signIn: "സൈൻ ഇൻ", signOut: "സൈൻ ഔട്ട്", signedAs: "സൈൻ ഇൻ · {p}", changePin: "PIN മാറ്റൂ",
+        curPin: "ഇപ്പോഴത്തെ PIN", newPin: "പുതിയ PIN", save: "സേവ്", pinChanged: "PIN മാറ്റി", errNewPin: "പുതിയ PIN 4 അക്കമായിരിക്കണം.",
+        newAcct: "CLUTCHPRINT PIN സെറ്റ് ചെയ്തു — ഏത് ഫോണിലും മൊബൈലും PIN-ഉം ഉപയോഗിച്ച് ടോക്കണുകൾ കാണാം.", tLinkSite: "ലിങ്ക് കോപ്പി ചെയ്തു — മൊബൈലും PIN-ഉം ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്ത് ടോക്കൺ നോക്കാം",
         tTok: "ടോക്കൺ {tok} കോപ്പി ചെയ്തു", tLink: "ലിങ്ക് കോപ്പി ചെയ്തു — ഏത് ഫോണിലും തുറന്ന് ഓർഡർ നോക്കാം", tLocked: "ലോക്ക്ഡ് ഇൻ! ടോക്കൺ {tok} T FIX® CUSAT-ലേക്ക് അയച്ചു.", tUpi: "UPI ID കോപ്പി ചെയ്തു",
         payUpi: "{amt} UPI വഴി അടയ്ക്കൂ", showQr: "UPI QR കോഡ് കാണിക്കൂ", upiId: "UPI ID:", copy: "കോപ്പി", upiNote: "പേയ്‌മെന്റ് കുറിപ്പിൽ {tok} എഴുതൂ. പേയ്‌മെന്റ് പരിശോധിച്ച ശേഷം കട ഓർഡർ 'പണം ലഭിച്ചു' ആക്കും.",
         howEyebrow: "CLUTCHPRINT എങ്ങനെ", howTitle: "1. അപ്‌ലോഡ് · 2. ഓട്ടോ-പ്രിന്റ് · 3. വാങ്ങി പോകൂ", built: "CUSAT ഡെഡ്‌ലൈനുകൾക്കായി",
@@ -610,7 +671,7 @@
       $("#lang-btn").textContent = t("langBtn");
       $("#lang-btn").setAttribute("aria-label", lang === "en" ? "മലയാളം" : "English");
       $$("[data-wa]").forEach(a => a.href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(t("waMsg")));
-      renderRates(); updateHours(); renderFiles(); renderPass();
+      renderRates(); updateHours(); renderFiles(); renderAccount(); renderPass();
     }
 
     /* ============ shop hours + print server status ============ */
@@ -777,11 +838,14 @@
       const name = $("#name").value.trim(), phone = validPhone($("#phone").value);
       if (!name) { showError(t("errName")); $("#name").focus(); return; }
       if (!phone) { showError(t("errPhone")); $("#phone").focus(); return; }
+      const sess = getSession(), pin = $("#pin").value.trim(), usePin = !(sess && sess.phone === phone);
+      if (usePin && !/^\d{4}$/.test(pin)) { showError(t("errPin")); $("#pin").focus(); return; }
       if (!files.length) { showError(t("errFiles")); return; }
       if (files.some(f => f.range && !parseRange(f.range, f.pages))) { showError(t("errRange")); return; }
       if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError(t("errTotal")); return; }
       const e = estimate(), fd = new FormData();
       fd.append("name", name); fd.append("phone", phone); fd.append("notes", $("#notes").value.trim());
+      if (usePin) fd.append("pin", pin);
       if (!e.unknown) fd.append("est_total", String(e.total));
       fd.append("options", JSON.stringify(files.map(f => ({ color: opts.color, doubleside: opts.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: opts.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages }))));
       files.forEach(f => fd.append("files[]", f.file, f.name));
@@ -792,14 +856,21 @@
       engine(t("eUploading"), "gold", 15, true);
       const xhr = new XMLHttpRequest();
       xhr.open("POST", API + "order.php");
+      if (!usePin) xhr.setRequestHeader("X-Client-Session", sess.token);
       xhr.upload.onprogress = ev => { if (!ev.lengthComputable) return; const p = Math.round(ev.loaded / ev.total * 100); bar.firstElementChild.style.width = p + "%"; btn.textContent = t("uploading", { p }); };
       const done = () => { sending = false; btn.disabled = false; bar.hidden = true; btn.textContent = t("send"); };
       xhr.onerror = () => { done(); showError(t("errNet")); renderPass(); };
       xhr.onload = () => {
         done(); let data = {};
         try { data = JSON.parse(xhr.responseText); } catch (err) {}
-        if (xhr.status !== 201 || !data.code) { showError(data.error || t("errNet")); renderPass(); return; }
+        if (xhr.status !== 201 || !data.code) {
+          showError(xhr.status === 401 ? t("errPinWrong") : xhr.status === 429 && /PIN/.test(data.error || "") ? t("errLocked") : (data.error || t("errNet")));
+          renderPass(); return;
+        }
         saveOrder({ code: data.code, token: data.token, at: Date.now() });
+        if (data.session) setSession({ token: data.session, phone, name });
+        $("#pin").value = ""; renderAccount();
+        if (data.new_account) setTimeout(() => toast(t("newAcct")), 2600);
         current = data.code; files = []; $("#notes").value = ""; renderFiles();
         toast(t("tLocked", { tok: tok(data.code) }));
         refreshOrders();
@@ -810,15 +881,41 @@
 
     /* ============ orders on this phone + live status ============ */
     let current = null; const cache = {};
-    const loadOrders = () => { try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+    const loadLocal = () => { try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+    // CLUTCHPRINT sign-in (mobile number = username, PIN = password). Stored on this phone only.
+    const SESS_KEY = "clutch-session";
+    const getSession = () => { try { const v = JSON.parse(localStorage.getItem(SESS_KEY) || "null"); return v && v.token ? v : null; } catch (e) { return null; } };
+    const setSession = v => { try { localStorage.setItem(SESS_KEY, JSON.stringify(v)); } catch (e) {} };
+    const clearSession = () => { try { localStorage.removeItem(SESS_KEY); } catch (e) {} acctOrders = []; };
+    const maskPhone = p => p.slice(0, 2) + "******" + p.slice(-2);
+    let acctOrders = [];   // [{code, at}] from the signed-in account
+    // All tokens this phone knows about: the account's (any device) + per-order links saved here.
+    const loadOrders = () => {
+      const seen = new Set(), out = [];
+      for (const o of [...acctOrders, ...loadLocal()]) if (!seen.has(o.code)) { seen.add(o.code); out.push(o); }
+      return out.sort((a, b) => (b.at || 0) - (a.at || 0));
+    };
     const saveOrders = l => { try { localStorage.setItem(STORE, JSON.stringify(l.slice(0, 20))); } catch (e) {} };
-    const saveOrder = o => saveOrders([o, ...loadOrders().filter(x => x.code !== o.code)]);
-    const orderLink = o => location.origin + location.pathname + "?order=" + encodeURIComponent(o.code) + "&t=" + o.token;
+    const saveOrder = o => saveOrders([o, ...loadLocal().filter(x => x.code !== o.code)]);
+    const siteLink = () => location.origin + location.pathname + "#upload-studio";
+    const orderLink = o => o.token ? location.origin + location.pathname + "?order=" + encodeURIComponent(o.code) + "&t=" + o.token : siteLink();
+    const authHeaders = () => { const s = getSession(); return s ? { "X-Client-Session": s.token } : {}; };
 
     async function refreshOrders() {
+      const sess = getSession();
+      if (sess) {
+        try {
+          const r = await fetch(API + "account.php?action=orders", { cache: "no-store", headers: authHeaders() });
+          if (r.status === 401) { clearSession(); renderAccount(); }
+          else if (r.ok) {
+            const d = await r.json();
+            acctOrders = d.orders.map(o => { cache[o.code] = o; return { code: o.code, at: Date.parse(o.created_at) || 0 }; });
+          }
+        } catch (e) {}
+      }
       const list = loadOrders();
       if (!current && list.length) current = list[0].code;
-      await Promise.all(list.map(async o => {
+      await Promise.all(loadLocal().filter(o => o.token).map(async o => {
         try { const r = await fetch(API + "status.php?code=" + encodeURIComponent(o.code) + "&t=" + encodeURIComponent(o.token), { cache: "no-store" }); if (r.ok) cache[o.code] = await r.json(); }
         catch (e) {}
       }));
@@ -857,7 +954,7 @@
     function renderPass() {
       const list = loadOrders();
       const o = list.find(x => x.code === current) || list[0];
-      $("#my-orders").hidden = list.length < 2;
+      $("#my-orders").hidden = list.length < 2 && !(getSession() && list.length);
       $("#my-orders-list").replaceChildren(...list.slice(0, 6).map(x => {
         const st = cache[x.code] ? t((BADGE[cache[x.code].status] || BADGE.pending)[0]) : "…";
         return el("button", { type: "button", class: "rounded-lg border px-2.5 py-1 font-mono-tech text-[11px] " + (o && x.code === o.code ? "border-[#d4af37] bg-[#d4af37]/15 text-[#f3d97d]" : "border-white/10 bg-white/5 text-zinc-300 hover:border-white/25"),
@@ -879,7 +976,7 @@
       badge(...(BADGE[status] || BADGE.pending));
       btnTok.disabled = btnLink.disabled = false;
       btnTok.onclick = () => copy(T0, t("tTok", { tok: T0 }));
-      btnLink.onclick = () => copy(orderLink(o), t("tLink"));
+      btnLink.onclick = () => copy(orderLink(o), o.token ? t("tLink") : t("tLinkSite"));
       renderQR(orderLink(o));
       const amount = s && s.confirmed_total != null ? s.confirmed_total : s && s.est_total;
       const confirmed = !!(s && s.confirmed_total != null);
@@ -946,6 +1043,51 @@
         el("p", { class: "mt-1.5 text-[11px] leading-relaxed text-zinc-400", text: t("upiNote", { tok: tok(o.code) }) }));
     }
 
+    /* ============ CLUTCHPRINT account: sign in / out, change PIN ============ */
+    function renderAccount() {
+      const s = getSession();
+      $("#acct-out").hidden = !!s; $("#acct-in").hidden = !s;
+      if (s) $("#acct-who").textContent = t("signedAs", { p: maskPhone(s.phone) });
+      const typed = validPhone($("#phone").value || "");
+      if (s && !$("#phone").value) { $("#phone").value = s.phone; if (!$("#name").value && s.name) $("#name").value = s.name; }
+      const same = s && (validPhone($("#phone").value || "") === s.phone);
+      $("#pin-row").hidden = !!same;
+      $("#signed-note").hidden = !same;
+      if (same) $("#signed-note").textContent = t("signedNote", { p: maskPhone(s.phone) });
+    }
+    async function login() {
+      const phone = validPhone($("#login-phone").value), pin = $("#login-pin").value.trim(), err = $("#login-err");
+      err.hidden = true;
+      if (!phone) { err.textContent = t("errPhone"); err.hidden = false; return; }
+      if (!/^\d{4}$/.test(pin)) { err.textContent = t("errPin"); err.hidden = false; return; }
+      const fd = new FormData(); fd.append("phone", phone); fd.append("pin", pin);
+      $("#login-btn").disabled = true;
+      try {
+        const r = await fetch(API + "account.php?action=login", { method: "POST", body: fd });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { err.textContent = r.status === 401 ? t("errPinWrong") : r.status === 404 ? t("errNoAcct") : r.status === 429 ? t("errLocked") : (d.error || t("errNet")); err.hidden = false; return; }
+        setSession({ token: d.session, phone, name: d.name || "" });
+        $("#login-pin").value = ""; current = null;
+        renderAccount(); await refreshOrders();
+      } catch (e) { err.textContent = t("errNet"); err.hidden = false; }
+      finally { $("#login-btn").disabled = false; }
+    }
+    async function logout() {
+      try { await fetch(API + "account.php?action=logout", { method: "POST", headers: authHeaders() }); } catch (e) {}
+      clearSession(); current = null; renderAccount(); renderPass();
+    }
+    async function changePin() {
+      const cur = $("#cur-pin").value.trim(), nw = $("#new-pin").value.trim();
+      if (!/^\d{4}$/.test(cur)) { toast(t("errPin")); return; }
+      if (!/^\d{4}$/.test(nw)) { toast(t("errNewPin")); return; }
+      const fd = new FormData(); fd.append("pin", cur); fd.append("new_pin", nw);
+      const r = await fetch(API + "account.php?action=change_pin", { method: "POST", body: fd, headers: authHeaders() }).catch(() => null);
+      if (r && r.ok) { $("#cur-pin").value = $("#new-pin").value = ""; toast(t("pinChanged")); }
+      else if (r && r.status === 401) { const d = await r.json().catch(() => ({})); toast(/sign in/i.test(d.error || "") ? t("errNet") : t("errPinWrong")); }
+      else if (r && r.status === 429) toast(t("errLocked"));
+      else toast(t("errNet"));
+    }
+
     /* ============ rates ============ */
     function renderRates() {
       const cards = [[t("rBw") + " · A4", RATES.A4.bw], [t("rColor") + " · A4", RATES.A4.colour], [t("rBw") + " · A3", RATES.A3.bw], [t("rColor") + " · A3", RATES.A3.colour]];
@@ -982,6 +1124,11 @@
     $("#copies-plus").addEventListener("click", () => { if (opts.copies < 500) { opts.copies++; renderSummary(); } });
     $("#pps").addEventListener("change", e => { opts.pps = +e.target.value; renderSummary(); });
     $("#send-btn").addEventListener("click", send);
+    $("#login-btn").addEventListener("click", login);
+    $("#login-pin").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+    $("#logout-btn").addEventListener("click", logout);
+    $("#chg-pin-btn").addEventListener("click", changePin);
+    $("#phone").addEventListener("input", renderAccount);
     $("#lang-btn").addEventListener("click", () => {
       lang = lang === "en" ? "ml" : "en";
       try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
@@ -991,7 +1138,7 @@
     applyLang();
     refreshOrders(); checkServer();
     setInterval(updateHours, 60000);
-    setInterval(() => { if (!document.hidden) { checkServer(); if (loadOrders().length) refreshOrders(); } }, 30000);
+    setInterval(() => { if (!document.hidden) { checkServer(); if (loadOrders().length || getSession()) refreshOrders(); } }, 30000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkServer(); refreshOrders(); } });
   })();
   </script>

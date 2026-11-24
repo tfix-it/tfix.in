@@ -3,14 +3,17 @@
  * POST /api/order.php — a customer places an order (works while the shop is closed).
  *
  * multipart/form-data:
- *   name, phone, notes, est_total
+ *   name, phone, pin, notes, est_total
+ *   (phone = CLUTCHPRINT username; pin = 4-digit PIN — set on the first order
+ *    from that mobile number, checked on every later order)
  *   files[]   — up to MAX_FILES_PER_ORDER files (pdf, jpg, png, docx, pptx, ppt)
  *   options   — JSON array, one object per file, same order as files[]:
  *               {color, doubleside, duplex_edge, paper_size, orientation,
  *                pages_per_sheet, copies, pages_range, est_pages}
  *
- * Returns {code, token}. The token is needed (with the code) to check status;
- * only a hash of it is stored.
+ * Returns {code, token, session}. code = pickup token (CP-105); token = secret for
+ * the per-order status link (only its hash is stored); session = sign-in for
+ * "My tokens" on this phone.
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -43,6 +46,9 @@ if ($name === '') {
 if ($phone === null) {
     fail(400, 'Please enter a valid 10-digit mobile number.');
 }
+// Mobile number + PIN (creates the account on the first order). A customer
+// already signed in on this phone with the same mobile number needs no PIN.
+$newCustomer = session_phone() === $phone ? false : require_pin($phone, (string)($_POST['pin'] ?? ''), $name);
 $estTotal = is_numeric($_POST['est_total'] ?? null) ? max(0, min(1000000, (float)$_POST['est_total'])) : null;
 
 // --- files + options ---
@@ -159,4 +165,7 @@ try {
     fail(500, 'Could not save your order. Please try again.');
 }
 
-send_json(201, ['code' => $code, 'token' => $token, 'status' => 'pending']);
+send_json(201, [
+    'code' => $code, 'token' => $token, 'status' => 'pending',
+    'session' => create_session($phone), 'new_account' => $newCustomer,
+]);

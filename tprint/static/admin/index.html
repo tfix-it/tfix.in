@@ -27,6 +27,7 @@
   .pill-ready{ background:#DCF0E1; color:var(--ok); }
   .pill-collected{ background:#E7E7E2; color:var(--ink-soft); }
   .pill-auto{ background:#E4DEF7; color:#5B3FA6; margin-left:6px; }
+  .pill-online{ background:#1a1a1d; color:#F3D97D; border:1px solid #D4AF37; margin-bottom:3px; }
   .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
   .row-actions select, .row-actions button{
     font-size:12px; padding:5px 8px; border-radius:4px; border:1px solid var(--border); background:#fff; cursor:pointer;
@@ -116,7 +117,7 @@
     <section class="panel">
       <h2>Job queue</h2>
       <div class="filter-bar">
-        <input type="text" id="searchInput" placeholder="Search mobile number or job code (e.g. 9876543210 or 9876543210-3)">
+        <input type="text" id="searchInput" placeholder="Search mobile, job code or online token (e.g. 9876543210, 9876543210-3, CP-105)">
         <input type="date" id="dateFilter" title="Filter by date">
         <button id="clearFiltersBtn" type="button">Clear</button>
       </div>
@@ -132,6 +133,16 @@
     </section>
 
     <div style="display:grid; gap:24px; align-content:start;">
+      <section class="panel">
+        <h2>Online customers (CLUTCHPRINT)</h2>
+        <p style="font-size:12px; color:#666; margin:0 0 10px;">Online customers sign in on print.tfix.in with their mobile number and a 4-digit PIN. If they forget it, enter their number to give them a new temporary PIN (they can change it after signing in).</p>
+        <div class="settings-form">
+          <div class="full"><label>Customer mobile number</label><input type="tel" id="pinPhone" inputmode="numeric" maxlength="16" placeholder="10-digit mobile"></div>
+          <div class="actions"><button id="pinResetBtn">Reset PIN</button></div>
+        </div>
+        <div id="pinResult" style="display:none; margin-top:10px; font-size:14px;"></div>
+      </section>
+
       <section class="panel">
         <h2>Account</h2>
         <div class="settings-form" id="pwForm">
@@ -317,7 +328,8 @@ function applyFilters() {
       const matchesSearch =
         job.phone.toLowerCase().includes(search) ||
         code.includes(search) ||
-        internalId.includes(search);
+        internalId.includes(search) ||
+        (job.original_filename || '').toLowerCase().includes(search);   // online token "CP-105", customer name
       if (!matchesSearch) return false;
     }
     if (date) {
@@ -384,10 +396,12 @@ function renderJobRow(job) {
         ${job.source_filename ? `<a href="/uploads/${encodeURIComponent(job.source_filename)}" target="_blank" rel="noopener" style="font-size:11px; color:var(--blue);">Original</a>` : ''}
       </div>`;
 
+  // Online (CLUTCHPRINT) jobs are labelled "[CP-105 · Name] file.pdf" by cloud_sync.
+  const online = /^\[(CP-\d+|TP[A-Z0-9]{6}) · /.exec(job.original_filename || '');
   return `
-    <td>${job.phone}-${job.daily_seq}<br><span style="color:#999; font-size:11px;">#${String(job.id).padStart(3, '0')}</span></td>
-    <td title="${job.original_filename}">
-      ${truncate(job.original_filename, 16)}<br>
+    <td>${online ? `<span class="pill pill-online">ONLINE #${esc(online[1])}</span><br>` : ''}${esc(job.phone)}-${job.daily_seq}<br><span style="color:#999; font-size:11px;">#${String(job.id).padStart(3, '0')}</span></td>
+    <td title="${esc(job.original_filename)}">
+      ${esc(truncate(job.original_filename, 16))}<br>
       <span style="color:#999;">${job.pages}p</span>
       ${fileLinks}
     </td>
@@ -407,7 +421,27 @@ function renderJobRow(job) {
     </td>`;
 }
 
-function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+function truncate(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+// File names and customer names come from the internet (online orders): always escape.
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+// ---------- online customers: reset CLUTCHPRINT PIN ----------
+el('pinResetBtn').addEventListener('click', async () => {
+  const phone = el('pinPhone').value.trim(), out = el('pinResult');
+  if (!phone) return;
+  if (!confirm('Give ' + phone + ' a new temporary PIN? Their old PIN stops working and they are signed out everywhere.')) return;
+  el('pinResetBtn').disabled = true;
+  const fd = new FormData(); fd.append('phone', phone);
+  try {
+    const res = await fetch('/api/admin/cloud/reset-pin', { method: 'POST', body: fd, credentials: 'include' });
+    const data = await res.json().catch(() => ({}));
+    out.style.display = 'block';
+    out.style.color = res.ok ? '' : 'var(--red, #c0392b)';
+    out.innerHTML = res.ok
+      ? 'New PIN for <b>' + esc(data.phone) + '</b>: <b style="font-size:20px; letter-spacing:3px;">' + esc(data.pin) + '</b><br><span style="color:#666; font-size:12px;">Tell the customer in person. It is not shown again.</span>'
+      : esc(data.detail || 'Could not reset the PIN.');
+  } finally { el('pinResetBtn').disabled = false; }
+});
 
 function attachRowHandlers() {
   document.querySelectorAll('.printBtn').forEach(btn => {
