@@ -13,6 +13,7 @@
  *   GET  ?action=rewards&phone=N      CLUTCH Rewards balance + recent history for a mobile number
  *   POST ?action=redeem  (JSON)       {phone, amount, note} use rewards at the counter (staff)
  *   GET  ?action=ledger_verify        check the tamper-evident rewards log (hash chain)
+ *   POST ?action=cancel  (JSON)       {order_ids:[...]} or {all_open:true} cancel unfinished orders (staff)
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -131,7 +132,9 @@ switch ($action) {
     case 'status':
         require_method('POST');
         $body = json_body();
-        $setOrder = $pdo->prepare('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?');
+        // A cancelled order stays cancelled (staff cancelled it on the website).
+        $setOrder = $pdo->prepare("UPDATE orders SET status = ?, updated_at = ? WHERE id = ? AND status <> 'cancelled'");
+        $cur = $pdo->prepare('SELECT status FROM orders WHERE id = ?');
         $setFile = $pdo->prepare('UPDATE order_files SET job_status = ?, paid = ? WHERE id = ? AND order_id = ?');
         $setCost = $pdo->prepare('UPDATE order_files SET cost = ? WHERE id = ? AND order_id = ?');
         $setTotal = $pdo->prepare('UPDATE orders SET confirmed_total = (SELECT ROUND(COALESCE(SUM(cost), 0), 2) FROM order_files
@@ -142,6 +145,10 @@ switch ($action) {
             $status = (string)($o['status'] ?? '');
             if ($oid <= 0 || !in_array($status, ORDER_STATUSES, true)) {
                 continue;
+            }
+            $cur->execute([$oid]);
+            if (in_array($cur->fetchColumn(), [false, 'cancelled'], true)) {
+                continue;   // unknown or cancelled order: ignore the update
             }
             $setOrder->execute([$status, now(), $oid]);
             $costs = false;
@@ -166,6 +173,35 @@ switch ($action) {
             $n++;
         }
         send_json(200, ['ok' => true, 'updated' => $n]);
+
+    case 'cancel':
+        // Staff: cancel orders that are not finished. {order_ids:[...]} or {all_open:true}.
+        // Files still waiting here are deleted. Collected and already-cancelled orders are left alone.
+        require_method('POST');
+        $body = json_body();
+        $open = "status NOT IN ('collected', 'cancelled')";
+        if (!empty($body['all_open'])) {
+            $ids = array_map('intval', $pdo->query("SELECT id FROM orders WHERE $open")->fetchAll(PDO::FETCH_COLUMN));
+        } else {
+            $ids = array_values(array_filter(array_map('intval', (array)($body['order_ids'] ?? [])), fn($i) => $i > 0));
+        }
+        $done = [];
+        $set = $pdo->prepare("UPDATE orders SET status = 'cancelled', updated_at = ? WHERE id = ? AND $open");
+        $get = $pdo->prepare('SELECT code FROM orders WHERE id = ?');
+        $cur = $pdo->prepare('SELECT status FROM orders WHERE id = ?');
+        foreach ($ids as $oid) {
+            $cur->execute([$oid]);
+            $was = $cur->fetchColumn();
+            if ($was !== false && !in_array($was, ['collected', 'cancelled'], true)) {
+                $set->execute([now(), $oid]);
+                foreach (order_files($oid) as $f) {
+                    delete_stored_file($f);
+                }
+                $get->execute([$oid]);
+                $done[] = (string)$get->fetchColumn();
+            }
+        }
+        send_json(200, ['ok' => true, 'cancelled' => $done]);
 
     case 'rewards':
         require_method('GET');

@@ -374,3 +374,33 @@ def test_rewards_given_before_the_log_are_backfilled(site, tmp_path):
     info = client(site).rewards('9876543210')
     assert info['ledger']['ok'] and info['ledger']['entries'] == 1
     assert info['history'][0]['points'] == 10 and info['history'][0]['balance'] == 10
+
+
+def test_staff_cancel_open_orders(site, tmp_path):
+    a = place_order(site, [(pdf(tmp_path, 1), BW)])
+    b = place_order(site, [(pdf(tmp_path, 2), BW)])
+    done = place_order(site, [(pdf(tmp_path, 1), BW)])
+    cloud_sync.sync_once(client(site))
+    with db.get_conn() as conn:                                # finish the 3rd order
+        jobs = [dict(r) for r in conn.execute('SELECT * FROM jobs').fetchall()]
+    job3 = [j for j in jobs if done['code'] in j['original_filename']][0]
+    print_service.confirm_payment(job3['id'], True); db.update_job(job3['id'], status='collected')
+    cloud_sync.push_statuses(client(site))
+    c = place_order(site, [(pdf(tmp_path, 1), BW)])            # still waiting online, file on the server
+    out = client(site)._json('POST', 'cancel', body={'all_open': True})
+    assert sorted(out['cancelled']) == sorted([a['code'], b['code'], c['code']])
+    assert [status(site, o)['status'] for o in (a, b, c, done)] == ['cancelled'] * 3 + ['collected']
+    assert list((site.data / 'uploads').iterdir()) == []          # waiting file deleted
+    assert client(site).pending() == []
+    assert client(site)._json('POST', 'cancel', body={'all_open': True})['cancelled'] == []
+    with pytest.raises(cloud_sync.CloudError, match='401'):
+        client(site, token='x' * 40)._json('POST', 'cancel', body={'all_open': True})
+
+
+def test_cancelled_order_stays_cancelled_when_shop_pushes(site, tmp_path):
+    o = place_order(site, [(pdf(tmp_path, 1), BW)])
+    job = cloud_sync.sync_once(client(site))[0]
+    client(site)._json('POST', 'cancel', body={'all_open': True})
+    print_service.confirm_payment(job['id'], True)
+    cloud_sync.push_statuses(client(site))
+    assert status(site, o)['status'] == 'cancelled'
