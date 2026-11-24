@@ -1,1111 +1,866 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>T FIX CUSAT · AI Auto Print</title>
-<meta name="description" content="Printing, Xerox, lamination and binding at T FIX CUSAT, South Pipeline Road, Kalamassery. Upload your files online any time and collect your prints at the shop.">
-<meta name="theme-color" content="#0B0B0D">
-<meta property="og:title" content="T FIX CUSAT · AI Auto Print">
-<meta property="og:description" content="Printing, Xerox, lamination and binding near CUSAT. Upload your files online any time.">
-<meta property="og:url" content="https://print.tfix.in/">
-<meta property="og:image" content="https://print.tfix.in/og-image.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+Malayalam:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-/* ------------------------------------------------------------------
-   Brand system — one signature device used everywhere:
-   brand black + gold (from the T FIX logo); gold is the only action colour,
-   one mantra (Send. Print. Collect.), one action (Upload files).
-------------------------------------------------------------------- */
-:root{
-  --ink:#14161F;
-  --paper:#FAF7F2;
-  --card:#FFFFFF;
-  --muted:#5B5F6E;
-  --line:#E6E1D8;
-  --gold:#F2C94C;          /* brand gold (fills, buttons) */
-  --gold-hi:#FCE379;
-  --gold-lo:#D9A82E;
-  --black:#0B0B0D;         /* brand black (logo tile, plates) */
-  --wa:#1FAF5A;
-  --gold-ink:#8A6A12;
-  --ok:#1C9A55;
-  --bad:#D2344B;
-  --shadow:0 1px 2px rgba(20,22,31,.06),0 8px 24px rgba(20,22,31,.06);
-  --radius:18px;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ink:#F4F1EA; --paper:#101219; --card:#191C26; --muted:#A3A7B5; --line:#2A2E3B; --gold-ink:#F5D466;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --ink:#F4F1EA; --paper:#101219; --card:#191C26; --muted:#A3A7B5; --line:#2A2E3B; --gold-ink:#F5D466;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
-[hidden]{display:none !important}
-html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:clip;
-}
-html[lang="ml"] body{font-family:"Noto Sans Malayalam","Space Grotesk",system-ui,sans-serif}
-a{color:inherit}
-.wrap{max-width:1080px; margin:0 auto; padding:0 16px}
-
-/* Header */
-header{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--paper) 88%,transparent);
-  backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px);
-  border-bottom:1px solid var(--line)}
-.bar{display:flex; align-items:center; gap:12px; height:64px}
-.brand{min-width:0; display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:700; letter-spacing:.02em}
-.brand svg{width:36px; height:36px; flex:none}
-.brand small{display:block; font-size:11px; font-weight:500; letter-spacing:.18em; color:var(--gold-ink)}
-.spacer{flex:1}
-.lang{flex:none; display:inline-flex; border:1px solid var(--line); border-radius:999px; padding:3px; background:var(--card)}
-.lang button{border:0; background:transparent; color:var(--muted); font:inherit; font-size:13px; font-weight:600;
-  padding:6px 12px; border-radius:999px; cursor:pointer}
-.lang button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
-
-@font-face{font-family:"Archivo Black"; src:url("fonts/archivo-black.woff2") format("woff2"); font-weight:400; font-display:swap}
-/* T FIX logo (vector rebuild of the brand logo) */
-.brand-tile{flex:none; width:40px; height:40px; border-radius:11px; background:#0B0B0D; display:grid; place-items:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.logo-sym{width:30px; height:auto; display:block; overflow:visible}
-.brand-text{line-height:1.1}
-.brand-name{display:block; font-family:"Archivo Black","Space Grotesk",sans-serif; font-size:20px; line-height:1; letter-spacing:.03em}
-.brand-sub{display:flex; align-items:baseline; gap:7px; margin-top:2px; white-space:nowrap}
-.brand-sub b{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:12px; letter-spacing:.42em}
-.brand-sub small{font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-ink)}
-.logo-plate{display:inline-flex; flex-direction:column; align-items:flex-start; gap:8px; max-width:100%; background:#0B0B0D; border-radius:18px; padding:16px 22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.18)}
-.logo-full{width:min(100%,340px); height:auto; display:block; overflow:visible}
-.logo-plate-sm{padding:12px 16px; border-radius:14px; margin-bottom:14px; gap:6px}
-.plate-tag{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:13px; letter-spacing:.32em; text-transform:uppercase;
-  color:#F5D466; padding-left:2px}
-.logo-plate-sm .plate-tag{font-size:10px; letter-spacing:.28em}
-.logo-plate-sm .logo-full{width:min(100%,220px)}
-.logo-shine{transform-box:view-box; animation:logo-shine 6s ease-in-out 1.2s infinite}
-.logo-sym .logo-shine{animation-name:logo-shine-sym}
-@keyframes logo-shine{0%{transform:skewX(-20deg) translateX(-120px)}55%,100%{transform:skewX(-20deg) translateX(960px)}}
-@keyframes logo-shine-sym{0%{transform:skewX(-20deg) translateX(-90px)}55%,100%{transform:skewX(-20deg) translateX(400px)}}
-@media (prefers-reduced-motion:reduce){ .logo-shine{animation:none; opacity:0} }
-
-/* Status pill */
-.status{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; max-width:100%; line-height:1.3;
-  padding:6px 12px; border-radius:999px; background:var(--card); border:1px solid var(--line)}
-.status i{flex:none; width:8px; height:8px; border-radius:50%; background:var(--muted)}
-.status.open i{background:var(--ok); box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 20%,transparent)}
-.status.closed i{background:var(--bad)}
-
-/* The offset — signature device */
-.offset{position:relative; display:inline-block; color:var(--ink)}
-.offset::before,.offset::after{content:attr(data-text); position:absolute; inset:0; z-index:-1; pointer-events:none}
-/* Signature: one gold echo behind the headline (like the gold logo on black) */
-.offset::before{color:var(--gold); transform:translate(.06em,.06em)}
-.offset::after{content:none}
-
-/* Hero */
-.hero{padding-top:56px; padding-bottom:32px; position:relative; isolation:isolate}
-.hero h1{font-size:clamp(44px,10vw,92px); line-height:.98; margin:22px 0 18px; letter-spacing:-.03em; font-weight:700}
-html[lang="ml"] .hero h1{font-size:clamp(34px,8vw,72px); line-height:1.15; letter-spacing:0}
-.hero h1 span{display:block}
-.hero p.lead{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:620px; margin:0 0 28px}
-.cta{display:flex; flex-wrap:wrap; gap:12px}
-.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:0 22px;
-  border-radius:14px; font:inherit; font-weight:700; font-size:16px; text-decoration:none; cursor:pointer; border:0}
-.btn svg{width:22px; height:22px; flex:none}
-.btn-wa{background:var(--wa); color:#fff; box-shadow:0 6px 18px color-mix(in srgb,var(--wa) 35%,transparent)}
-.btn-wa:hover{filter:brightness(1.05)}
-.btn-wa-ghost svg{color:var(--wa)}
-.btn-ink{background:var(--ink); color:var(--paper)}
-.btn-gold{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 55%,var(--gold-lo)); color:#141006;
-  box-shadow:0 6px 18px color-mix(in srgb,var(--gold-lo) 40%,transparent), inset 0 1px 0 rgba(255,255,255,.5)}
-.btn-gold:hover{filter:brightness(1.04)}
-.btn-ghost{background:var(--card); color:var(--ink); border:1px solid var(--line)}
-.btn:focus-visible,.lang button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.seg label:has(input:focus-visible){
-  outline:3px solid var(--gold-lo); outline-offset:2px}
-
-/* Sections */
-section{padding:40px 0}
-.eyebrow{font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-ink); margin:0 0 8px}
-h2{font-size:clamp(28px,5vw,40px); line-height:1.1; margin:0 0 24px; letter-spacing:-.02em}
-html[lang="ml"] h2{letter-spacing:0; line-height:1.3}
-html[lang="ml"] .eyebrow{letter-spacing:.02em}
-
-/* Steps */
-.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
-.step{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)}
-.step .n{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:18px; color:#14161F; margin-bottom:14px}
-.step .n{background:var(--black); color:var(--gold-hi); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}
-.step h3{margin:0 0 6px; font-size:19px}
-.step p{margin:0; color:var(--muted)}
-
-/* Order */
-.order{display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start}
-.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)}
-.field{margin-bottom:18px}
-.field > label,.field > .lbl{display:block; font-weight:600; font-size:14px; margin-bottom:8px}
-.row2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
-input[type=number],input[type=text],input[type=time],select,textarea{
-  width:100%; min-height:48px; padding:10px 14px; border-radius:12px; border:1px solid var(--line);
-  background:var(--paper); color:var(--ink); font:inherit; font-size:16px}
-textarea{min-height:84px; resize:vertical}
-.seg{display:flex; flex-wrap:wrap; gap:8px}
-.seg label{position:relative; display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border-radius:12px;
-  border:1px solid var(--line); background:var(--paper); cursor:pointer; font-weight:600; font-size:15px; user-select:none}
-.seg input{position:absolute; opacity:0; pointer-events:none}
-.seg label:has(input:checked){background:var(--ink); color:var(--paper); border-color:var(--ink)}
-.stepper{display:flex; align-items:stretch; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--paper)}
-.stepper button{width:48px; border:0; background:transparent; color:var(--ink); font:inherit; font-size:22px; cursor:pointer}
-.stepper input{border:0; border-radius:0; text-align:center; min-height:48px; background:transparent; -moz-appearance:textfield}
-.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
-
-.summary{position:sticky; top:84px}
-.summary h3{margin:0 0 14px; font-size:18px}
-.lines{list-style:none; margin:0 0 14px; padding:0; font-size:15px}
-.lines li{display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px dashed var(--line)}
-.lines li span:first-child{color:var(--muted)}
-.total{display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 4px}
-.total strong{font-size:40px; letter-spacing:-.02em}
-.note{font-size:13px; color:var(--muted); margin:0 0 16px}
-.attach{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin-bottom:16px;
-  background:color-mix(in srgb,var(--gold) 16%,var(--card)); font-size:14px}
-.attach svg{width:20px; height:20px; flex:none; margin-top:2px}
-.summary .btn{width:100%}
-
-/* Online order */
-.closed-note{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin:0 0 18px;
-  background:var(--card); border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line)); font-size:15px}
-.closed-note b{flex:none; width:10px; height:10px; margin-top:7px; border-radius:50%; background:var(--gold)}
-input[type=tel]{width:100%; min-height:48px; padding:10px 14px; border-radius:12px; border:1px solid var(--line);
-  background:var(--paper); color:var(--ink); font:inherit; font-size:16px}
-.drop{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:120px;
-  padding:18px; border:2px dashed var(--line); border-radius:16px; background:var(--paper); cursor:pointer; text-align:center}
-.drop:hover,.drop.over{border-color:var(--gold-lo)}
-.drop:has(input:focus-visible){outline:3px solid var(--gold-lo); outline-offset:2px}
-.drop svg{width:30px; height:30px; color:var(--gold-ink)}
-.drop b{font-size:17px}
-.drop small{color:var(--muted); font-size:13px}
-.drop input{position:absolute; inset:0; opacity:0; cursor:pointer}
-.files{display:grid; gap:12px; margin-top:12px}
-.file{border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--paper)}
-.file-head{display:flex; gap:10px; align-items:center; margin-bottom:12px}
-.file-icon{flex:none; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; font-size:11px; font-weight:700;
-  color:#fff; background:var(--ink); text-transform:uppercase}
-.file-icon{background:var(--black); color:var(--gold-hi)}
-.file-name{flex:1; min-width:0}
-.file-name b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.file-name small{color:var(--muted)}
-.file-x{flex:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink);
-  font-size:20px; line-height:1; cursor:pointer}
-.opts{display:grid; grid-template-columns:1fr 1fr; gap:12px 14px}
-.opt-lbl{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px}
-.opts .seg{gap:6px}
-.opts .seg label{min-height:40px; padding:0 12px; font-size:14px; background:var(--card)}
-.opts .stepper{background:var(--card)}
-.opts .stepper input,.opts .stepper button{min-height:40px}
-.opts select,.opts input[type=text]{min-height:40px; background:var(--card); font-size:15px; padding:8px 12px}
-.range-input{margin-top:6px}
-.field-err{color:var(--bad); font-size:13px; margin:4px 0 0}
-.form-error{color:var(--bad); font-weight:600; font-size:14px; margin:0 0 12px}
-.progress{height:6px; border-radius:6px; background:var(--line); overflow:hidden; margin-top:10px}
-.progress i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi)); transition:width .2s}
-.btn[disabled]{opacity:.65; cursor:progress}
-.summary .btn{width:100%}
-.summary .btn + .btn{margin-top:10px}
-.lines li.unk span:last-child{color:var(--muted); font-size:13px}
-/* UPI payment */
-.upi{margin-top:14px; padding:14px; border-radius:14px; background:color-mix(in srgb,var(--gold) 12%,var(--card)); border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line))}
-.upi .btn{width:100%}
-.upi-qr{display:block; width:min(260px,100%); height:auto; margin:12px auto 4px; border-radius:12px; background:#fff}
-.upi-id{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:10px 0 6px; font-size:15px}
-.upi-id code{font:inherit; font-weight:700}
-.upi-id button{min-height:34px; padding:0 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font:inherit; font-size:13px; font-weight:600; cursor:pointer}
-.upi details summary{cursor:pointer; font-weight:600; font-size:14px; margin-top:12px}
-.upi p{margin:6px 0 0; font-size:13px; color:var(--muted)}
-/* My orders */
-.orders{display:grid; gap:14px}
-.ocard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow)}
-.ocard.new{border-color:var(--gold-lo); box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 35%,transparent),var(--shadow)}
-.osent{margin:0 0 12px; font-weight:600}
-.ohead{display:flex; justify-content:space-between; gap:8px 16px; align-items:flex-start; flex-wrap:wrap}
-.ocode{font-size:24px; font-weight:700; letter-spacing:.06em; font-variant-numeric:tabular-nums}
-.ocode small{display:block; font-size:12px; letter-spacing:0; font-weight:500; color:var(--muted)}
-.oamt{text-align:right; font-size:22px; font-weight:700}
-.oamt small{display:block; font-size:12px; font-weight:500; color:var(--muted)}
-.ostatus{margin:12px 0 2px; font-size:18px; font-weight:700}
-.odetail{margin:0; color:var(--muted)}
-.track{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:14px 0 6px}
-.track span{height:6px; border-radius:6px; background:var(--line)}
-.track span.on{background:linear-gradient(90deg,var(--gold-lo),var(--gold))}
-.track-labels{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; font-size:11px; color:var(--muted)}
-.ofiles{list-style:none; padding:0; margin:12px 0 0; font-size:14px}
-.ofiles li{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-top:1px dashed var(--line)}
-.ofiles li span:first-child{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.ofiles .err{color:var(--bad); white-space:normal}
-.oactions{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
-.oactions .btn{min-height:40px; font-size:14px; padding:0 14px}
-@media (max-width:520px){ .opts{grid-template-columns:1fr} .oamt{text-align:left} }
-
-/* Prices */
-.prices{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px}
-.price{display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
-  border-radius:14px; padding:16px 18px}
-.price .name{font-weight:600}
-.price .sub{display:block; font-size:13px; color:var(--muted); font-weight:400}
-.price .amt{font-weight:700; white-space:nowrap}
-.price .amt.ask{color:var(--gold-ink)}
-.price .amt-line{display:block; text-align:right; line-height:1.35}
-.price .amt-line + .amt-line{font-weight:500; color:var(--muted); font-size:14px}
-
-/* Visit */
-.visit{display:grid; grid-template-columns:1fr 1fr; gap:20px}
-.hours{width:100%; border-collapse:collapse; font-size:15px}
-.hours td{padding:10px 0; border-bottom:1px solid var(--line)}
-.hours td:last-child{text-align:right; font-weight:600}
-.hours tr.today td{color:var(--gold-ink)}
-address{font-style:normal; font-size:17px; line-height:1.6; margin-bottom:18px}
-.actions{display:flex; flex-wrap:wrap; gap:10px}
-
-footer{padding:40px 0 110px; border-top:1px solid var(--line); margin-top:24px; color:var(--muted); font-size:14px}
-footer .mantra{font-size:clamp(26px,6vw,44px); font-weight:700; color:var(--ink); letter-spacing:-.02em; margin:0 0 10px; isolation:isolate; position:relative}
-html[lang="ml"] footer .mantra{letter-spacing:0}
-
-/* Floating WhatsApp (phones) */
-.fab{position:fixed; right:16px; bottom:16px; z-index:30; display:none}
-.fab .btn{border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
-
-@media (max-width:860px){
-  .order,.visit{grid-template-columns:1fr}
-  .summary{position:static}
-  .steps{grid-template-columns:1fr}
-  .fab{display:block}
-}
-@media (max-width:520px){
-  .bar .status{display:none}
-  .row2{grid-template-columns:1fr}
-  .hero{padding-top:36px}
-  .brand-name{font-size:18px}
-  .brand-sub b{font-size:11px; letter-spacing:.34em}
-  .brand-sub small{font-size:9px; letter-spacing:.1em}
-  .logo-plate{padding:13px 16px}
-}
-.status-mobile{display:none}
-.pills{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px}
-.srv.on i{background:var(--ok); box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 20%,transparent)}
-.srv.off i{background:#9AA0AE}
-.srv.warn{border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
-.srv.warn i{background:var(--bad); animation:srv-pulse 1.6s ease-in-out infinite}
-@keyframes srv-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bad) 45%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
-@media (prefers-reduced-motion:reduce){ .srv.warn i{animation:none} }
-.srv-note b{background:#9AA0AE}
-@media (max-width:520px){ .status-mobile{display:inline-flex} }
-@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLUTCHPRINT AI — T FIX® CUSAT | print.tfix.in</title>
+  <meta name="description" content="CLUTCHPRINT AI by T FIX® CUSAT: upload your files any time, pay by UPI, pick up your prints at the counter on Pipeline Road, Kalamassery." />
+  <meta name="theme-color" content="#07080a" />
+  <meta property="og:title" content="CLUTCHPRINT AI — T FIX® CUSAT" />
+  <meta property="og:description" content="Last-minute print? You're covered. Upload any time, pick up at T FIX® CUSAT." />
+  <meta property="og:url" content="https://print.tfix.in/" />
+  <meta property="og:image" content="https://print.tfix.in/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind is compiled ahead of time into assets/app.css (no runtime CDN). -->
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    :root {
+      --bg-deep: #07080a;
+      --bg-radial: #181a20;
+      --surface: rgba(20, 22, 27, 0.86);
+      --gold-light: #f3d97d;
+      --gold-mid: #d4af37;
+      --gold-dark: #9c7518;
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --border-gold: rgba(212, 175, 55, 0.36);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; background-color: var(--bg-deep); color: #f8f9fa; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body {
+      margin: 0; min-height: 100vh; overflow-x: hidden;
+      background:
+        radial-gradient(ellipse 80% 55% at 50% -10%, rgba(212, 175, 55, 0.13) 0%, rgba(212, 175, 55, 0.03) 38%, transparent 70%),
+        radial-gradient(circle at 50% 20%, var(--bg-radial) 0%, #0d0e12 52%, var(--bg-deep) 100%);
+    }
+    section[id] { scroll-margin-top: 84px; }
+    .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bg-grid-pattern {
+      background-image: linear-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fff0b3 0%, #e5c158 38%, #c99b26 72%, #f5dc82 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gold-btn {
+      background: linear-gradient(135deg, #f3d97d 0%, #d4af37 52%, #b5891d 100%); color: #0b0c0e;
+      box-shadow: 0 8px 28px rgba(212, 175, 55, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+    .gold-btn:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 12px 34px rgba(212, 175, 55, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+    .gold-btn:active { transform: translateY(0); }
+    .gold-btn[disabled] { opacity: .7; cursor: progress; transform: none; }
+    .glass-card { background: var(--surface); border: 1px solid var(--border-subtle); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .glass-card-gold {
+      background: linear-gradient(160deg, rgba(31, 28, 20, 0.92) 0%, rgba(16, 17, 21, 0.95) 60%);
+      border: 1px solid var(--border-gold); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(212, 175, 55, 0.08);
+    }
+    /* CLUTCHPRINT wordmark: slanted bold gold CLUTCH + thin white PRINT + gold-bordered AI capsule */
+    .clutch-wordmark { display: inline-flex; align-items: flex-start; line-height: 1; user-select: none; white-space: nowrap; }
+    .clutch-part { font-weight: 900; font-style: italic; letter-spacing: -0.04em; transform: skewX(-6deg); display: inline-block; padding-right: .06em; }
+    .print-part { font-weight: 300; font-style: italic; letter-spacing: 0.04em; color: #fff; transform: skewX(-6deg); display: inline-block; margin-left: 0.04em; }
+    .ai-capsule {
+      display: inline-flex; align-items: center; justify-content: center; transform: skewX(-12deg) translateY(-0.18em);
+      margin-left: 0.3em; padding: 0.14rem 0.42rem; border-radius: 9999px; border: 1.5px solid #d4af37;
+      background: rgba(212, 175, 55, 0.14); color: #f3d97d; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+      font-size: 0.62rem; letter-spacing: 0.08em; line-height: 1; box-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
+    }
+    .dropzone-active { border-color: #f3d97d !important; background: rgba(212, 175, 55, 0.09) !important; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.14); }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.86); } }
+    .live-dot { animation: pulseDot 1.8s ease-in-out infinite; }
+    @keyframes shimmerBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(220%); } }
+    .progress-shimmer::after { content: ''; position: absolute; inset: 0; width: 45%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: shimmerBar 1.3s linear infinite; }
+    .field { width: 100%; min-height: 44px; border-radius: .6rem; border: 1px solid rgba(255,255,255,.1); background: rgba(13,14,18,.8); color: #fff; padding: .55rem .8rem; font: inherit; font-size: 16px; }
+    .field:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,.18); }
+    .field::placeholder { color: #71717a; }
+    .opt-on { border-color: #d4af37 !important; background: rgba(212,175,55,.15) !important; color: #f3d97d !important; font-weight: 600; }
+    .logo-sym { width: 26px; height: auto; display: block; overflow: visible; }
+    .logo-shine { transform-box: view-box; animation: logo-shine-sym 6s ease-in-out 1.2s infinite; }
+    @keyframes logo-shine-sym { 0% { transform: skewX(-20deg) translateX(-90px); } 55%, 100% { transform: skewX(-20deg) translateX(400px); } }
+    .upi-qr { display: block; width: min(240px, 100%); height: auto; margin: .75rem auto .25rem; border-radius: .75rem; background: #fff; }
+    #qr-box img, #qr-box canvas { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .live-dot, .logo-shine, .progress-shimmer::after { animation: none; } }
+  </style>
 </head>
-<body>
+<body class="bg-grid-pattern antialiased selection:bg-[#d4af37]/30 selection:text-[#f3d97d]">
 
-<header>
-  <div class="wrap bar">
-    <a class="brand" href="#top" aria-label="T FIX CUSAT · AI Auto Print">
-      <span class="brand-tile"><svg viewBox="-6 -6 301 260" class="logo-sym" aria-hidden="true"><defs><linearGradient id="g-hd" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hd"><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" clip-rule="nonzero"/></clipPath><linearGradient id="sh-hd" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" fill="url(#g-hd)" fill-rule="nonzero"/><g clip-path="url(#clip-hd)"><rect class="logo-shine" x="0" y="-40" width="56" height="340" fill="url(#sh-hd)" transform="skewX(-20)"/></g></svg></span>
-      <span class="brand-text"><span class="brand-name">T FIX</span><span class="brand-sub"><b>CUSAT</b><small>AI Auto Print</small></span></span>
-    </a>
-    <span class="spacer"></span>
-    <span class="status" data-status><i></i><span data-status-text>…</span></span>
-    <div class="lang" role="group" aria-label="Language">
-      <button type="button" data-lang="en" aria-pressed="true">EN</button>
-      <button type="button" data-lang="ml" aria-pressed="false">മല</button>
-    </div>
-  </div>
-</header>
-
-<main id="top">
-  <div class="wrap hero">
-    <div class="pills">
-      <span class="status status-mobile" data-status><i></i><span data-status-text>…</span></span>
-      <span class="status srv" data-srv hidden><i></i><span data-srv-text>…</span></span>
-    </div>
-    <div class="logo-plate"><svg viewBox="-6 -6 858 260" class="logo-full" role="img" aria-label="T FIX CUSAT"><defs><linearGradient id="g-hr" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hr"><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z M309 16.5H435V48.5H391V165.5H353V48.5H309Z M499 16.5H600V47.5H536V78.5H594V109.5H536V165.5H499Z M627 16.5H665V165.5H627Z M690.5 16.5H733.5L765 61.4L796.5 16.5H839.5L789.6 87.8L844 165.5H800L764.5 115L729 165.5H686L742.3 87.9Z M376.11785714285713 247.83142857142857Q370.5057142857143 247.83142857142857 365.6903571428571 245.99535714285713Q360.875 244.15928571428572 357.3414285714286 240.76428571428573Q353.8078571428572 237.36928571428572 351.83321428571435 232.79642857142858Q349.85857142857145 228.22357142857143 349.85857142857145 222.75Q349.85857142857145 217.27642857142857 351.83321428571435 212.70357142857142Q353.8078571428572 208.13071428571428 357.37607142857144 204.73571428571427Q360.94428571428574 201.34071428571428 365.725 199.50464285714287Q370.5057142857143 197.66857142857143 376.1871428571429 197.66857142857143Q382.4921428571429 197.66857142857143 387.58464285714285 199.85107142857143Q392.6771428571429 202.03357142857143 396.1414285714286 206.26L388.9357142857143 212.9114285714286Q386.44142857142856 210.0707142857143 383.3928571428571 208.65035714285716Q380.3442857142857 207.23000000000002 376.74142857142857 207.23000000000002Q373.3464285714286 207.23000000000002 370.5057142857143 208.33857142857144Q367.665 209.44714285714286 365.5864285714286 211.5257142857143Q363.5078571428572 213.6042857142857 362.3646428571429 216.445Q361.2214285714286 219.28571428571428 361.2214285714286 222.75Q361.2214285714286 226.21428571428572 362.3646428571429 229.055Q363.5078571428572 231.8957142857143 365.5864285714286 233.9742857142857Q367.665 236.05285714285714 370.5057142857143 237.1614285714286Q373.3464285714286 238.27 376.74142857142857 238.27Q380.3442857142857 238.27 383.3928571428571 236.84964285714287Q386.44142857142856 235.42928571428573 388.9357142857143 232.51928571428573L396.1414285714286 239.1707142857143Q392.6771428571429 243.39714285714285 387.58464285714285 245.6142857142857Q382.4921428571429 247.83142857142857 376.11785714285713 247.83142857142857Z M472.50000000000006 247.83142857142857Q462.17642857142863 247.83142857142857 456.35642857142864 242.0807142857143Q450.5364285714286 236.33 450.5364285714286 225.66V198.5H461.7607142857143V225.24428571428572Q461.7607142857143 232.17285714285714 464.6014285714286 235.2214285714286Q467.44214285714287 238.27 472.56928571428574 238.27Q477.6964285714286 238.27 480.5371428571429 235.2214285714286Q483.3778571428572 232.17285714285714 483.3778571428572 225.24428571428572V198.5H494.46357142857147V225.66Q494.46357142857147 236.33 488.6435714285715 242.0807142857143Q482.8235714285715 247.83142857142857 472.50000000000006 247.83142857142857Z M570.5842857142857 247.83142857142857Q564.7642857142857 247.83142857142857 559.4292857142857 246.2725Q554.0942857142857 244.71357142857144 550.8378571428572 242.21928571428572L554.6485714285714 233.76642857142858Q557.7664285714285 235.98357142857142 562.0274999999999 237.40392857142857Q566.2885714285713 238.8242857142857 570.6535714285714 238.8242857142857Q573.9792857142857 238.8242857142857 576.0232142857142 238.16607142857143Q578.0671428571428 237.50785714285715 579.0371428571428 236.32999999999998Q580.0071428571429 235.15214285714285 580.0071428571429 233.62785714285715Q580.0071428571429 231.68785714285715 578.4828571428571 230.54464285714286Q576.9585714285714 229.40142857142857 574.4642857142857 228.67392857142858Q571.9699999999999 227.94642857142858 568.9560714285714 227.28821428571428Q565.9421428571428 226.63 562.9282142857143 225.66Q559.9142857142857 224.69 557.42 223.16571428571427Q554.9257142857142 221.64142857142858 553.3667857142857 219.14714285714285Q551.8078571428571 216.65285714285716 551.8078571428571 212.77285714285713Q551.8078571428571 208.6157142857143 554.0596428571428 205.18607142857144Q556.3114285714286 201.75642857142856 560.8496428571428 199.71249999999998Q565.3878571428571 197.66857142857143 572.2471428571428 197.66857142857143Q576.8199999999999 197.66857142857143 581.2542857142857 198.7425Q585.6885714285714 199.81642857142856 589.0835714285714 201.96428571428572L585.6192857142856 210.48642857142858Q582.2242857142857 208.54642857142858 578.8292857142857 207.61107142857145Q575.4342857142857 206.6757142857143 572.1778571428571 206.6757142857143Q568.9214285714286 206.6757142857143 566.8428571428572 207.43785714285713Q564.7642857142857 208.2 563.8635714285715 209.4125Q562.9628571428572 210.625 562.9628571428572 212.21857142857144Q562.9628571428572 214.08928571428572 564.4871428571428 215.23250000000002Q566.0114285714285 216.37571428571428 568.5057142857142 217.06857142857143Q571.0 217.76142857142858 574.0139285714286 218.45428571428573Q577.0278571428571 219.14714285714285 580.0417857142857 220.04785714285714Q583.0557142857142 220.94857142857143 585.55 222.47285714285715Q588.0442857142857 223.99714285714285 589.6032142857143 226.49142857142857Q591.1621428571428 228.9857142857143 591.1621428571428 232.79642857142858Q591.1621428571428 236.8842857142857 588.8757142857143 240.27928571428572Q586.5892857142857 243.6742857142857 582.0510714285714 245.75285714285712Q577.5128571428571 247.83142857142857 570.5842857142857 247.83142857142857Z M640.8053571428571 247.0 662.4224999999999 198.5H673.5082142857142L695.1946428571428 247.0H683.4160714285714L665.6789285714285 204.18142857142857H670.1132142857142L652.3067857142856 247.0ZM651.6139285714285 236.60714285714286 654.5932142857142 228.085H679.5360714285714L682.5846428571429 236.60714285714286Z M756.3878571428571 247.0V207.6457142857143H740.8678571428571V198.5H783.1321428571429V207.6457142857143H767.6121428571429V247.0Z" clip-rule="nonzero"/></clipPath><linearGradient id="sh-hr" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z M309 16.5H435V48.5H391V165.5H353V48.5H309Z M499 16.5H600V47.5H536V78.5H594V109.5H536V165.5H499Z M627 16.5H665V165.5H627Z M690.5 16.5H733.5L765 61.4L796.5 16.5H839.5L789.6 87.8L844 165.5H800L764.5 115L729 165.5H686L742.3 87.9Z M376.11785714285713 247.83142857142857Q370.5057142857143 247.83142857142857 365.6903571428571 245.99535714285713Q360.875 244.15928571428572 357.3414285714286 240.76428571428573Q353.8078571428572 237.36928571428572 351.83321428571435 232.79642857142858Q349.85857142857145 228.22357142857143 349.85857142857145 222.75Q349.85857142857145 217.27642857142857 351.83321428571435 212.70357142857142Q353.8078571428572 208.13071428571428 357.37607142857144 204.73571428571427Q360.94428571428574 201.34071428571428 365.725 199.50464285714287Q370.5057142857143 197.66857142857143 376.1871428571429 197.66857142857143Q382.4921428571429 197.66857142857143 387.58464285714285 199.85107142857143Q392.6771428571429 202.03357142857143 396.1414285714286 206.26L388.9357142857143 212.9114285714286Q386.44142857142856 210.0707142857143 383.3928571428571 208.65035714285716Q380.3442857142857 207.23000000000002 376.74142857142857 207.23000000000002Q373.3464285714286 207.23000000000002 370.5057142857143 208.33857142857144Q367.665 209.44714285714286 365.5864285714286 211.5257142857143Q363.5078571428572 213.6042857142857 362.3646428571429 216.445Q361.2214285714286 219.28571428571428 361.2214285714286 222.75Q361.2214285714286 226.21428571428572 362.3646428571429 229.055Q363.5078571428572 231.8957142857143 365.5864285714286 233.9742857142857Q367.665 236.05285714285714 370.5057142857143 237.1614285714286Q373.3464285714286 238.27 376.74142857142857 238.27Q380.3442857142857 238.27 383.3928571428571 236.84964285714287Q386.44142857142856 235.42928571428573 388.9357142857143 232.51928571428573L396.1414285714286 239.1707142857143Q392.6771428571429 243.39714285714285 387.58464285714285 245.6142857142857Q382.4921428571429 247.83142857142857 376.11785714285713 247.83142857142857Z M472.50000000000006 247.83142857142857Q462.17642857142863 247.83142857142857 456.35642857142864 242.0807142857143Q450.5364285714286 236.33 450.5364285714286 225.66V198.5H461.7607142857143V225.24428571428572Q461.7607142857143 232.17285714285714 464.6014285714286 235.2214285714286Q467.44214285714287 238.27 472.56928571428574 238.27Q477.6964285714286 238.27 480.5371428571429 235.2214285714286Q483.3778571428572 232.17285714285714 483.3778571428572 225.24428571428572V198.5H494.46357142857147V225.66Q494.46357142857147 236.33 488.6435714285715 242.0807142857143Q482.8235714285715 247.83142857142857 472.50000000000006 247.83142857142857Z M570.5842857142857 247.83142857142857Q564.7642857142857 247.83142857142857 559.4292857142857 246.2725Q554.0942857142857 244.71357142857144 550.8378571428572 242.21928571428572L554.6485714285714 233.76642857142858Q557.7664285714285 235.98357142857142 562.0274999999999 237.40392857142857Q566.2885714285713 238.8242857142857 570.6535714285714 238.8242857142857Q573.9792857142857 238.8242857142857 576.0232142857142 238.16607142857143Q578.0671428571428 237.50785714285715 579.0371428571428 236.32999999999998Q580.0071428571429 235.15214285714285 580.0071428571429 233.62785714285715Q580.0071428571429 231.68785714285715 578.4828571428571 230.54464285714286Q576.9585714285714 229.40142857142857 574.4642857142857 228.67392857142858Q571.9699999999999 227.94642857142858 568.9560714285714 227.28821428571428Q565.9421428571428 226.63 562.9282142857143 225.66Q559.9142857142857 224.69 557.42 223.16571428571427Q554.9257142857142 221.64142857142858 553.3667857142857 219.14714285714285Q551.8078571428571 216.65285714285716 551.8078571428571 212.77285714285713Q551.8078571428571 208.6157142857143 554.0596428571428 205.18607142857144Q556.3114285714286 201.75642857142856 560.8496428571428 199.71249999999998Q565.3878571428571 197.66857142857143 572.2471428571428 197.66857142857143Q576.8199999999999 197.66857142857143 581.2542857142857 198.7425Q585.6885714285714 199.81642857142856 589.0835714285714 201.96428571428572L585.6192857142856 210.48642857142858Q582.2242857142857 208.54642857142858 578.8292857142857 207.61107142857145Q575.4342857142857 206.6757142857143 572.1778571428571 206.6757142857143Q568.9214285714286 206.6757142857143 566.8428571428572 207.43785714285713Q564.7642857142857 208.2 563.8635714285715 209.4125Q562.9628571428572 210.625 562.9628571428572 212.21857142857144Q562.9628571428572 214.08928571428572 564.4871428571428 215.23250000000002Q566.0114285714285 216.37571428571428 568.5057142857142 217.06857142857143Q571.0 217.76142857142858 574.0139285714286 218.45428571428573Q577.0278571428571 219.14714285714285 580.0417857142857 220.04785714285714Q583.0557142857142 220.94857142857143 585.55 222.47285714285715Q588.0442857142857 223.99714285714285 589.6032142857143 226.49142857142857Q591.1621428571428 228.9857142857143 591.1621428571428 232.79642857142858Q591.1621428571428 236.8842857142857 588.8757142857143 240.27928571428572Q586.5892857142857 243.6742857142857 582.0510714285714 245.75285714285712Q577.5128571428571 247.83142857142857 570.5842857142857 247.83142857142857Z M640.8053571428571 247.0 662.4224999999999 198.5H673.5082142857142L695.1946428571428 247.0H683.4160714285714L665.6789285714285 204.18142857142857H670.1132142857142L652.3067857142856 247.0ZM651.6139285714285 236.60714285714286 654.5932142857142 228.085H679.5360714285714L682.5846428571429 236.60714285714286Z M756.3878571428571 247.0V207.6457142857143H740.8678571428571V198.5H783.1321428571429V207.6457142857143H767.6121428571429V247.0Z" fill="url(#g-hr)" fill-rule="nonzero"/><g clip-path="url(#clip-hr)"><rect class="logo-shine" x="0" y="-40" width="56" height="340" fill="url(#sh-hr)" transform="skewX(-20)"/></g></svg><span class="plate-tag">AI Auto Print</span></div>
-    <h1>
-      <span class="offset" data-i18n="m1" data-text="Send.">Send.</span>
-      <span class="offset" data-i18n="m2" data-text="Print.">Print.</span>
-      <span class="offset" data-i18n="m3" data-text="Collect.">Collect.</span>
-    </h1>
-    <p class="lead" data-i18n="lead">Printing, Xerox and binding next to CUSAT. Upload your files any time — even at night — and collect your prints at the shop.</p>
-    <div class="cta">
-      <a class="btn btn-gold" href="#order" data-i18n="ctaOrder">Upload files</a>
-      <a class="btn btn-ghost btn-wa-ghost" data-wa-plain href="#" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
-        <span data-i18n="ctaWa">WhatsApp us</span>
+  <!-- Top Navigation -->
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#08090c]/85 backdrop-blur-md">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <a href="#top" class="flex min-w-0 items-center gap-3 focus:outline-none" aria-label="CLUTCHPRINT AI by T FIX CUSAT">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d4af37]/40 bg-[#0b0b0d] shadow-[0_0_20px_rgba(212,175,55,0.14)]">
+          <svg viewBox="-6 -6 301 260" class="logo-sym" aria-hidden="true"><defs><linearGradient id="g-hd" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient><clipPath id="clip-hd"><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" clip-rule="nonzero"/></clipPath><linearGradient id="sh-hd" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" fill="url(#g-hd)" fill-rule="nonzero"/><g clip-path="url(#clip-hd)"><rect class="logo-shine" x="0" y="-40" width="56" height="340" fill="url(#sh-hd)" transform="skewX(-20)"/></g></svg>
+        </div>
+        <div class="flex min-w-0 flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="whitespace-nowrap text-[11px] font-bold tracking-[0.18em] text-[#f3d97d] sm:text-xs">T FIX® CUSAT</span>
+            <span class="hidden rounded bg-white/5 px-1.5 py-0.5 font-mono-tech text-[10px] text-zinc-400 sm:inline">print.tfix.in</span>
+          </div>
+          <div class="clutch-wordmark text-lg sm:text-xl">
+            <span class="clutch-part gold-gradient-text">CLUTCH</span><span class="print-part">PRINT</span><span class="ai-capsule">AI</span>
+          </div>
+        </div>
       </a>
-    </div>
-  </div>
 
-  <section>
-    <div class="wrap">
-      <p class="eyebrow" data-i18n="howEyebrow">How it works</p>
-      <h2 data-i18n="howTitle">Three steps. That's it.</h2>
-      <div class="steps">
-        <div class="step"><div class="n">1</div><h3 data-i18n="s1t">Upload</h3><p data-i18n="s1p">Upload your files and choose print options. Any time — even when we're closed.</p></div>
-        <div class="step"><div class="n">2</div><h3 data-i18n="s2t">Pay</h3><p data-i18n="s2p">We check your files and confirm the price. Pay at the shop (cash or UPI) — we print once payment is confirmed.</p></div>
-        <div class="step"><div class="n">3</div><h3 data-i18n="s3t">Collect</h3><p data-i18n="s3p">Pick up your prints at the shop on South Pipeline Road, near CUSAT.</p></div>
+      <nav class="hidden items-center gap-6 text-sm text-zinc-300 md:flex" aria-label="Main">
+        <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 transition hover:text-[#f3d97d]">
+          <span>Home</span><span class="font-mono-tech text-[10px] text-[#d4af37]">↗</span>
+        </a>
+        <a href="#upload-studio" class="transition hover:text-[#f3d97d]">Auto-Print</a>
+        <a href="#how-it-works" class="transition hover:text-[#f3d97d]">3-Step Flow</a>
+        <a href="#location" class="transition hover:text-[#f3d97d]">Pipeline Rd · <span data-close-time>9:30 PM</span></a>
+      </nav>
+
+      <a href="#upload-studio" class="gold-btn shrink-0 rounded-lg px-3.5 py-2 text-xs font-bold tracking-wide sm:px-4 sm:text-sm">Drop File</a>
+    </div>
+  </header>
+
+  <main id="top" class="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
+
+    <!-- Hero -->
+    <section class="mx-auto max-w-3xl text-center">
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <!-- Shop open / closed (live, India time) -->
+        <span class="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/35 bg-[#14130f]/90 px-3.5 py-1.5 shadow-[0_0_24px_rgba(212,175,55,0.12)]">
+          <span id="shop-dot" class="live-dot h-2 w-2 shrink-0 rounded-full bg-zinc-500"></span>
+          <span id="shop-pill" class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-[#f3d97d] sm:text-xs">CHECKING HOURS…</span>
+        </span>
+        <!-- Print server (T Print on Shop PC 1) online / offline -->
+        <span id="srv-pill-wrap" hidden class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#101116]/90 px-3.5 py-1.5">
+          <span id="srv-dot" class="h-2 w-2 shrink-0 rounded-full bg-zinc-500"></span>
+          <span id="srv-pill" class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-zinc-200 sm:text-xs"></span>
+        </span>
       </div>
-    </div>
-  </section>
 
-  <section id="order">
-    <div class="wrap">
-      <p class="eyebrow" data-i18n="orderEyebrow">Order online</p>
-      <h2 data-i18n="orderTitle">Upload your files</h2>
-      <p class="closed-note" id="closedNote" hidden><b aria-hidden="true"></b><span></span></p>
-      <p class="closed-note srv-note" id="srvNote" hidden><b aria-hidden="true"></b><span></span></p>
-      <div class="order">
-        <form class="card" id="orderForm" autocomplete="on" novalidate onsubmit="return false">
-          <div class="row2">
-            <div class="field">
-              <label for="name" data-i18n="fName">Your name</label>
-              <input id="name" name="name" type="text" autocomplete="name" maxlength="60" required>
-            </div>
-            <div class="field">
-              <label for="phone" data-i18n="fPhone">Mobile number</label>
-              <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" data-i18n-ph="phonePh" placeholder="10-digit mobile" required>
+      <div class="mt-6 flex justify-center">
+        <div class="clutch-wordmark text-[2.6rem] leading-none sm:text-5xl md:text-6xl">
+          <span class="clutch-part gold-gradient-text">CLUTCH</span><span class="print-part">PRINT</span><span class="ai-capsule !px-2.5 !py-1 !text-xs sm:!text-sm">AI</span>
+        </div>
+      </div>
+
+      <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+        Last-minute print? <span class="gold-gradient-text">You're covered.</span>
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
+        Upload from your hostel, class, or bus. Our AI handles the queue—just walk into <strong class="whitespace-nowrap font-semibold text-white">T FIX® CUSAT</strong> and grab your pages.
+      </p>
+      <p class="mt-3 font-mono-tech text-xs tracking-wide text-[#d4af37]/90 sm:text-sm">
+        No queue. No panic. Upload anytime — even at night.
+      </p>
+    </section>
+
+    <!-- Upload studio -->
+    <section id="upload-studio" class="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+
+      <!-- Left: details, dropzone, options, estimate -->
+      <form id="order-form" class="glass-card rounded-2xl p-5 sm:p-6 lg:col-span-7" novalidate onsubmit="return false">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
+          <div>
+            <h2 class="text-base font-bold text-white sm:text-lg">Instant AI Print Queue</h2>
+            <p class="text-xs text-zinc-400">PDF, DOCX, PPTX, JPG or PNG · up to 10 files, 25 MB each</p>
+          </div>
+          <span class="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 font-mono-tech text-xs text-zinc-300">
+            SERVER: <span id="srv-badge" class="text-zinc-400">…</span>
+          </span>
+        </div>
+
+        <p id="closed-note" hidden class="mt-4 rounded-xl border border-[#d4af37]/30 bg-[#14130f] px-3.5 py-2.5 text-xs leading-relaxed text-zinc-300"></p>
+
+        <!-- Customer details -->
+        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="block">
+            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Your name</span>
+            <input id="name" class="field mt-1.5" type="text" autocomplete="name" maxlength="60" placeholder="e.g. Anu" required />
+          </label>
+          <label class="block">
+            <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Mobile number</span>
+            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" required />
+          </label>
+        </div>
+
+        <!-- Dropzone -->
+        <div id="dropzone" tabindex="0" role="button" aria-label="Drop your files: PDF, DOCX, PPTX, JPG or PNG"
+             class="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d4af37]/40 bg-[#0d0e12]/80 px-4 py-7 text-center transition hover:border-[#f3d97d] hover:bg-[#15140f]/80 focus:outline-none focus:ring-2 focus:ring-[#d4af37]">
+          <input id="file-input" type="file" multiple accept=".pdf,.docx,.pptx,.ppt,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" class="hidden" />
+          <div class="flex h-12 w-12 items-center justify-center rounded-full border border-[#d4af37]/40 bg-[#d4af37]/10 text-[#f3d97d]">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+            </svg>
+          </div>
+          <p class="mt-3 text-base font-bold text-white sm:text-lg">Drop Your Files (PDF / DOCX / JPG)</p>
+          <p class="mt-1 text-xs text-zinc-400">Tap to browse from phone or laptop, or drag &amp; drop right here</p>
+        </div>
+
+        <!-- Selected files -->
+        <ul id="file-list" class="mt-3 space-y-2"></ul>
+
+        <!-- Print options -->
+        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Ink Mode</span>
+            <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Ink mode">
+              <button type="button" data-opt="color" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">B&amp;W</button>
+              <button type="button" data-opt="color" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">Color</button>
             </div>
           </div>
-          <div class="field">
-            <span class="lbl" data-i18n="fFiles">Files</span>
-            <label class="drop" id="drop">
-              <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.pptx,.ppt,application/pdf,image/jpeg,image/png">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-              <b data-i18n="dropTitle">Tap to add files</b>
-              <small data-i18n="dropSub">PDF, JPG, PNG, Word or PowerPoint · up to 10 files, 25 MB each</small>
+          <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Sides</span>
+            <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Sides">
+              <button type="button" data-opt="doubleside" data-val="0" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">1-Sided</button>
+              <button type="button" data-opt="doubleside" data-val="1" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">Duplex</button>
+            </div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Paper</span>
+            <div class="mt-2 grid grid-cols-2 gap-1.5" role="group" aria-label="Paper size">
+              <button type="button" data-opt="paper_size" data-val="A4" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">A4</button>
+              <button type="button" data-opt="paper_size" data-val="A3" class="opt rounded-lg border border-white/10 bg-white/5 py-1.5 text-xs text-zinc-300">A3</button>
+            </div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3">
+            <span class="block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Copies</span>
+            <div class="mt-2 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-1.5 py-1">
+              <button type="button" id="copies-minus" class="flex h-7 w-7 items-center justify-center rounded text-zinc-300 hover:bg-white/10 hover:text-white" aria-label="Fewer copies">−</button>
+              <span id="copies-count" class="font-mono-tech text-sm font-bold text-white" aria-live="polite">1</span>
+              <button type="button" id="copies-plus" class="flex h-7 w-7 items-center justify-center rounded text-zinc-300 hover:bg-white/10 hover:text-white" aria-label="More copies">+</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="mt-3 rounded-xl border border-white/10 bg-[#0d0e12]/50 px-3.5 py-2.5">
+          <summary class="cursor-pointer font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">More options · pages per sheet · note</summary>
+          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label class="block">
+              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Pages per sheet</span>
+              <select id="pps" class="field mt-1.5">
+                <option value="1">1 (normal)</option><option value="2">2</option><option value="4">4</option>
+              </select>
             </label>
-            <div class="files" id="fileList"></div>
+            <label class="block">
+              <span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400">Note for the shop</span>
+              <input id="notes" class="field mt-1.5" type="text" maxlength="400" placeholder="e.g. spiral binding, colour cover" />
+            </label>
           </div>
-          <div class="field" style="margin-bottom:0">
-            <label for="notes" data-i18n="fNotes">Notes (optional)</label>
-            <textarea id="notes" name="notes" maxlength="400" data-i18n-ph="notesPh" placeholder="e.g. spiral binding, colour cover page"></textarea>
+          <p class="mt-2 text-[11px] text-zinc-500">To print only some pages of a file, tap “All pages” next to the file.</p>
+        </details>
+
+        <!-- Estimate + send -->
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#0b0c10] px-4 py-3.5">
+          <div class="flex flex-wrap items-center gap-5 font-mono-tech text-xs">
+            <div><span class="block text-[10px] uppercase text-zinc-500">Pages</span><span id="stat-pages" class="text-sm font-bold text-white">—</span></div>
+            <div class="h-6 w-px bg-white/10"></div>
+            <div><span class="block text-[10px] uppercase text-zinc-500">Sheets</span><span id="stat-sheets" class="text-sm font-bold text-white">—</span></div>
+            <div class="h-6 w-px bg-white/10"></div>
+            <div><span class="block text-[10px] uppercase text-zinc-500">Est. Total</span><span id="stat-price" class="text-sm font-bold text-[#f3d97d]">₹0</span></div>
           </div>
-        </form>
+          <button id="send-btn" type="button" class="gold-btn w-full rounded-xl px-5 py-3 text-sm font-extrabold tracking-wide sm:w-auto">Send to CLUTCHPRINT AI</button>
+        </div>
+        <div id="progress" hidden class="relative mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full w-0 rounded-full bg-gradient-to-r from-[#b5891d] via-[#d4af37] to-[#f3d97d] transition-all duration-200"></div></div>
+        <p id="form-error" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
+        <p id="rate-breakdown" class="mt-2 text-left sm:text-right font-mono-tech text-[10px] leading-relaxed text-zinc-400"></p>
+      </form>
 
-        <aside class="card summary" aria-live="polite">
-          <h3 data-i18n="sumTitle">Your order</h3>
-          <ul class="lines" id="lines"></ul>
-          <div class="total"><span data-i18n="estTotal">Estimated total</span><strong id="total">₹0</strong></div>
-          <p class="note" data-i18n="estNote">Estimate. The shop confirms the final price when it receives your order.</p>
-          <div class="attach">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>
-            <span data-i18n="payNote">Pay at the shop (cash or UPI). We start printing once your payment is confirmed.</span>
+      <!-- Right: live AI status + pickup pass -->
+      <div class="flex flex-col gap-5 lg:col-span-5">
+
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono-tech text-xs font-semibold uppercase tracking-wider text-[#f3d97d]">CLUTCHPRINT AI Engine</span>
+            <span id="engine-state" class="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono-tech text-[11px] text-zinc-300">READY</span>
           </div>
-          <p class="form-error" id="formError" role="alert" hidden></p>
-          <button class="btn btn-gold" id="submitBtn" type="button" data-i18n="send">Send order</button>
-          <div class="progress" id="progress" hidden><i></i></div>
-          <a class="btn btn-ghost" data-wa-plain href="#" target="_blank" rel="noopener" data-i18n="askWa">Questions? WhatsApp us</a>
-        </aside>
-      </div>
-    </div>
-  </section>
+          <div class="relative mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div id="engine-bar" class="relative h-full w-0 rounded-full bg-gradient-to-r from-[#b5891d] via-[#d4af37] to-[#f3d97d] transition-all duration-500"></div>
+          </div>
+          <ol class="mt-5 space-y-3.5">
+            <li id="step-1" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
+              <span id="step-1-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">1</span>
+              <div class="min-w-0 flex-1"><p id="step-1-title" class="text-sm font-semibold text-zinc-300">Reading pages…</p><p id="step-1-sub" class="font-mono-tech text-[11px] text-zinc-500">Waiting for your files</p></div>
+            </li>
+            <li id="step-2" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
+              <span id="step-2-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">2</span>
+              <div class="min-w-0 flex-1"><p id="step-2-title" class="text-sm font-semibold text-zinc-300">Queued at T FIX…</p><p id="step-2-sub" class="font-mono-tech text-[11px] text-zinc-500">The shop server checks &amp; prices every file</p></div>
+            </li>
+            <li id="step-3" class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition">
+              <span id="step-3-icon" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400">3</span>
+              <div class="min-w-0 flex-1"><p id="step-3-title" class="text-sm font-semibold text-zinc-300">Locked in. Ready at T FIX.</p><p id="step-3-sub" class="font-mono-tech text-[11px] text-zinc-500">Printed after payment is confirmed</p></div>
+            </li>
+          </ol>
+        </div>
 
-  <section id="myorders" hidden>
-    <div class="wrap">
-      <p class="eyebrow" data-i18n="myEyebrow">Your orders</p>
-      <h2 data-i18n="myTitle">Track your order</h2>
-      <div class="orders" id="orderCards"></div>
-    </div>
-  </section>
+        <!-- Pickup pass -->
+        <div id="token-card" class="glass-card-gold rounded-2xl p-5">
+          <div class="flex items-start justify-between gap-3 border-b border-[#d4af37]/25 pb-3.5">
+            <div class="min-w-0">
+              <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-[#d4af37]">T FIX® CUSAT PICKUP PASS</span>
+              <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span id="token-number" class="whitespace-nowrap font-mono-tech text-[1.7rem] font-bold leading-tight tracking-tight text-white sm:text-3xl">#TP······</span>
+                <span id="token-badge" class="whitespace-nowrap rounded bg-[#d4af37]/20 px-2 py-0.5 font-mono-tech text-[10px] font-semibold text-[#f3d97d]">PREVIEW</span>
+              </div>
+            </div>
+            <div id="qr-box" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-[#d4af37]/40 bg-[#0b0c0e] p-1.5" aria-label="Order link QR code">
+              <svg viewBox="0 0 36 36" class="h-full w-full opacity-40" fill="none" aria-hidden="true">
+                <rect x="2" y="2" width="10" height="10" rx="1.5" stroke="#F3D97D" stroke-width="2" /><rect x="5" y="5" width="4" height="4" fill="#F3D97D" />
+                <rect x="24" y="2" width="10" height="10" rx="1.5" stroke="#F3D97D" stroke-width="2" /><rect x="27" y="5" width="4" height="4" fill="#F3D97D" />
+                <rect x="2" y="24" width="10" height="10" rx="1.5" stroke="#F3D97D" stroke-width="2" /><rect x="5" y="27" width="4" height="4" fill="#F3D97D" />
+                <rect x="16" y="12" width="4" height="8" fill="#F8F9FA" /><rect x="24" y="16" width="10" height="4" fill="#D4AF37" /><rect x="16" y="24" width="6" height="4" fill="#F3D97D" />
+              </svg>
+            </div>
+          </div>
 
-  <section id="prices">
-    <div class="wrap">
-      <p class="eyebrow" data-i18n="priceEyebrow">Prices</p>
-      <h2 data-i18n="priceTitle">Printing prices</h2>
-      <div class="prices" id="priceList"></div>
-      <p class="note" id="priceNote" style="margin-top:14px"></p>
-    </div>
-  </section>
+          <p id="pass-line" class="mt-3.5 text-sm font-medium text-zinc-100">Send your files and your pickup token appears here.</p>
 
-  <section id="visit">
-    <div class="wrap">
-      <p class="eyebrow" data-i18n="visitEyebrow">Visit</p>
-      <h2 data-i18n="visitTitle">Collect at the shop</h2>
-      <div class="visit">
-        <div class="card">
-          <address>
-            <strong>T FIX CUSAT</strong><br>
-            South Pipeline Road, CUSAT PO<br>
-            Kalamassery, Kochi 682022
-          </address>
-          <div class="actions">
-            <a class="btn btn-ink" id="mapLink" href="#" target="_blank" rel="noopener" data-i18n="directions">Directions</a>
-            <a class="btn btn-ghost" id="callLink" href="#" data-i18n="call">Call</a>
+          <div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-black/35 p-3 font-mono-tech text-[11px]">
+            <div class="min-w-0"><span class="block text-zinc-500">FILES</span><span id="pass-files" class="block truncate text-zinc-200">—</span></div>
+            <div class="min-w-0"><span class="block text-zinc-500">TOTAL</span><span id="pass-total" class="block truncate text-[#f3d97d]">—</span></div>
+          </div>
+
+          <ul id="pass-file-list" class="mt-3 space-y-1 font-mono-tech text-[11px]"></ul>
+          <div id="pay-box"></div>
+
+          <div class="mt-4 flex gap-2">
+            <button id="copy-token-btn" type="button" disabled class="flex-1 rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 font-mono-tech text-xs font-semibold text-[#f3d97d] transition hover:bg-[#d4af37]/25 disabled:opacity-40">Copy Token</button>
+            <button id="copy-link-btn" type="button" disabled class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono-tech text-xs text-zinc-300 transition hover:bg-white/10 hover:text-white disabled:opacity-40">Copy Link</button>
+          </div>
+          <div id="my-orders" hidden class="mt-4 border-t border-[#d4af37]/20 pt-3">
+            <span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-zinc-500">Your recent orders</span>
+            <div id="my-orders-list" class="mt-2 flex flex-wrap gap-2"></div>
           </div>
         </div>
-        <div class="card">
-          <h3 style="margin:0 0 6px" data-i18n="hoursTitle">Opening hours</h3>
-          <table class="hours">
-            <tbody>
-              <tr data-days="1,2,3,4,5,6"><td data-i18n="monSat">Monday – Saturday</td><td>8:30 AM – 9:30 PM</td></tr>
-              <tr data-days="0"><td data-i18n="sun">Sunday</td><td>9:30 AM – 9:30 PM</td></tr>
-            </tbody>
-          </table>
+      </div>
+    </section>
+
+    <!-- 3-step flow -->
+    <section id="how-it-works" class="mt-16">
+      <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+        <div>
+          <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]">HOW CLUTCHPRINT WORKS</span>
+          <h2 class="mt-1 text-2xl font-extrabold text-white">1. UPLOAD · 2. AUTO-PRINT · 3. GRAB &amp; GO</h2>
+        </div>
+        <span class="font-mono-tech text-xs text-zinc-400">Built for CUSAT deadlines</span>
+      </div>
+      <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="glass-card rounded-2xl p-5">
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">01 / UPLOAD</span>
+          <h3 class="mt-2 text-lg font-bold text-white">Drop from anywhere</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">Send PDFs, DOCX assignments, or JPG hall tickets from your hostel, classroom, or bus straight to <span class="font-mono-tech text-zinc-200">print.tfix.in</span> — any time, even when we're closed.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">02 / AUTO-PRINT</span>
+          <h3 class="mt-2 text-lg font-bold text-white">AI counts, prices &amp; queues</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">CLUTCHPRINT AI reads every page, prices it at the shop's rates and queues it at T FIX automatically — no pen drives or WhatsApp forwarding. Pay by UPI right here or at the counter.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <span class="font-mono-tech text-xs font-bold text-[#f3d97d]">03 / GRAB &amp; GO</span>
+          <h3 class="mt-2 text-lg font-bold text-white">Flash token, skip the queue</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">Walk into <strong class="text-white">T FIX® CUSAT</strong> on Pipeline Road, show your <span class="font-mono-tech text-[#f3d97d]">#TP</span> token, and collect your pages.</p>
         </div>
       </div>
+
+      <!-- Rates -->
+      <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" id="rate-cards"></div>
+      <p id="rate-note" class="mt-2 font-mono-tech text-[11px] text-zinc-500"></p>
+    </section>
+
+    <!-- Location -->
+    <section id="location" class="mt-14">
+      <div class="glass-card rounded-2xl p-6">
+        <div class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-sm font-extrabold tracking-[0.16em] text-[#f3d97d]">T FIX® CUSAT</span>
+              <span class="rounded bg-white/5 px-2 py-0.5 font-mono-tech text-[10px] text-zinc-400">T = Trouble &amp; Tech</span>
+            </div>
+            <h3 class="mt-2 text-xl font-bold text-white">Pipeline Road, Kalamassery</h3>
+            <p class="mt-1 text-sm text-zinc-400">South Pipeline Road, CUSAT PO, Kalamassery 682022 · Direct counter pickup for <span class="font-mono-tech text-[#f3d97d]">print.tfix.in</span> orders.</p>
+            <dl class="mt-3 grid max-w-sm grid-cols-2 gap-x-6 gap-y-1 font-mono-tech text-xs">
+              <dt class="text-zinc-500" data-day="1,2,3,4,5,6">Mon – Sat</dt><dd class="text-right text-zinc-200" data-day="1,2,3,4,5,6">08:30 – 21:30</dd>
+              <dt class="text-zinc-500" data-day="0">Sunday</dt><dd class="text-right text-zinc-200" data-day="0">09:30 – 21:30</dd>
+            </dl>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <span id="counter-pill" class="whitespace-nowrap rounded-xl border border-[#d4af37]/30 bg-[#14130f] px-4 py-2.5 font-mono-tech text-xs text-[#f3d97d]">● …</span>
+            <a id="map-link" href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50">Directions</a>
+            <a id="call-link" href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-[#d4af37]/50">Call</a>
+            <a data-wa href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 transition hover:border-emerald-400/50"><span class="text-emerald-400">●</span> WhatsApp</a>
+            <a href="#upload-studio" class="gold-btn rounded-xl px-4 py-2.5 text-xs font-extrabold tracking-wide">Start New Print</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-[#060709] py-6">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-center text-xs text-zinc-500 sm:flex-row sm:px-6 sm:text-left">
+      <p>© <span id="year">2026</span> <strong class="text-zinc-300">T FIX® CUSAT</strong> · CLUTCHPRINT AI. T FIX® is a registered trademark.</p>
+      <p class="font-mono-tech text-[11px] text-zinc-500"><a href="https://tfix.in" target="_blank" rel="noopener" class="hover:text-[#f3d97d]">tfix.in ↗</a> · print.tfix.in · Pipeline Road, Kalamassery</p>
     </div>
-  </section>
-</main>
+  </footer>
 
-<footer>
-  <div class="wrap">
-    <div class="logo-plate logo-plate-sm"><svg viewBox="-6 -6 858 260" class="logo-full" role="img" aria-label="T FIX CUSAT"><defs><linearGradient id="g-ft" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z M309 16.5H435V48.5H391V165.5H353V48.5H309Z M499 16.5H600V47.5H536V78.5H594V109.5H536V165.5H499Z M627 16.5H665V165.5H627Z M690.5 16.5H733.5L765 61.4L796.5 16.5H839.5L789.6 87.8L844 165.5H800L764.5 115L729 165.5H686L742.3 87.9Z M376.11785714285713 247.83142857142857Q370.5057142857143 247.83142857142857 365.6903571428571 245.99535714285713Q360.875 244.15928571428572 357.3414285714286 240.76428571428573Q353.8078571428572 237.36928571428572 351.83321428571435 232.79642857142858Q349.85857142857145 228.22357142857143 349.85857142857145 222.75Q349.85857142857145 217.27642857142857 351.83321428571435 212.70357142857142Q353.8078571428572 208.13071428571428 357.37607142857144 204.73571428571427Q360.94428571428574 201.34071428571428 365.725 199.50464285714287Q370.5057142857143 197.66857142857143 376.1871428571429 197.66857142857143Q382.4921428571429 197.66857142857143 387.58464285714285 199.85107142857143Q392.6771428571429 202.03357142857143 396.1414285714286 206.26L388.9357142857143 212.9114285714286Q386.44142857142856 210.0707142857143 383.3928571428571 208.65035714285716Q380.3442857142857 207.23000000000002 376.74142857142857 207.23000000000002Q373.3464285714286 207.23000000000002 370.5057142857143 208.33857142857144Q367.665 209.44714285714286 365.5864285714286 211.5257142857143Q363.5078571428572 213.6042857142857 362.3646428571429 216.445Q361.2214285714286 219.28571428571428 361.2214285714286 222.75Q361.2214285714286 226.21428571428572 362.3646428571429 229.055Q363.5078571428572 231.8957142857143 365.5864285714286 233.9742857142857Q367.665 236.05285714285714 370.5057142857143 237.1614285714286Q373.3464285714286 238.27 376.74142857142857 238.27Q380.3442857142857 238.27 383.3928571428571 236.84964285714287Q386.44142857142856 235.42928571428573 388.9357142857143 232.51928571428573L396.1414285714286 239.1707142857143Q392.6771428571429 243.39714285714285 387.58464285714285 245.6142857142857Q382.4921428571429 247.83142857142857 376.11785714285713 247.83142857142857Z M472.50000000000006 247.83142857142857Q462.17642857142863 247.83142857142857 456.35642857142864 242.0807142857143Q450.5364285714286 236.33 450.5364285714286 225.66V198.5H461.7607142857143V225.24428571428572Q461.7607142857143 232.17285714285714 464.6014285714286 235.2214285714286Q467.44214285714287 238.27 472.56928571428574 238.27Q477.6964285714286 238.27 480.5371428571429 235.2214285714286Q483.3778571428572 232.17285714285714 483.3778571428572 225.24428571428572V198.5H494.46357142857147V225.66Q494.46357142857147 236.33 488.6435714285715 242.0807142857143Q482.8235714285715 247.83142857142857 472.50000000000006 247.83142857142857Z M570.5842857142857 247.83142857142857Q564.7642857142857 247.83142857142857 559.4292857142857 246.2725Q554.0942857142857 244.71357142857144 550.8378571428572 242.21928571428572L554.6485714285714 233.76642857142858Q557.7664285714285 235.98357142857142 562.0274999999999 237.40392857142857Q566.2885714285713 238.8242857142857 570.6535714285714 238.8242857142857Q573.9792857142857 238.8242857142857 576.0232142857142 238.16607142857143Q578.0671428571428 237.50785714285715 579.0371428571428 236.32999999999998Q580.0071428571429 235.15214285714285 580.0071428571429 233.62785714285715Q580.0071428571429 231.68785714285715 578.4828571428571 230.54464285714286Q576.9585714285714 229.40142857142857 574.4642857142857 228.67392857142858Q571.9699999999999 227.94642857142858 568.9560714285714 227.28821428571428Q565.9421428571428 226.63 562.9282142857143 225.66Q559.9142857142857 224.69 557.42 223.16571428571427Q554.9257142857142 221.64142857142858 553.3667857142857 219.14714285714285Q551.8078571428571 216.65285714285716 551.8078571428571 212.77285714285713Q551.8078571428571 208.6157142857143 554.0596428571428 205.18607142857144Q556.3114285714286 201.75642857142856 560.8496428571428 199.71249999999998Q565.3878571428571 197.66857142857143 572.2471428571428 197.66857142857143Q576.8199999999999 197.66857142857143 581.2542857142857 198.7425Q585.6885714285714 199.81642857142856 589.0835714285714 201.96428571428572L585.6192857142856 210.48642857142858Q582.2242857142857 208.54642857142858 578.8292857142857 207.61107142857145Q575.4342857142857 206.6757142857143 572.1778571428571 206.6757142857143Q568.9214285714286 206.6757142857143 566.8428571428572 207.43785714285713Q564.7642857142857 208.2 563.8635714285715 209.4125Q562.9628571428572 210.625 562.9628571428572 212.21857142857144Q562.9628571428572 214.08928571428572 564.4871428571428 215.23250000000002Q566.0114285714285 216.37571428571428 568.5057142857142 217.06857142857143Q571.0 217.76142857142858 574.0139285714286 218.45428571428573Q577.0278571428571 219.14714285714285 580.0417857142857 220.04785714285714Q583.0557142857142 220.94857142857143 585.55 222.47285714285715Q588.0442857142857 223.99714285714285 589.6032142857143 226.49142857142857Q591.1621428571428 228.9857142857143 591.1621428571428 232.79642857142858Q591.1621428571428 236.8842857142857 588.8757142857143 240.27928571428572Q586.5892857142857 243.6742857142857 582.0510714285714 245.75285714285712Q577.5128571428571 247.83142857142857 570.5842857142857 247.83142857142857Z M640.8053571428571 247.0 662.4224999999999 198.5H673.5082142857142L695.1946428571428 247.0H683.4160714285714L665.6789285714285 204.18142857142857H670.1132142857142L652.3067857142856 247.0ZM651.6139285714285 236.60714285714286 654.5932142857142 228.085H679.5360714285714L682.5846428571429 236.60714285714286Z M756.3878571428571 247.0V207.6457142857143H740.8678571428571V198.5H783.1321428571429V207.6457142857143H767.6121428571429V247.0Z" fill="url(#g-ft)" fill-rule="nonzero"/></svg><span class="plate-tag">AI Auto Print</span></div>
-    <p class="mantra"><span class="offset" data-i18n="mantra" data-text="Send. Print. Collect.">Send. Print. Collect.</span></p>
-    <p>T FIX CUSAT · South Pipeline Road, CUSAT PO, Kalamassery 682022 · <a href="#" data-wa-plain target="_blank" rel="noopener">WhatsApp</a></p>
-    <p>© <span id="year"></span> T FIX CUSAT</p>
-  </div>
-</footer>
-
-<div class="fab">
-  <a class="btn btn-gold" href="#order" aria-label="Order online">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-    <span data-i18n="fab">Order</span>
+  <!-- T FIX home pill: only on very wide screens, where it sits clear of the content -->
+  <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" aria-label="Go to T FIX Home (tfix.in)"
+     class="group fixed bottom-6 left-6 z-30 hidden items-center gap-2.5 rounded-full border border-[#d4af37]/45 bg-[#101116]/90 py-2 pl-2.5 pr-3.5 text-xs font-semibold text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(212,175,55,0.16)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#f3d97d] 2xl:inline-flex">
+    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#f3d97d] via-[#d4af37] to-[#9c7518] text-[#0b0c0e]">
+      <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5M5.25 9.75V20a1 1 0 0 0 1 1h4.25v-5.5h3V21h4.25a1 1 0 0 0 1-1V9.75" /></svg>
+    </span>
+    <span class="flex flex-col leading-tight">
+      <span class="font-mono-tech text-[9px] uppercase tracking-[0.14em] text-[#f3d97d]">T FIX® HOME</span>
+      <span class="font-mono-tech text-[11px] text-zinc-200">tfix.in ↗</span>
+    </span>
   </a>
-</div>
 
-<script>
-/* ==================================================================
-   EDIT HERE — shop details and prices (₹)
-   ================================================================== */
-const SHOP = {
-  whatsapp: "919656369773",          // country code + number, no "+"
-  phone: "+919656369773",
-  mapQuery: "T FIX CUSAT, South Pipeline Road, CUSAT PO, Kalamassery 682022",
-  // UPI for paying online orders (from the shop's Google Pay QR, upi-qr.png).
-  upi: { id: "8907724736@okbizaxis", name: "T FIX", mc: "5251" },
-  // Opening hours, IST. 0 = Sunday … 6 = Saturday. [open, close] in 24h "HH:MM"
-  hours: { 0:["09:30","21:30"], 1:["08:30","21:30"], 2:["08:30","21:30"], 3:["08:30","21:30"],
-           4:["08:30","21:30"], 5:["08:30","21:30"], 6:["08:30","21:30"] }
-};
-const API = "api/";                    // online order inbox (PHP) on this site
-const MAX_FILES = 10, MAX_FILE_MB = 25, MAX_ORDER_MB = 60;
-const ALLOWED_EXT = ["pdf", "jpg", "jpeg", "png", "docx", "pptx", "ppt"];
+  <!-- Toast: bottom-centre on phones, bottom-right on larger screens -->
+  <div id="toast" role="status" class="pointer-events-none fixed inset-x-4 bottom-5 z-50 mx-auto max-w-sm translate-y-4 rounded-xl border border-[#d4af37]/45 bg-[#121318]/95 px-4 py-2.5 text-center font-mono-tech text-xs text-[#f3d97d] opacity-0 shadow-2xl transition-all duration-200 sm:inset-x-auto sm:right-5 sm:mx-0 sm:text-left"></div>
 
-// Prices (₹) — same as the T Print shop system (app/config.py DEFAULT_PRICING).
-// single = one sheet printed on one side, double = one sheet printed on both sides,
-// min = B&W minimum charge (applies to a customer's first order of the day).
-const RATES = {
-  A4: { bw: { single: 2, double: 3, min: 10 }, colour: { single: 10, double: 15 } },
-  A3: { bw: { single: 5, double: 7, min: 15 }, colour: { single: 15, double: 20 } }
-};
-// Price list shown on the page. Rows with single/double show both prices;
-// price: null shows "Ask us".
-const PRICE_LIST = [
-  { en: "B/W print / Xerox", ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A4", size: "A4", type: "bw" },
-  { en: "Colour print",      ml: "കളർ പ്രിന്റ്", sub: "A4", size: "A4", type: "colour" },
-  { en: "B/W print / Xerox", ml: "ബ്ലാക്ക് & വൈറ്റ് പ്രിന്റ് / സെറോക്സ്", sub: "A3", size: "A3", type: "bw" },
-  { en: "Colour print",      ml: "കളർ പ്രിന്റ്", sub: "A3", size: "A3", type: "colour" },
-  { en: "Spiral binding",    ml: "സ്പൈറൽ ബൈൻഡിംഗ്", sub: "", price: null },
-  { en: "Lamination",        ml: "ലാമിനേഷൻ", sub: "", price: null },
-  { en: "Passport photos",   ml: "പാസ്പോർട്ട് ഫോട്ടോ", sub: "", price: null }
-];
-
-// Same calculation as the T Print system (app/pricing.py print_cost).
-function tprintCost(pages, type, double, copies, size, pps = 1, applyMin = true) {
-  const r = RATES[size][type];
-  const printPages = Math.ceil(pages / pps);
-  let sheets, odd = 0, cost;
-  if (double) { odd = printPages % 2; sheets = Math.floor(printPages / 2); cost = sheets * r.double + odd * r.single; }
-  else { sheets = printPages; cost = sheets * r.single; }
-  cost *= copies;
-  const totalSheets = (sheets + odd) * copies;
-  let total = cost, minApplied = false;
-  if (type === "bw" && applyMin) {
-    const min = RATES[size].bw.min;
-    total = (printPages > 1 && double) ? cost - r.double + min : cost - r.single + min;
-    minApplied = true;
-  }
-  return { total, cost, totalSheets, minApplied };
-}
-
-/* ==================================================================
-   Text — English & Malayalam
-   ================================================================== */
-const T = {
-  en: {
-    m1:"Send.", m2:"Print.", m3:"Collect.", mantra:"Send. Print. Collect.",
-    lead:"Printing, Xerox and binding next to CUSAT. Upload your files any time — even at night — and collect your prints at the shop.",
-    ctaOrder:"Upload files", ctaWa:"WhatsApp us",
-    howEyebrow:"How it works", howTitle:"Three steps. That's it.",
-    s1t:"Upload", s1p:"Upload your files and choose print options. Any time — even when we're closed.",
-    s2t:"Pay", s2p:"We check your files and confirm the price. Pay by UPI from your order page, or at the shop — we print once payment is confirmed.",
-    s3t:"Collect", s3p:"Pick up your prints at the shop on South Pipeline Road, near CUSAT.",
-    orderEyebrow:"Order online", orderTitle:"Upload your files",
-    closedNote:"We're closed right now. Send your order anyway — it will be waiting for us when we open ({when}).",
-    fName:"Your name", fPhone:"Mobile number", phonePh:"10-digit mobile",
-    fFiles:"Files", dropTitle:"Tap to add files", dropSub:"PDF, JPG, PNG, Word or PowerPoint · up to 10 files, 25 MB each",
-    fNotes:"Notes (optional)", notesPh:"e.g. spiral binding, colour cover page",
-    pagesN:"{n} pages", page1:"1 page", pagesCounting:"Counting pages…", pagesAtShop:"Pages counted at the shop",
-    optType:"Print", bw:"B&W", colour:"Colour", optSize:"Paper", optSides:"Sides", single:"One side", double:"Both sides",
-    optCopies:"Copies", optPages:"Pages", pagesAll:"All pages", pagesCustom:"Choose pages", rangePh:"e.g. 1-5, 8",
-    rangeErr:"Use pages within 1–{n}, e.g. 1-5, 8", rangeErrU:"Use page numbers like 1-5, 8", optPps:"Pages per sheet", remove:"Remove",
-    sumTitle:"Your order", estTotal:"Estimated total", noFiles:"Add files to see the price",
-    estNote:"Estimate. The shop confirms the final price when it receives your order (B&W minimum charge applies to your first order of the day).",
-    atShop:"priced at shop", lnMin:"B&W minimum charge",
-    payNote:"Once the shop confirms the price, pay by UPI from your order page — or at the shop. We print after your payment is confirmed.",
-    send:"Send order", sending:"Sending… {p}%", askWa:"Questions? WhatsApp us",
-    errName:"Please enter your name.", errPhone:"Please enter a valid 10-digit mobile number.",
-    errFiles:"Please add at least one file.", errRange:"Please fix the page selection.",
-    errTooBig:"“{f}” is larger than 25 MB.", errTooMany:"You can send up to 10 files in one order.",
-    errType:"“{f}” is not supported. Use PDF, JPG, PNG, DOCX or PPTX.", errTotal:"Files are too large together (max 60 MB).",
-    errNet:"Could not send your order. Check your connection and try again.",
-    priceEyebrow:"Prices", priceTitle:"Printing prices", ask:"Ask us", oneSide:"one side", bothSides:"both sides",
-    priceNote:"Prices per sheet. B&W minimum charge {a4} (A4) / {a3} (A3) on your first order of the day — waived from your second order.",
-    myEyebrow:"Your orders", myTitle:"Track your order",
-    st_pending:"Waiting for shop", st_pending_d:"Your order is saved. The shop will pick it up when it opens.",
-    st_pending_d_on:"The shop's print server is online — your order will be picked up within a minute.",
-    srvOn:"AI Auto Print online", srvOff:"Print server offline", srvOffStaff:"Print server offline — staff, please check Shop\u00A0PC\u00A01",
-    srvOffNote:"The shop's print server is offline right now. Your order is saved and will be picked up as soon as it starts.",
-    st_received:"Price confirmed", st_received_d:"Please pay {amt} by UPI below or at the shop. We print after your payment is confirmed.",
-    st_paid:"Paid — in the print queue", st_paid_d:"We'll print your order shortly.",
-    st_printing:"Printing", st_printing_d:"Your order is on the printer.",
-    st_ready:"Ready for pickup", st_ready_d:"Collect it at the shop.",
-    st_collected:"Collected", st_collected_d:"Thank you!",
-    st_cancelled:"Cancelled", st_cancelled_d:"Contact the shop for details.",
-    tr1:"Sent", tr2:"Confirmed", tr3:"Paid", tr4:"Printing", tr5:"Ready",
-    estimate:"Estimate", total:"Total", copyLink:"Copy link", copied:"Copied", hide:"Hide",
-    orderSent:"Order sent! Keep this code — and copy the link to check your order on another phone.",
-    fileProblem:"Problem", orderCode:"Order code", loadErr:"Couldn't load the latest status.",
-    payUpi:"Pay {amt} by UPI", showQr:"Show QR code", upiId:"UPI ID", copy:"Copy",
-    upiNote:"Write your order code {code} in the payment note. The shop marks your order paid after checking the payment.",
-    visitEyebrow:"Visit", visitTitle:"Collect at the shop", directions:"Directions", call:"Call",
-    hoursTitle:"Opening hours", monSat:"Monday – Saturday", sun:"Sunday",
-    open:"Open now · till", closed:"Closed · opens", today:"today", tomorrow:"tomorrow", fab:"Order"
-  },
-  ml: {
-    m1:"അയയ്ക്കൂ.", m2:"പ്രിന്റ്.", m3:"കൈപ്പറ്റൂ.", mantra:"അയയ്ക്കൂ. പ്രിന്റ്. കൈപ്പറ്റൂ.",
-    lead:"CUSAT-ന് തൊട്ടടുത്ത് പ്രിന്റിംഗ്, സെറോക്സ്, ബൈൻഡിംഗ്. ഏത് സമയത്തും — രാത്രിയിലും — ഫയലുകൾ അപ്‌ലോഡ് ചെയ്യൂ, കടയിൽ വന്ന് പ്രിന്റുകൾ വാങ്ങൂ.",
-    ctaOrder:"ഫയൽ അപ്‌ലോഡ്", ctaWa:"WhatsApp ചെയ്യൂ",
-    howEyebrow:"എങ്ങനെ", howTitle:"മൂന്ന് ഘട്ടങ്ങൾ മാത്രം.",
-    s1t:"അപ്‌ലോഡ്", s1p:"ഫയലുകൾ അപ്‌ലോഡ് ചെയ്ത് പ്രിന്റ് ഓപ്ഷനുകൾ തിരഞ്ഞെടുക്കൂ. കട അടച്ചിരിക്കുമ്പോഴും ചെയ്യാം.",
-    s2t:"പണമടയ്ക്കൂ", s2p:"ഫയലുകൾ പരിശോധിച്ച് തുക ഉറപ്പിക്കും. ഓർഡർ പേജിൽ നിന്ന് UPI വഴിയോ കടയിലോ പണം നൽകൂ — പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.",
-    s3t:"കൈപ്പറ്റൂ", s3p:"CUSAT-ന് സമീപം സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡിലെ കടയിൽ നിന്ന് പ്രിന്റുകൾ വാങ്ങാം.",
-    orderEyebrow:"ഓൺലൈൻ ഓർഡർ", orderTitle:"ഫയലുകൾ അപ്‌ലോഡ് ചെയ്യൂ",
-    closedNote:"ഇപ്പോൾ കട അടച്ചിരിക്കുന്നു. എങ്കിലും ഓർഡർ അയയ്ക്കാം — കട തുറക്കുമ്പോൾ ({when}) ഞങ്ങൾ എടുക്കും.",
-    fName:"നിങ്ങളുടെ പേര്", fPhone:"മൊബൈൽ നമ്പർ", phonePh:"10 അക്ക മൊബൈൽ നമ്പർ",
-    fFiles:"ഫയലുകൾ", dropTitle:"ഫയലുകൾ ചേർക്കാൻ ടാപ്പ് ചെയ്യൂ", dropSub:"PDF, JPG, PNG, Word, PowerPoint · 10 ഫയലുകൾ വരെ, ഓരോന്നും 25 MB വരെ",
-    fNotes:"കുറിപ്പ് (ആവശ്യമെങ്കിൽ)", notesPh:"ഉദാ: സ്പൈറൽ ബൈൻഡിംഗ്, കവർ പേജ് കളറിൽ",
-    pagesN:"{n} പേജ്", page1:"1 പേജ്", pagesCounting:"പേജുകൾ എണ്ണുന്നു…", pagesAtShop:"പേജുകൾ കടയിൽ എണ്ണും",
-    optType:"പ്രിന്റ്", bw:"B&W", colour:"കളർ", optSize:"പേപ്പർ", optSides:"വശങ്ങൾ", single:"ഒരു വശം", double:"ഇരുവശവും",
-    optCopies:"കോപ്പികൾ", optPages:"പേജുകൾ", pagesAll:"എല്ലാ പേജും", pagesCustom:"പേജുകൾ തിരഞ്ഞെടുക്കൂ", rangePh:"ഉദാ: 1-5, 8",
-    rangeErr:"1–{n} നുള്ളിലെ പേജുകൾ നൽകൂ, ഉദാ: 1-5, 8", rangeErrU:"ഉദാ: 1-5, 8 എന്ന രീതിയിൽ നൽകൂ", optPps:"ഒരു ഷീറ്റിൽ പേജുകൾ", remove:"നീക്കം ചെയ്യൂ",
-    sumTitle:"നിങ്ങളുടെ ഓർഡർ", estTotal:"ഏകദേശ തുക", noFiles:"തുക കാണാൻ ഫയലുകൾ ചേർക്കൂ",
-    estNote:"ഇത് ഏകദേശ തുകയാണ്. ഓർഡർ ലഭിക്കുമ്പോൾ കട അന്തിമ തുക ഉറപ്പിക്കും (ദിവസത്തെ ആദ്യ ഓർഡറിന് B&W മിനിമം ചാർജ് ബാധകം).",
-    atShop:"തുക കടയിൽ", lnMin:"B&W മിനിമം ചാർജ്",
-    payNote:"കട തുക ഉറപ്പിച്ചാൽ ഓർഡർ പേജിൽ നിന്ന് UPI വഴിയോ കടയിലോ പണം നൽകൂ. പണം ലഭിച്ചതായി ഉറപ്പിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.",
-    send:"ഓർഡർ അയയ്ക്കൂ", sending:"അയയ്ക്കുന്നു… {p}%", askWa:"സംശയങ്ങൾ? WhatsApp ചെയ്യൂ",
-    errName:"പേര് നൽകൂ.", errPhone:"ശരിയായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകൂ.",
-    errFiles:"കുറഞ്ഞത് ഒരു ഫയൽ ചേർക്കൂ.", errRange:"പേജ് തിരഞ്ഞെടുപ്പ് ശരിയാക്കൂ.",
-    errTooBig:"“{f}” 25 MB-യിൽ കൂടുതലാണ്.", errTooMany:"ഒരു ഓർഡറിൽ 10 ഫയലുകൾ വരെ മാത്രം.",
-    errType:"“{f}” പിന്തുണയ്ക്കുന്നില്ല. PDF, JPG, PNG, DOCX, PPTX ഉപയോഗിക്കൂ.", errTotal:"ഫയലുകൾ മൊത്തം വളരെ വലുതാണ് (പരമാവധി 60 MB).",
-    errNet:"ഓർഡർ അയയ്ക്കാനായില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.",
-    priceEyebrow:"നിരക്കുകൾ", priceTitle:"പ്രിന്റിംഗ് നിരക്കുകൾ", ask:"ചോദിക്കൂ", oneSide:"ഒരു വശം", bothSides:"ഇരുവശവും",
-    priceNote:"നിരക്ക് ഓരോ ഷീറ്റിനും. ബ്ലാക്ക് & വൈറ്റിന് ദിവസത്തെ ആദ്യ ഓർഡറിൽ മിനിമം ചാർജ് {a4} (A4) / {a3} (A3) — രണ്ടാമത്തെ ഓർഡർ മുതൽ ഇല്ല.",
-    myEyebrow:"നിങ്ങളുടെ ഓർഡറുകൾ", myTitle:"ഓർഡർ നില",
-    st_pending:"കടയ്ക്കായി കാത്തിരിക്കുന്നു", st_pending_d:"ഓർഡർ സേവ് ചെയ്തു. കട തുറക്കുമ്പോൾ എടുക്കും.",
-    st_pending_d_on:"കടയിലെ പ്രിന്റ് സെർവർ ഓൺലൈനാണ് — ഒരു മിനിറ്റിനുള്ളിൽ ഓർഡർ എടുക്കും.",
-    srvOn:"AI ഓട്ടോ പ്രിന്റ് ഓൺലൈൻ", srvOff:"പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ", srvOffStaff:"പ്രിന്റ് സെർവർ ഓഫ്‌ലൈൻ — സ്റ്റാഫ്, Shop\u00A0PC\u00A01 പരിശോധിക്കൂ",
-    srvOffNote:"കടയിലെ പ്രിന്റ് സെർവർ ഇപ്പോൾ ഓഫ്‌ലൈനാണ്. നിങ്ങളുടെ ഓർഡർ സേവ് ചെയ്യും, സെർവർ ഓണാകുമ്പോൾ എടുക്കും.",
-    st_received:"തുക ഉറപ്പിച്ചു", st_received_d:"താഴെ UPI വഴിയോ കടയിലോ {amt} നൽകൂ. പണം ലഭിച്ച ശേഷം പ്രിന്റ് ചെയ്യും.",
-    st_paid:"പണം ലഭിച്ചു — പ്രിന്റ് ക്യൂവിൽ", st_paid_d:"ഉടൻ പ്രിന്റ് ചെയ്യും.",
-    st_printing:"പ്രിന്റ് ചെയ്യുന്നു", st_printing_d:"നിങ്ങളുടെ ഓർഡർ പ്രിന്ററിലാണ്.",
-    st_ready:"വാങ്ങാൻ തയ്യാർ", st_ready_d:"കടയിൽ വന്ന് വാങ്ങൂ.",
-    st_collected:"കൈപ്പറ്റി", st_collected_d:"നന്ദി!",
-    st_cancelled:"റദ്ദാക്കി", st_cancelled_d:"വിവരങ്ങൾക്ക് കടയുമായി ബന്ധപ്പെടൂ.",
-    tr1:"അയച്ചു", tr2:"ഉറപ്പിച്ചു", tr3:"പണം", tr4:"പ്രിന്റ്", tr5:"തയ്യാർ",
-    estimate:"ഏകദേശം", total:"ആകെ", copyLink:"ലിങ്ക് കോപ്പി", copied:"കോപ്പി ചെയ്തു", hide:"മറയ്ക്കൂ",
-    orderSent:"ഓർഡർ അയച്ചു! ഈ കോഡ് സൂക്ഷിക്കൂ — മറ്റൊരു ഫോണിൽ നില അറിയാൻ ലിങ്ക് കോപ്പി ചെയ്യൂ.",
-    fileProblem:"പ്രശ്നം", orderCode:"ഓർഡർ കോഡ്", loadErr:"പുതിയ നില ലഭ്യമായില്ല.",
-    payUpi:"{amt} UPI വഴി അടയ്ക്കൂ", showQr:"QR കോഡ് കാണിക്കൂ", upiId:"UPI ID", copy:"കോപ്പി",
-    upiNote:"പേയ്‌മെന്റ് കുറിപ്പിൽ ഓർഡർ കോഡ് {code} എഴുതൂ. പേയ്‌മെന്റ് പരിശോധിച്ച ശേഷം കട ഓർഡർ 'പണം ലഭിച്ചു' ആക്കും.",
-    visitEyebrow:"സന്ദർശിക്കൂ", visitTitle:"കടയിൽ നിന്ന് വാങ്ങൂ", directions:"വഴി കാണാം", call:"വിളിക്കൂ",
-    hoursTitle:"പ്രവർത്തന സമയം", monSat:"തിങ്കൾ – ശനി", sun:"ഞായർ",
-    open:"ഇപ്പോൾ തുറന്നിരിക്കുന്നു · വരെ", closed:"അടച്ചിരിക്കുന്നു · തുറക്കുന്നത്", today:"ഇന്ന്", tomorrow:"നാളെ", fab:"ഓർഡർ"
-  }
-};
-
-/* ================================================================== */
-let lang = "en";
-try { const s = localStorage.getItem("tfix-print-lang"); if (s === "ml" || s === "en") lang = s; } catch (e) {}
-
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
-const t = (k, vars) => {
-  let s = (T[lang] && T[lang][k]) || T.en[k] || k;
-  if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace("{" + a + "}", b);
-  return s;
-};
-const el = (tag, props = {}, ...kids) => {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === "class") n.className = v;
-    else if (k === "text") n.textContent = v;
-    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
-    else n.setAttribute(k, v);
-  }
-  kids.flat().forEach(c => c != null && n.append(c));
-  return n;
-};
-
-function applyLang() {
-  document.documentElement.lang = lang;
-  $$("[data-i18n]").forEach(n => {
-    const v = t(n.dataset.i18n);
-    n.textContent = v;
-    if (n.classList.contains("offset")) n.dataset.text = v;
-  });
-  $$("[data-i18n-ph]").forEach(n => n.placeholder = t(n.dataset.i18nPh));
-  $$(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
-  renderPrices(); updateStatus(); renderFiles(); renderOrders();
-}
-
-function renderPrices() {
-  $("#priceList").innerHTML = "";
-  PRICE_LIST.forEach(p => {
-    const name = el("span", { class: "name", text: lang === "ml" ? p.ml : p.en },
-      p.sub ? el("span", { class: "sub", text: p.sub }) : null);
-    let amt;
-    if (p.type) {
-      const r = RATES[p.size][p.type];
-      amt = el("span", { class: "amt" },
-        el("span", { class: "amt-line", text: rupee(r.single) + " " + t("oneSide") }),
-        el("span", { class: "amt-line", text: rupee(r.double) + " " + t("bothSides") }));
-    } else amt = el("span", { class: "amt ask", text: t("ask") });
-    $("#priceList").append(el("div", { class: "price" }, name, amt));
-  });
-  $("#priceNote").textContent = t("priceNote", { a4: rupee(RATES.A4.bw.min), a3: rupee(RATES.A3.bw.min) });
-}
-
-/* --- Open / closed, in India time --- */
-function nowIST() {
-  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false })
-    .formatToParts(new Date());
-  const get = type => parts.find(p => p.type === type).value;
-  const day = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(get("weekday"));
-  return { day, mins: (+get("hour") % 24) * 60 + +get("minute") };
-}
-const toMins = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
-const fmt12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; };
-
-/* --- Print server (T Print on Shop PC 1) online / offline --- */
-let srvOnline = null;   // null = unknown (not checked yet / network error)
-let shopOpen = false;
-
-async function checkServer() {
-  try {
-    const r = await fetch(API + "server.php", { cache: "no-store" });
-    srvOnline = r.ok ? !!(await r.json()).online : null;
-  } catch (e) { srvOnline = null; }
-  renderServer();
-  renderOrders();
-}
-
-function renderServer() {
-  const pill = $("[data-srv]");
-  pill.hidden = srvOnline === null;
-  pill.classList.toggle("on", srvOnline === true);
-  pill.classList.toggle("off", srvOnline === false && !shopOpen);
-  pill.classList.toggle("warn", srvOnline === false && shopOpen);   // open but server off: remind staff
-  $("[data-srv-text]").textContent = srvOnline ? t("srvOn") : shopOpen ? t("srvOffStaff") : t("srvOff");
-  const note = $("#srvNote");
-  note.hidden = srvOnline !== false;
-  $("span", note).textContent = t("srvOffNote");
-}
-
-function updateStatus() {
-  const { day, mins } = nowIST();
-  const [o, c] = SHOP.hours[day];
-  const open = mins >= toMins(o) && mins < toMins(c);
-  shopOpen = open;
-  let text, when = "";
-  if (open) text = t("open") + " " + fmt12(c);
-  else {
-    const before = mins < toMins(o);
-    const nd = before ? day : (day + 1) % 7;
-    when = (before ? t("today") : t("tomorrow")) + " " + fmt12(SHOP.hours[nd][0]);
-    text = t("closed") + " " + when;
-  }
-  $$("[data-status]").forEach(n => { n.classList.toggle("open", open); n.classList.toggle("closed", !open); });
-  $$("[data-status-text]").forEach(n => n.textContent = text);
-  $$(".hours tr").forEach(tr => tr.classList.toggle("today", tr.dataset.days.split(",").includes(String(day))));
-  const note = $("#closedNote");
-  note.hidden = open;
-  if (!open) $("span", note).textContent = t("closedNote", { when });
-  renderServer();
-}
-
-/* ==================================================================
-   Online order: files + options
-   ================================================================== */
-let files = [];          // { id, file, name, ext, kind, pages (null = unknown), counting, opts }
-let nextId = 1;
-
-const extOf = name => (name.split(".").pop() || "").toLowerCase();
-const kindOf = ext => ext === "pdf" ? "pdf" : (ext === "jpg" || ext === "jpeg" || ext === "png") ? "img" : "doc";
-
-// Parse "1-5, 8" -> sorted page list (null if invalid). total = null when unknown.
-function parseRange(str, total) {
-  const s = (str || "").replace(/\s+/g, "");
-  if (!/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(s)) return null;
-  const set = new Set();
-  for (const part of s.split(",")) {
-    const [a, b = a] = part.split("-").map(Number);
-    if (a < 1 || a > b || (total != null && b > total) || b - a > 5000) return null;
-    for (let p = a; p <= b; p++) set.add(p);
-  }
-  return [...set].sort((x, y) => x - y);
-}
-
-function selectedPages(f) {
-  if (f.opts.pagesMode === "all") return f.pages;
-  const list = parseRange(f.opts.range, f.pages);
-  return list ? list.length : null;
-}
-
-let pdfjsReady = null;
-function loadPdfJs() {
-  if (!pdfjsReady) pdfjsReady = new Promise((res, rej) => {
-    const s = document.createElement("script");
-    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-    s.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-      res(window.pdfjsLib);
+  <script>
+  (function () {
+    /* ============ EDIT HERE — shop details and prices (₹) ============ */
+    const SHOP = {
+      whatsapp: "919656369773", phone: "+919656369773",
+      mapQuery: "T FIX CUSAT, South Pipeline Road, CUSAT PO, Kalamassery 682022",
+      // India time. 0 = Sunday … 6 = Saturday. [open, close]
+      hours: { 0: ["09:30", "21:30"], 1: ["08:30", "21:30"], 2: ["08:30", "21:30"], 3: ["08:30", "21:30"], 4: ["08:30", "21:30"], 5: ["08:30", "21:30"], 6: ["08:30", "21:30"] },
+      upi: { id: "8907724736@okbizaxis", name: "T FIX", mc: "5251" }
     };
-    s.onerror = rej;
-    document.head.append(s);
-  });
-  return pdfjsReady;
-}
+    // Same as the T Print shop system (app/config.py). single = one side, double = both sides, per sheet.
+    const RATES = {
+      A4: { bw: { single: 2, double: 3, min: 10 }, colour: { single: 10, double: 15 } },
+      A3: { bw: { single: 5, double: 7, min: 15 }, colour: { single: 15, double: 20 } }
+    };
+    const API = "api/", MAX_FILES = 10, MAX_FILE_MB = 25, MAX_ORDER_MB = 60;
+    const ALLOWED_EXT = ["pdf", "jpg", "jpeg", "png", "docx", "pptx", "ppt"];
+    const STORE = "tprint-orders";
 
-async function countPages(f) {
-  if (f.kind === "img") { f.pages = 1; return; }
-  if (f.kind !== "pdf") { f.pages = null; return; }
-  f.counting = true; renderFiles();
-  try {
-    const lib = await loadPdfJs();
-    const doc = await lib.getDocument({ data: await f.file.arrayBuffer() }).promise;
-    f.pages = doc.numPages;
-    doc.destroy();
-  } catch (e) { f.pages = null; }
-  f.counting = false; renderFiles();
-}
+    /* ============ helpers ============ */
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
+    const el = (tag, props = {}, ...kids) => {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (k === "class") n.className = v; else if (k === "text") n.textContent = v;
+        else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+      }
+      kids.flat().forEach(c => c != null && n.append(c));
+      return n;
+    };
+    let toastTimer = null;
+    function toast(msg) {
+      const t = $("#toast"); t.textContent = msg;
+      t.classList.remove("opacity-0", "translate-y-4"); t.classList.add("opacity-100", "translate-y-0");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.add("opacity-0", "translate-y-4"); t.classList.remove("opacity-100", "translate-y-0"); }, 2400);
+    }
+    async function copy(text, okMsg) {
+      try { await navigator.clipboard.writeText(text); toast(okMsg); }
+      catch (e) { prompt("Copy:", text); }
+    }
 
-function addFiles(list) {
-  hideError();
-  for (const file of list) {
-    const ext = extOf(file.name);
-    if (!ALLOWED_EXT.includes(ext)) { showError(t("errType", { f: file.name })); continue; }
-    if (file.size > MAX_FILE_MB * 1048576) { showError(t("errTooBig", { f: file.name })); continue; }
-    if (files.length >= MAX_FILES) { showError(t("errTooMany")); break; }
-    const f = { id: nextId++, file, name: file.name, ext, kind: kindOf(ext), pages: null, counting: false,
-      opts: { color: false, doubleside: false, paper_size: "A4", copies: 1, pagesMode: "all", range: "", pps: 1 } };
-    files.push(f);
-    countPages(f);
-  }
-  renderFiles();
-}
+    // T Print price calculation (app/pricing.py print_cost)
+    function tprintCost(pages, colour, double, copies, size, pps, applyMin) {
+      const r = RATES[size][colour ? "colour" : "bw"];
+      const printPages = Math.ceil(pages / pps);
+      let sheets, odd = 0, cost;
+      if (double) { odd = printPages % 2; sheets = Math.floor(printPages / 2); cost = sheets * r.double + odd * r.single; }
+      else { sheets = printPages; cost = sheets * r.single; }
+      cost *= copies;
+      let total = cost;
+      if (!colour && applyMin) total = (printPages > 1 && double) ? cost - r.double + RATES[size].bw.min : cost - r.single + RATES[size].bw.min;
+      return { total, sheets: (sheets + odd) * copies };
+    }
 
-function seg(name, options, current, onPick) {
-  return el("div", { class: "seg", role: "radiogroup" }, options.map(([value, label]) => {
-    const input = el("input", { type: "radio", name, value });
-    input.checked = value === current;
-    input.addEventListener("change", () => onPick(value));
-    return el("label", {}, input, el("span", { text: label }));
-  }));
-}
+    /* ============ shop hours + print server status ============ */
+    function nowIST() {
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+      const get = t => parts.find(p => p.type === t).value;
+      return { day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday")), mins: (+get("hour") % 24) * 60 + +get("minute") };
+    }
+    const toMins = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+    const fmt12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; };
+    let shopOpen = false, srvOnline = null;
 
-function fileCard(f) {
-  const id = f.id, o = f.opts;
-  const meta = f.counting ? t("pagesCounting") : f.pages == null ? t("pagesAtShop")
-    : f.pages === 1 ? t("page1") : t("pagesN", { n: f.pages });
-  const update = fn => { fn(); renderSummary(); };
+    function updateHours() {
+      const { day, mins } = nowIST(), [o, c] = SHOP.hours[day];
+      shopOpen = mins >= toMins(o) && mins < toMins(c);
+      let pill, when = "";
+      if (shopOpen) pill = "CLUTCHPRINT LIVE · OPEN TILL " + fmt12(c);
+      else {
+        const before = mins < toMins(o), nd = before ? day : (day + 1) % 7;
+        when = (before ? "today " : "tomorrow ") + fmt12(SHOP.hours[nd][0]);
+        pill = "CLOSED · OPENS " + when.toUpperCase();
+      }
+      $("#shop-pill").textContent = pill;
+      $("#shop-dot").className = "h-2 w-2 shrink-0 rounded-full " + (shopOpen ? "live-dot bg-[#34d399] shadow-[0_0_8px_#34d399]" : "bg-zinc-500");
+      $("#counter-pill").textContent = shopOpen ? "● COUNTER OPEN · TILL " + c : "● CLOSED · OPENS " + when.toUpperCase();
+      $$("[data-close-time]").forEach(n => n.textContent = fmt12(c));
+      $$("[data-day]").forEach(n => n.classList.toggle("!text-[#f3d97d]", n.dataset.day.split(",").includes(String(day))));
+      const note = $("#closed-note");
+      note.hidden = shopOpen;
+      if (!shopOpen) note.textContent = "We're closed right now. Send your order anyway — it will be waiting for us when we open (" + when + ").";
+      renderServer();
+    }
 
-  const copies = el("input", { type: "number", inputmode: "numeric", min: "1", max: "500", value: String(o.copies), "aria-label": t("optCopies") });
-  copies.addEventListener("input", () => update(() => { o.copies = Math.max(1, Math.min(500, Math.floor(+copies.value) || 1)); }));
-  const step = d => () => { o.copies = Math.max(1, Math.min(500, o.copies + d)); copies.value = o.copies; renderSummary(); };
+    async function checkServer() {
+      try { const r = await fetch(API + "server.php", { cache: "no-store" }); srvOnline = r.ok ? !!(await r.json()).online : null; }
+      catch (e) { srvOnline = null; }
+      renderServer(); renderPass();
+    }
+    function renderServer() {
+      const wrap = $("#srv-pill-wrap"), dot = $("#srv-dot"), txt = $("#srv-pill"), badge = $("#srv-badge");
+      wrap.hidden = srvOnline === null;
+      wrap.classList.toggle("border-red-500/40", srvOnline === false && shopOpen);
+      if (srvOnline) {
+        dot.className = "live-dot h-2 w-2 shrink-0 rounded-full bg-[#34d399] shadow-[0_0_8px_#34d399]";
+        txt.textContent = "AI AUTO PRINT ONLINE";
+        badge.textContent = "ONLINE"; badge.className = "text-emerald-300";
+      } else if (srvOnline === false) {
+        dot.className = "h-2 w-2 shrink-0 rounded-full " + (shopOpen ? "live-dot bg-red-400 shadow-[0_0_8px_#f87171]" : "bg-zinc-500");
+        txt.textContent = shopOpen ? "PRINT SERVER OFFLINE — STAFF, PLEASE CHECK SHOP PC 1" : "PRINT SERVER OFFLINE";
+        badge.textContent = "OFFLINE"; badge.className = shopOpen ? "text-red-300" : "text-zinc-400";
+      } else { badge.textContent = "…"; badge.className = "text-zinc-400"; }
+    }
 
-  const range = el("input", { type: "text", class: "range-input", inputmode: "numeric", value: o.range, placeholder: t("rangePh"), "aria-label": t("pagesCustom") });
-  const rangeErr = el("p", { class: "field-err", hidden: "" });
-  const checkRange = () => {
-    const bad = o.pagesMode === "custom" && !parseRange(o.range, f.pages);
-    rangeErr.hidden = !bad || !o.range;
-    rangeErr.textContent = f.pages ? t("rangeErr", { n: f.pages }) : t("rangeErrU");
-  };
-  range.hidden = o.pagesMode !== "custom";
-  range.addEventListener("input", () => update(() => { o.range = range.value; checkRange(); }));
-  const pagesSel = el("select", { "aria-label": t("optPages") },
-    el("option", { value: "all", text: t("pagesAll") }), el("option", { value: "custom", text: t("pagesCustom") }));
-  pagesSel.value = o.pagesMode;
-  pagesSel.addEventListener("change", () => update(() => {
-    o.pagesMode = pagesSel.value; range.hidden = o.pagesMode !== "custom"; checkRange();
-    if (!range.hidden) range.focus();
-  }));
-  checkRange();
+    /* ============ order builder ============ */
+    const opts = { color: false, doubleside: false, paper_size: "A4", copies: 1, pps: 1 };
+    let files = [], nextId = 1;
+    const extOf = n => (n.split(".").pop() || "").toLowerCase();
 
-  const pps = el("select", { "aria-label": t("optPps") }, [1, 2, 4].map(n => el("option", { value: String(n), text: String(n) })));
-  pps.value = String(o.pps);
-  pps.addEventListener("change", () => update(() => { o.pps = +pps.value; }));
+    function parseRange(str, total) {
+      const s = (str || "").replace(/\s+/g, "");
+      if (!/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(s)) return null;
+      const set = new Set();
+      for (const part of s.split(",")) {
+        const [a, b = a] = part.split("-").map(Number);
+        if (a < 1 || a > b || (total != null && b > total) || b - a > 5000) return null;
+        for (let p = a; p <= b; p++) set.add(p);
+      }
+      return [...set].sort((x, y) => x - y);
+    }
+    const selectedPages = f => f.range ? ((parseRange(f.range, f.pages) || []).length || null) : f.pages;
 
-  return el("div", { class: "file" },
-    el("div", { class: "file-head" },
-      el("span", { class: "file-icon " + f.kind, text: f.ext }),
-      el("span", { class: "file-name" }, el("b", { text: f.name }), el("small", { text: meta })),
-      el("button", { type: "button", class: "file-x", "aria-label": t("remove") + " " + f.name, text: "×",
-        onclick: () => { files = files.filter(x => x.id !== id); renderFiles(); } })),
-    el("div", { class: "opts" },
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optType") }),
-        seg("c" + id, [["bw", t("bw")], ["colour", t("colour")]], o.color ? "colour" : "bw", v => update(() => { o.color = v === "colour"; }))),
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optSides") }),
-        seg("s" + id, [["single", t("single")], ["double", t("double")]], o.doubleside ? "double" : "single", v => update(() => { o.doubleside = v === "double"; }))),
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optSize") }),
-        seg("z" + id, [["A4", "A4"], ["A3", "A3"]], o.paper_size, v => update(() => { o.paper_size = v; }))),
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optCopies") }),
-        el("div", { class: "stepper" },
-          el("button", { type: "button", "aria-label": "−", text: "−", onclick: step(-1) }), copies,
-          el("button", { type: "button", "aria-label": "+", text: "+", onclick: step(1) }))),
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optPages") }), pagesSel, range, rangeErr),
-      el("div", {}, el("span", { class: "opt-lbl", text: t("optPps") }), pps)));
-}
+    let pdfjsReady = null;
+    function loadPdfJs() {
+      if (!pdfjsReady) pdfjsReady = new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+        s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; res(window.pdfjsLib); };
+        s.onerror = rej; document.head.append(s);
+      });
+      return pdfjsReady;
+    }
+    async function countPages(f) {
+      const ext = f.ext;
+      if (ext === "jpg" || ext === "jpeg" || ext === "png") { f.pages = 1; return; }
+      if (ext !== "pdf") { f.pages = null; return; }
+      f.counting = true; renderFiles();
+      try { const lib = await loadPdfJs(); const doc = await lib.getDocument({ data: await f.file.arrayBuffer() }).promise; f.pages = doc.numPages; doc.destroy(); }
+      catch (e) { f.pages = null; }
+      f.counting = false; renderFiles();
+    }
+    function addFiles(list) {
+      hideError();
+      for (const file of list) {
+        const ext = extOf(file.name);
+        if (!ALLOWED_EXT.includes(ext)) { showError("“" + file.name + "” is not supported. Use PDF, DOCX, PPTX, JPG or PNG."); continue; }
+        if (file.size > MAX_FILE_MB * 1048576) { showError("“" + file.name + "” is larger than 25 MB."); continue; }
+        if (files.length >= MAX_FILES) { showError("You can send up to 10 files in one order."); break; }
+        const f = { id: nextId++, file, name: file.name, ext, pages: null, counting: false, range: "", rangeOpen: false };
+        files.push(f); countPages(f);
+      }
+      renderFiles();
+    }
 
-function renderFiles() {
-  const list = $("#fileList");
-  list.replaceChildren(...files.map(fileCard));
-  renderSummary();
-}
+    function fileRow(f) {
+      const meta = f.counting ? "counting pages…" : f.pages == null ? "pages counted at the shop" : f.pages + (f.pages === 1 ? " page" : " pages");
+      const size = f.file.size >= 1048576 ? (f.file.size / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(f.file.size / 1024)) + " KB";
+      const range = el("input", { class: "field mt-2 !min-h-[38px] !text-sm", type: "text", inputmode: "numeric", placeholder: "Pages to print, e.g. 1-5, 8", value: f.range, "aria-label": "Pages to print for " + f.name });
+      range.hidden = !f.rangeOpen;
+      const err = el("p", { class: "mt-1 text-[11px] text-red-300", hidden: "" });
+      const check = () => { const bad = f.range && !parseRange(f.range, f.pages); err.hidden = !bad; err.textContent = f.pages ? "Use pages within 1–" + f.pages + ", e.g. 1-5, 8" : "Use page numbers like 1-5, 8"; };
+      range.addEventListener("input", () => { f.range = range.value.trim(); check(); renderSummary(); });
+      check();
+      const pagesBtn = el("button", { type: "button", class: "rounded border px-2 py-1 text-[11px] " + (f.rangeOpen ? "border-[#d4af37] text-[#f3d97d]" : "border-white/10 text-zinc-300 hover:border-[#d4af37]/50"), text: f.rangeOpen ? "Choose pages" : "All pages" });
+      pagesBtn.addEventListener("click", () => {
+        f.rangeOpen = !f.rangeOpen; if (!f.rangeOpen) f.range = "";
+        renderFiles();
+        if (f.rangeOpen) { const i = $('#file-list [data-fid="' + f.id + '"] input'); if (i) i.focus(); }
+      });
+      return el("li", { class: "rounded-lg border border-[#d4af37]/40 bg-[#181712] px-3.5 py-2.5", "data-fid": String(f.id) },
+        el("div", { class: "flex items-center justify-between gap-3" },
+          el("div", { class: "min-w-0" },
+            el("p", { class: "truncate font-mono-tech text-xs font-semibold text-[#f3d97d]", text: f.name }),
+            el("p", { class: "font-mono-tech text-[11px] text-zinc-400", text: f.ext.toUpperCase() + " · " + size + " · " + meta })),
+          el("div", { class: "flex shrink-0 items-center gap-1" }, pagesBtn,
+            el("button", { type: "button", class: "rounded px-2 py-1 font-mono-tech text-[11px] text-zinc-400 hover:bg-white/10 hover:text-white", "aria-label": "Remove " + f.name, text: "✕",
+              onclick: () => { files = files.filter(x => x.id !== f.id); renderFiles(); } }))),
+        range, err);
+    }
+    function renderFiles() { $("#file-list").replaceChildren(...files.map(fileRow)); renderSummary(); }
 
-function estimate() {
-  let total = 0, unknown = 0;
-  const lines = files.map((f, i) => {
-    const pages = selectedPages(f);
-    if (pages == null) { unknown++; return { f, cost: null }; }
-    const q = tprintCost(pages, f.opts.color ? "colour" : "bw", f.opts.doubleside, f.opts.copies, f.opts.paper_size, f.opts.pps, i === 0);
-    total += q.total;
-    return { f, cost: q.total, pages };
-  });
-  return { total, unknown, lines };
-}
+    function estimate() {
+      let total = 0, pages = 0, sheets = 0, unknown = 0;
+      files.forEach((f, i) => {
+        const p = selectedPages(f);
+        if (p == null) { unknown++; return; }
+        const q = tprintCost(p, opts.color, opts.doubleside, opts.copies, opts.paper_size, opts.pps, i === 0);
+        total += q.total; pages += p * opts.copies; sheets += q.sheets;
+      });
+      return { total, pages, sheets, unknown };
+    }
+    function renderSummary() {
+      $$(".opt").forEach(b => {
+        const key = b.dataset.opt, v = b.dataset.val;
+        const on = key === "paper_size" ? opts.paper_size === v : String(Number(opts[key])) === v;
+        b.classList.toggle("opt-on", on); b.setAttribute("aria-pressed", String(on));
+      });
+      $("#copies-count").textContent = String(opts.copies);
+      const e = estimate();
+      $("#stat-pages").textContent = files.length ? e.pages + (e.unknown ? "+" : "") + " pgs" : "—";
+      $("#stat-sheets").textContent = files.length ? e.sheets + (e.unknown ? "+" : "") + " " + opts.paper_size : "—";
+      $("#stat-price").textContent = rupee(e.total) + (e.unknown ? " +" : "");
+      const r = RATES[opts.paper_size];
+      $("#rate-breakdown").textContent = opts.paper_size + " · B&W ₹" + r.bw.single + "/sheet 1-sided or ₹" + r.bw.double + " duplex (₹" + r.bw.min + " min on your first order of the day) · Color ₹" + r.colour.single + " 1-sided or ₹" + r.colour.double + " duplex" + (e.unknown ? " · Word/PowerPoint priced at the shop" : "");
+    }
 
-function renderSummary() {
-  const { total, unknown, lines } = estimate();
-  const ul = $("#lines");
-  ul.replaceChildren();
-  if (!files.length) ul.append(el("li", { class: "unk" }, el("span", { text: t("noFiles") }), el("span", { text: "" })));
-  lines.forEach(({ f, cost, pages }) => {
-    const desc = `${f.name}${pages ? ` · ${pages}p × ${f.opts.copies}` : ""}`;
-    ul.append(el("li", { class: cost == null ? "unk" : "" }, el("span", { text: desc }),
-      el("span", { text: cost == null ? t("atShop") : rupee(cost) })));
-  });
-  $("#total").textContent = rupee(total) + (unknown ? " +" : "");
-}
+    function showError(m) { const e = $("#form-error"); e.textContent = m; e.hidden = false; }
+    function hideError() { $("#form-error").hidden = true; }
+    function validPhone(raw) {
+      let d = raw.replace(/\D+/g, "");
+      if (d.length === 12 && d.startsWith("91")) d = d.slice(2); else if (d.length === 11 && d.startsWith("0")) d = d.slice(1);
+      return /^[6-9]\d{9}$/.test(d) ? d : null;
+    }
 
-function showError(msg) { const e = $("#formError"); e.textContent = msg; e.hidden = false; }
-function hideError() { $("#formError").hidden = true; }
+    function send() {
+      hideError();
+      const name = $("#name").value.trim(), phone = validPhone($("#phone").value);
+      if (!name) { showError("Please enter your name."); $("#name").focus(); return; }
+      if (!phone) { showError("Please enter a valid 10-digit mobile number."); $("#phone").focus(); return; }
+      if (!files.length) { showError("Please add at least one file."); return; }
+      if (files.some(f => f.range && !parseRange(f.range, f.pages))) { showError("Please fix the page selection."); return; }
+      if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError("Files are too large together (max 60 MB)."); return; }
+      const e = estimate(), fd = new FormData();
+      fd.append("name", name); fd.append("phone", phone); fd.append("notes", $("#notes").value.trim());
+      if (!e.unknown) fd.append("est_total", String(e.total));
+      fd.append("options", JSON.stringify(files.map(f => ({ color: opts.color, doubleside: opts.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: opts.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages }))));
+      files.forEach(f => fd.append("files[]", f.file, f.name));
 
-function validPhone(raw) {
-  let d = raw.replace(/\D+/g, "");
-  if (d.length === 12 && d.startsWith("91")) d = d.slice(2);
-  else if (d.length === 11 && d.startsWith("0")) d = d.slice(1);
-  return /^[6-9]\d{9}$/.test(d) ? d : null;
-}
+      const btn = $("#send-btn"), bar = $("#progress");
+      btn.disabled = true; bar.hidden = false; bar.firstElementChild.style.width = "0";
+      setStep(1, "active", "Uploading " + files.length + (files.length === 1 ? " file" : " files") + "…"); setStep(2, "idle"); setStep(3, "idle");
+      engine("UPLOADING", "gold", 15, true);
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API + "order.php");
+      xhr.upload.onprogress = ev => { if (!ev.lengthComputable) return; const p = Math.round(ev.loaded / ev.total * 100); bar.firstElementChild.style.width = p + "%"; btn.textContent = "Uploading… " + p + "%"; };
+      const done = () => { btn.disabled = false; bar.hidden = true; btn.textContent = "Send to CLUTCHPRINT AI"; };
+      xhr.onerror = () => { done(); showError("Could not send your order. Check your connection and try again."); renderPass(); };
+      xhr.onload = () => {
+        done(); let data = {};
+        try { data = JSON.parse(xhr.responseText); } catch (err) {}
+        if (xhr.status !== 201 || !data.code) { showError(data.error || "Could not send your order. Please try again."); renderPass(); return; }
+        saveOrder({ code: data.code, token: data.token, at: Date.now() });
+        current = data.code; files = []; $("#notes").value = ""; renderFiles();
+        toast("Locked in! Token #" + data.code + " sent to T FIX® CUSAT.");
+        refreshOrders();
+        $("#token-card").scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+      xhr.send(fd);
+    }
 
-function submitOrder() {
-  hideError();
-  const name = $("#name").value.trim();
-  const phone = validPhone($("#phone").value);
-  if (!name) { showError(t("errName")); $("#name").focus(); return; }
-  if (!phone) { showError(t("errPhone")); $("#phone").focus(); return; }
-  if (!files.length) { showError(t("errFiles")); return; }
-  if (files.some(f => f.opts.pagesMode === "custom" && !parseRange(f.opts.range, f.pages))) { showError(t("errRange")); return; }
-  if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError(t("errTotal")); return; }
+    /* ============ orders on this phone + live status ============ */
+    let current = null; const cache = {};
+    const loadOrders = () => { try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+    const saveOrders = l => { try { localStorage.setItem(STORE, JSON.stringify(l.slice(0, 20))); } catch (e) {} };
+    const saveOrder = o => saveOrders([o, ...loadOrders().filter(x => x.code !== o.code)]);
+    const orderLink = o => location.origin + location.pathname + "?order=" + o.code + "&t=" + o.token;
 
-  const { total, unknown } = estimate();
-  const fd = new FormData();
-  fd.append("name", name);
-  fd.append("phone", phone);
-  fd.append("notes", $("#notes").value.trim());
-  if (!unknown) fd.append("est_total", String(total));
-  fd.append("options", JSON.stringify(files.map(f => ({
-    color: f.opts.color, doubleside: f.opts.doubleside, duplex_edge: "long", paper_size: f.opts.paper_size,
-    orientation: "portrait", pages_per_sheet: f.opts.pps, copies: f.opts.copies,
-    pages_range: f.opts.pagesMode === "custom" ? f.opts.range.replace(/\s+/g, "") : "",
-    est_pages: f.pages,
-  }))));
-  files.forEach(f => fd.append("files[]", f.file, f.name));
+    async function refreshOrders() {
+      const list = loadOrders();
+      if (!current && list.length) current = list[0].code;
+      await Promise.all(list.map(async o => {
+        try { const r = await fetch(API + "status.php?code=" + encodeURIComponent(o.code) + "&t=" + encodeURIComponent(o.token), { cache: "no-store" }); if (r.ok) cache[o.code] = await r.json(); }
+        catch (e) {}
+      }));
+      renderPass();
+    }
 
-  const btn = $("#submitBtn"), bar = $("#progress");
-  btn.disabled = true; bar.hidden = false; $("i", bar).style.width = "0";
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", API + "order.php");
-  xhr.upload.onprogress = e => {
-    if (!e.lengthComputable) return;
-    const p = Math.round(e.loaded / e.total * 100);
-    $("i", bar).style.width = p + "%";
-    btn.textContent = t("sending", { p });
-  };
-  const done = () => { btn.disabled = false; bar.hidden = true; btn.textContent = t("send"); };
-  xhr.onerror = () => { done(); showError(t("errNet")); };
-  xhr.onload = () => {
-    done();
-    let data = {};
-    try { data = JSON.parse(xhr.responseText); } catch (e) {}
-    if (xhr.status !== 201 || !data.code) { showError(data.error || t("errNet")); return; }
-    saveOrder({ code: data.code, token: data.token, at: Date.now() });
-    justSent = data.code;
-    files = []; $("#notes").value = ""; renderFiles();
-    renderOrders(true);
-    $("#myorders").scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-  xhr.send(fd);
-}
+    const STEP_CLS = {
+      idle: ["flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono-tech text-xs text-zinc-400", "text-sm font-semibold text-zinc-300", "font-mono-tech text-[11px] text-zinc-500"],
+      active: ["flex items-start gap-3 rounded-xl border border-[#d4af37]/50 bg-[#d4af37]/10 p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#f3d97d] bg-[#d4af37]/20 font-mono-tech text-xs font-bold text-[#f3d97d]", "text-sm font-bold text-[#f3d97d]", "font-mono-tech text-[11px] text-zinc-300"],
+      done: ["flex items-start gap-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 font-mono-tech text-xs font-bold text-emerald-300", "text-sm font-semibold text-white", "font-mono-tech text-[11px] text-emerald-300/90"],
+      warn: ["flex items-start gap-3 rounded-xl border border-red-500/35 bg-red-500/10 p-3 transition", "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/20 font-mono-tech text-xs font-bold text-red-300", "text-sm font-semibold text-white", "font-mono-tech text-[11px] text-red-300"]
+    };
+    const STEP_DEFAULT = [["Reading pages…", "Waiting for your files"], ["Queued at T FIX…", "The shop server checks & prices every file"], ["Locked in. Ready at T FIX.", "Printed after payment is confirmed"]];
+    function setStep(n, mode, sub, title) {
+      const c = STEP_CLS[mode];
+      $("#step-" + n).className = c[0]; $("#step-" + n + "-icon").className = c[1]; $("#step-" + n + "-title").className = c[2]; $("#step-" + n + "-sub").className = c[3];
+      $("#step-" + n + "-icon").textContent = mode === "done" ? "✓" : mode === "active" ? "●" : mode === "warn" ? "!" : String(n);
+      $("#step-" + n + "-title").textContent = title || STEP_DEFAULT[n - 1][0];
+      $("#step-" + n + "-sub").textContent = sub || STEP_DEFAULT[n - 1][1];
+    }
+    function engine(label, tone, pct, shimmer) {
+      const s = $("#engine-state");
+      s.textContent = label;
+      s.className = "rounded-full border px-2.5 py-0.5 font-mono-tech text-[11px] " + (tone === "green" ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300" : tone === "gold" ? "border-[#d4af37]/50 bg-[#d4af37]/15 text-[#f3d97d]" : tone === "red" ? "border-red-500/40 bg-red-500/15 text-red-300" : "border-white/10 bg-white/5 text-zinc-300");
+      const bar = $("#engine-bar"); bar.style.width = pct + "%"; bar.classList.toggle("progress-shimmer", !!shimmer);
+    }
 
-/* ==================================================================
-   My orders — kept on this phone; status from the website
-   ================================================================== */
-const STORE = "tprint-orders";
-let justSent = null;
-const statusCache = {};
+    const BADGE = {
+      pending: ["WAITING FOR SHOP", "bg-white/10 text-zinc-300"], received: ["PRICE CONFIRMED", "bg-[#d4af37]/20 text-[#f3d97d]"],
+      paid: ["PAID · IN QUEUE", "bg-[#d4af37]/20 text-[#f3d97d]"], printing: ["PRINTING", "bg-[#d4af37]/25 text-[#f3d97d]"],
+      ready: ["READY AT T FIX", "bg-emerald-500/20 text-emerald-300"], collected: ["COLLECTED", "bg-emerald-500/20 text-emerald-300"],
+      cancelled: ["CANCELLED", "bg-red-500/20 text-red-300"]
+    };
+    function badge(text, cls) { const b = $("#token-badge"); b.textContent = text; b.className = "whitespace-nowrap rounded px-2 py-0.5 font-mono-tech text-[10px] font-semibold " + cls; }
 
-function loadOrders() {
-  try { const v = JSON.parse(localStorage.getItem(STORE) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
-}
-function saveOrders(list) { try { localStorage.setItem(STORE, JSON.stringify(list.slice(0, 20))); } catch (e) {} }
-function saveOrder(o) { saveOrders([o, ...loadOrders().filter(x => x.code !== o.code)]); }
-const orderLink = o => `${location.origin}${location.pathname}?order=${o.code}&t=${o.token}#myorders`;
+    function renderPass() {
+      const list = loadOrders();
+      const o = list.find(x => x.code === current) || list[0];
+      $("#my-orders").hidden = list.length < 2;
+      $("#my-orders-list").replaceChildren(...list.slice(0, 6).map(x => {
+        const st = cache[x.code] ? (BADGE[cache[x.code].status] || BADGE.pending)[0] : "…";
+        return el("button", { type: "button", class: "rounded-lg border px-2.5 py-1 font-mono-tech text-[11px] " + (o && x.code === o.code ? "border-[#d4af37] bg-[#d4af37]/15 text-[#f3d97d]" : "border-white/10 bg-white/5 text-zinc-300 hover:border-white/25"),
+          text: "#" + x.code + " · " + st, onclick: () => { current = x.code; renderPass(); } });
+      }));
+      const btnTok = $("#copy-token-btn"), btnLink = $("#copy-link-btn");
+      if (!o) {
+        $("#token-number").textContent = "#TP······";
+        badge("PREVIEW", "bg-[#d4af37]/20 text-[#f3d97d]");
+        $("#pass-line").textContent = "Send your files and your pickup token appears here.";
+        $("#pass-files").textContent = "—"; $("#pass-total").textContent = "—";
+        $("#pass-file-list").replaceChildren(); $("#pay-box").replaceChildren();
+        btnTok.disabled = btnLink.disabled = true;
+        if (!$("#send-btn").disabled) { setStep(1, "idle"); setStep(2, "idle"); setStep(3, "idle"); engine(srvOnline === false ? "SERVER OFFLINE" : "READY", srvOnline === false ? "red" : "", 0, false); }
+        return;
+      }
+      const s = cache[o.code], status = s ? s.status : "pending";
+      $("#token-number").textContent = "#" + o.code;
+      badge(...(BADGE[status] || BADGE.pending));
+      btnTok.disabled = btnLink.disabled = false;
+      btnTok.onclick = () => copy(o.code, "Copied token #" + o.code);
+      btnLink.onclick = () => copy(orderLink(o), "Link copied — open it on any phone to track this order");
+      renderQR(orderLink(o));
+      const amount = s && s.confirmed_total != null ? s.confirmed_total : s && s.est_total;
+      const confirmed = !!(s && s.confirmed_total != null);
+      $("#pass-files").textContent = s && s.files ? s.files[0].name + (s.files.length > 1 ? " +" + (s.files.length - 1) : "") : "…";
+      $("#pass-total").textContent = amount != null ? rupee(amount) + (confirmed ? "" : " (est.)") : "priced at the shop";
+      $("#pass-file-list").replaceChildren(...(s && s.files ? s.files.map(f => f.error
+        ? el("li", { class: "min-w-0" },
+            el("span", { class: "block truncate text-zinc-300", text: f.name }),
+            el("span", { class: "block break-words text-red-300", text: "Problem: " + f.error }))
+        : el("li", { class: "flex justify-between gap-3" },
+            el("span", { class: "min-w-0 truncate text-zinc-300", text: f.name + (f.pages ? " · " + f.pages + "p × " + f.copies : "") }),
+            el("span", { class: "shrink-0 text-zinc-400", text: f.cost != null ? rupee(f.cost) : "" }))) : []));
 
-const STEPS = ["pending", "received", "paid", "printing", "ready"];
+      const lines = {
+        pending: "Show token #" + o.code + " at the T FIX counter. " + (srvOnline ? "The shop server is online — it will price your order within a minute." : "The shop server picks it up as soon as it's online."),
+        received: "Price confirmed: " + (amount != null ? rupee(amount) : "") + ". Pay by UPI below or at the counter — we print once payment is confirmed.",
+        paid: "Paid — your order is in the print queue.", printing: "Printing now at T FIX® CUSAT.",
+        ready: "Ready! Show token #" + o.code + " at the T FIX counter to collect.", collected: "Collected. Thank you!", cancelled: "This order was cancelled — please contact the shop."
+      };
+      $("#pass-line").textContent = lines[status] || lines.pending;
+      $("#pay-box").replaceChildren(status === "received" && confirmed && amount > 0 ? upiBlock(o, amount) : "");
 
-function orderCard(o) {
-  const s = statusCache[o.code];
-  const status = s && s.status || "pending";
-  const stepIdx = status === "collected" ? 4 : Math.max(0, STEPS.indexOf(status));
-  const amount = s && s.confirmed_total != null ? s.confirmed_total : s && s.est_total;
-  const confirmed = s && s.confirmed_total != null;
-  const placed = new Date(o.at).toLocaleString(lang === "ml" ? "ml-IN" : "en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+      // AI engine steps follow the real order status
+      const nFiles = s && s.files ? s.files.length : 0;
+      setStep(1, "done", nFiles ? nFiles + (nFiles === 1 ? " file" : " files") + " received · order #" + o.code : "Order #" + o.code + " saved", "Files received");
+      if (status === "pending") {
+        setStep(2, srvOnline === false ? "warn" : "active", srvOnline === false ? "Shop server offline — your order waits safely" : "Waiting for the shop server to price it", "Queued at T FIX…");
+        setStep(3, "idle"); engine(srvOnline === false ? "WAITING" : "QUEUED", srvOnline === false ? "red" : "gold", 40, srvOnline !== false);
+      } else if (status === "cancelled") {
+        setStep(2, "warn", "Cancelled by the shop", "Cancelled"); setStep(3, "idle"); engine("CANCELLED", "red", 100, false);
+      } else {
+        setStep(2, "done", "Priced by T Print" + (amount != null ? ": " + rupee(amount) : ""), "Checked & priced");
+        if (status === "received") { setStep(3, "active", "Pay " + (amount != null ? rupee(amount) : "") + " by UPI or at the counter", "Waiting for payment"); engine("PAY TO PRINT", "gold", 66, false); }
+        else if (status === "paid") { setStep(3, "active", "Paid — printing next", "In the print queue"); engine("PAID", "gold", 80, true); }
+        else if (status === "printing") { setStep(3, "active", "On the printer now", "Printing…"); engine("PRINTING", "gold", 90, true); }
+        else { setStep(3, "done", status === "collected" ? "Collected — thank you!" : "Token #" + o.code + " ready at the Pipeline Road counter", "Locked in. Ready at T FIX."); engine(status === "collected" ? "COLLECTED" : "LOCKED IN", "green", 100, false); }
+      }
+    }
 
-  const copyBtn = el("button", { type: "button", class: "btn btn-ghost", text: t("copyLink") });
-  copyBtn.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(orderLink(o)); copyBtn.textContent = t("copied"); }
-    catch (e) { prompt(t("copyLink"), orderLink(o)); }
-  });
-  return el("div", { class: "ocard" + (o.code === justSent ? " new" : "") },
-    o.code === justSent ? el("p", { class: "osent", text: t("orderSent") }) : null,
-    el("div", { class: "ohead" },
-      el("div", { class: "ocode" }, el("small", { text: t("orderCode") + " · " + placed }), document.createTextNode(o.code)),
-      amount != null ? el("div", { class: "oamt" }, el("small", { text: confirmed ? t("total") : t("estimate") }), document.createTextNode(rupee(amount))) : null),
-    el("p", { class: "ostatus", text: t("st_" + status) }),
-    el("p", { class: "odetail", text: s ? t("st_" + status + (status === "pending" && srvOnline ? "_d_on" : "_d"), { amt: amount != null ? rupee(amount) : "" }) : (o.err ? t("loadErr") : "…") }),
-    el("div", { class: "track", "aria-hidden": "true" }, STEPS.map((_, i) => el("span", { class: i <= stepIdx ? "on" : "" }))),
-    el("div", { class: "track-labels", "aria-hidden": "true" }, ["tr1", "tr2", "tr3", "tr4", "tr5"].map(k => el("span", { text: t(k) }))),
-    s && s.files ? el("ul", { class: "ofiles" }, s.files.map(f => el("li", {},
-      el("span", { text: `${f.name}${f.pages ? ` · ${f.pages}p × ${f.copies}` : ""}` }),
-      f.error ? el("span", { class: "err", text: t("fileProblem") + ": " + f.error })
-        : el("span", { text: f.cost != null ? rupee(f.cost) : "" })))) : null,
-    status === "received" && confirmed && amount > 0 ? upiBlock(o, amount) : null,
-    el("div", { class: "oactions" }, copyBtn,
-      el("button", { type: "button", class: "btn btn-ghost", text: t("hide"),
-        onclick: () => { saveOrders(loadOrders().filter(x => x.code !== o.code)); renderOrders(); } })));
-}
+    let qrLoaded = null, qrFor = "";
+    function renderQR(url) {
+      if (qrFor === url) return; qrFor = url;
+      if (!qrLoaded) qrLoaded = new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.onload = res; s.onerror = rej; document.head.append(s); });
+      qrLoaded.then(() => {
+        const box = $("#qr-box"); box.replaceChildren(); box.classList.add("bg-white");
+        new window.QRCode(box, { text: url, width: 120, height: 120, colorDark: "#0b0c0e", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
+        box.title = "Scan to open this order on another phone";
+      }).catch(() => {});
+    }
 
-function upiLink(o, amount) {
-  const u = SHOP.upi;
-  const q = new URLSearchParams({ pa: u.id, pn: u.name, mc: u.mc, am: Number(amount).toFixed(2), cu: "INR", tn: `${o.code} print order` });
-  return "upi://pay?" + q.toString().replace(/\+/g, "%20").replace(/%40/g, "@");
-}
+    function upiLink(o, amount) {
+      const u = SHOP.upi, q = new URLSearchParams({ pa: u.id, pn: u.name, mc: u.mc, am: Number(amount).toFixed(2), cu: "INR", tn: o.code + " print order" });
+      return "upi://pay?" + q.toString().replace(/\+/g, "%20").replace(/%40/g, "@");
+    }
+    const openQr = new Set();
+    function upiBlock(o, amount) {
+      const mobile = window.matchMedia("(pointer: coarse)").matches;
+      const details = el("details", { class: "mt-3" }, el("summary", { class: "cursor-pointer font-mono-tech text-[11px] text-zinc-300", text: "Show UPI QR code" }),
+        el("img", { class: "upi-qr", src: "upi-qr.png", alt: "UPI QR code — " + SHOP.upi.id, width: "688", height: "1045", loading: "lazy" }));
+      details.open = !mobile || openQr.has(o.code);
+      details.addEventListener("toggle", () => { details.open ? openQr.add(o.code) : openQr.delete(o.code); });
+      return el("div", { class: "mt-3 rounded-xl border border-[#d4af37]/40 bg-[#d4af37]/10 p-3" },
+        mobile ? el("a", { class: "gold-btn block rounded-lg px-4 py-2.5 text-center text-sm font-extrabold", href: upiLink(o, amount), text: "Pay " + rupee(amount) + " by UPI" }) : null,
+        details,
+        el("div", { class: "mt-2 flex flex-wrap items-center gap-2 font-mono-tech text-[11px]" },
+          el("span", { class: "text-zinc-400", text: "UPI ID:" }), el("span", { class: "font-bold text-white", text: SHOP.upi.id }),
+          el("button", { type: "button", class: "rounded border border-white/15 px-2 py-0.5 text-zinc-300 hover:bg-white/10", text: "Copy", onclick: () => copy(SHOP.upi.id, "UPI ID copied") })),
+        el("p", { class: "mt-1.5 text-[11px] leading-relaxed text-zinc-400", text: "Write " + o.code + " in the payment note. The shop marks your order paid after checking the payment." }));
+    }
 
-const openQr = new Set();   // keep the QR open across the 30-second status refresh
-function upiBlock(o, amount) {
-  const mobile = window.matchMedia("(pointer: coarse)").matches;
-  const copy = el("button", { type: "button", text: t("copy") });
-  copy.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(SHOP.upi.id); copy.textContent = t("copied"); } catch (e) {}
-  });
-  const qr = el("details", {}, el("summary", { text: t("showQr") }),
-    el("img", { class: "upi-qr", src: "upi-qr.png", alt: "UPI QR code — " + SHOP.upi.id, width: "688", height: "1045", loading: "lazy" }));
-  qr.open = !mobile || openQr.has(o.code);
-  qr.addEventListener("toggle", () => { qr.open ? openQr.add(o.code) : openQr.delete(o.code); });
-  return el("div", { class: "upi" },
-    mobile ? el("a", { class: "btn btn-gold", href: upiLink(o, amount), text: t("payUpi", { amt: rupee(amount) }) }) : null,
-    qr,
-    el("div", { class: "upi-id" }, el("span", { text: t("upiId") + ":" }), el("code", { text: SHOP.upi.id }), copy),
-    el("p", { text: t("upiNote", { code: o.code}) }));
-}
+    /* ============ rates ============ */
+    function renderRates() {
+      const cards = [["B&W · A4", RATES.A4.bw], ["Color · A4", RATES.A4.colour], ["B&W · A3", RATES.A3.bw], ["Color · A3", RATES.A3.colour]];
+      $("#rate-cards").replaceChildren(...cards.map(([t, r]) => el("div", { class: "glass-card rounded-xl p-3.5" },
+        el("span", { class: "font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400", text: t }),
+        el("p", { class: "mt-1 text-lg font-extrabold text-white" }, rupee(r.single), el("span", { class: "text-xs font-medium text-zinc-400", text: " 1-sided" })),
+        el("p", { class: "font-mono-tech text-xs text-[#f3d97d]", text: rupee(r.double) + " duplex" }))));
+      $("#rate-note").textContent = "Per sheet. B&W minimum ₹" + RATES.A4.bw.min + " (A4) / ₹" + RATES.A3.bw.min + " (A3) on your first order of the day. Binding, lamination & passport photos: ask at the counter.";
+    }
 
-function renderOrders(refresh) {
-  const list = loadOrders();
-  $("#myorders").hidden = !list.length;
-  $("#orderCards").replaceChildren(...list.map(orderCard));
-  if (refresh) refreshOrders();
-}
+    /* ============ wire up ============ */
+    const q = new URLSearchParams(location.search);
+    const linkCode = (q.get("order") || "").toUpperCase(), linkTok = q.get("t") || "";
+    if (/^TP[A-Z0-9]{6}$/.test(linkCode) && /^[a-f0-9]{32}$/.test(linkTok)) {
+      if (!loadOrders().some(o => o.code === linkCode)) saveOrder({ code: linkCode, token: linkTok, at: Date.now() });
+      current = linkCode; history.replaceState(null, "", location.pathname + "#upload-studio");
+    }
 
-async function refreshOrders() {
-  const list = loadOrders();
-  await Promise.all(list.map(async o => {
-    try {
-      const r = await fetch(`${API}status.php?code=${encodeURIComponent(o.code)}&t=${encodeURIComponent(o.token)}`, { cache: "no-store" });
-      if (r.ok) { statusCache[o.code] = await r.json(); o.err = false; }
-      else if (r.status === 404) o.err = true;
-    } catch (e) { o.err = true; }
-  }));
-  renderOrders();
-}
+    $$("[data-wa]").forEach(a => a.href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent("Hi T FIX CUSAT, I have a question about printing."));
+    $("#map-link").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
+    $("#call-link").href = "tel:" + SHOP.phone;
+    $("#year").textContent = new Date().getFullYear();
 
-// A shared order link: ?order=TPXXXXXX&t=TOKEN
-(function importLink() {
-  const p = new URLSearchParams(location.search);
-  const code = (p.get("order") || "").toUpperCase(), token = p.get("t") || "";
-  if (/^TP[A-Z0-9]{6}$/.test(code) && /^[a-f0-9]{32}$/.test(token)) {
-    if (!loadOrders().some(o => o.code === code)) saveOrder({ code, token, at: Date.now() });
-    history.replaceState(null, "", location.pathname + "#myorders");
-  }
-})();
+    const dz = $("#dropzone"), input = $("#file-input");
+    dz.addEventListener("click", () => input.click());
+    dz.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+    dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("dropzone-active"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("dropzone-active"));
+    dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("dropzone-active"); if (e.dataTransfer && e.dataTransfer.files) addFiles([...e.dataTransfer.files]); });
+    input.addEventListener("change", () => { addFiles([...input.files]); input.value = ""; });
 
-/* --- Wire up --- */
-$$("[data-wa-plain]").forEach(a => a.href = `https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent("Hi T FIX CUSAT, I have a question about printing.")}`);
-$("#mapLink").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
-$("#callLink").href = "tel:" + SHOP.phone;
-$("#year").textContent = new Date().getFullYear();
+    $$(".opt").forEach(b => b.addEventListener("click", () => {
+      const k = b.dataset.opt; opts[k] = k === "paper_size" ? b.dataset.val : b.dataset.val === "1"; renderSummary();
+    }));
+    $("#copies-minus").addEventListener("click", () => { if (opts.copies > 1) { opts.copies--; renderSummary(); } });
+    $("#copies-plus").addEventListener("click", () => { if (opts.copies < 500) { opts.copies++; renderSummary(); } });
+    $("#pps").addEventListener("change", e => { opts.pps = +e.target.value; renderSummary(); });
+    $("#send-btn").addEventListener("click", send);
 
-const input = $("#fileInput"), drop = $("#drop");
-input.addEventListener("change", () => { addFiles([...input.files]); input.value = ""; });
-["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
-["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
-drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
-$("#submitBtn").addEventListener("click", submitOrder);
-$$(".lang button").forEach(b => b.addEventListener("click", () => {
-  lang = b.dataset.lang;
-  try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
-  applyLang();
-}));
-
-applyLang();
-refreshOrders();
-checkServer();
-setInterval(updateStatus, 60000);
-setInterval(() => { if (!document.hidden) checkServer(); }, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) checkServer(); });
-setInterval(() => { if (!document.hidden && loadOrders().length) refreshOrders(); }, 30000);
-</script>
+    renderRates(); renderSummary(); updateHours(); renderPass();
+    refreshOrders(); checkServer();
+    setInterval(updateHours, 60000);
+    setInterval(() => { if (!document.hidden) { checkServer(); if (loadOrders().length) refreshOrders(); } }, 30000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkServer(); refreshOrders(); } });
+  })();
+  </script>
 </body>
 </html>
