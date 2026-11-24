@@ -1,0 +1,12 @@
+{
+  "name": "clutchprint-css",
+  "private": true,
+  "description": "Builds print/assets/app.css from the Tailwind classes used in print/index.html",
+  "scripts": {
+    "build": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --minify",
+    "watch": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}
