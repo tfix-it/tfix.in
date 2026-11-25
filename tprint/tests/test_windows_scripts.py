@@ -74,3 +74,12 @@ def test_make_cert_writes_a_certificate(tmp_path):
     assert 'PRIVATE KEY' in (tmp_path / 'key.pem').read_text()
     r2 = subprocess.run([sys.executable, str(ROOT / 'windows' / 'make-cert.py'), str(tmp_path)], capture_output=True, text=True)
     assert 'kept' in r2.stdout                      # never overwrites an existing certificate
+
+
+def test_setup_new_folder_mode_moves_data_and_the_task():
+    s = (ROOT / 'windows' / 'setup.ps1').read_text(encoding='ascii')
+    assert '$HereMode' in s and "Unregister-ScheduledTask -TaskName 'T Print Server'" in s
+    for f in ('printshop.db', 'tprint.env', 'cert.pem', 'key.pem'):
+        assert f"'{f}'" in s
+    assert 'Remove-Item -LiteralPath $Old' not in s          # the old folder is only copied from, never deleted
+    assert "MOVED-TO-NEW-FOLDER.txt" in s and 'last-update.txt' in s

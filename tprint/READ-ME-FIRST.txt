@@ -1,0 +1,20 @@
+T FIX(R) CUSAT - T Print (connects the shop printers to print.tfix.in)
+
+PUT THIS FOLDER AT  C:\TPrint   (not on the Desktop / OneDrive)
+  1. Right-click the zip > Extract All... > type  C:\  > Extract
+     (you get C:\TPrint with this file inside)
+  2. Open C:\TPrint and double-click  T-Print-Setup.bat  > Yes
+     ("Windows protected your PC": More info > Run anyway)
+  3. Wait for "All set". The admin page opens; print.tfix.in shows ONLINE.
+
+What the setup does:
+  - copies your shop data from the old T Print folder (database, shop key,
+    certificate, uploaded files). The old folder is NOT deleted - it stays
+    as a backup and gets a MOVED-TO-NEW-FOLDER.txt note.
+  - stops the old T Print and makes C:\TPrint start at every sign-in
+  - installs Python 3.12 and SumatraPDF if missing, lists the printers
+  - puts a "T Print 1-Click" shortcut on the Desktop
+  - saves a report on the Desktop: T-Print-setup-report.txt
+
+Daily use: nothing - T Print starts by itself. If the website ever shows
+the print server offline, double-click "T Print 1-Click" on the Desktop.
