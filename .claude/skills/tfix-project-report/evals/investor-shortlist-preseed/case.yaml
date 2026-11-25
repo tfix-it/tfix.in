@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: investor-shortlist-preseed
+expected_outcome: |
+  A fit profile followed by a short, verified shortlist with stage/ticket fit, a recent relevant deal or thesis with source and date for each, a route to approach, a top-5 order, and an honest note on which entries were verified and that large international funds only fit at later stages.

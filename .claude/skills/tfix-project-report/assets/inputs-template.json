@@ -1,0 +1,35 @@
+{
+  "_note": "EXAMPLE VALUES ONLY — replace every number with the founders' real figures before use. Amounts in ₹ per year unless stated. Lists give year-by-year values (Y1, Y2, ...); a single number applies to all years.",
+  "company": "T FIX CUSAT",
+  "start_year": "2027-28",
+  "years": 5,
+  "revenue_lines": [
+    {"name": "Printing (online + walk-in)", "units_per_day": 100, "price": 25, "days_per_year": 340,
+     "unit_growth_pct": [0, 20, 15, 10, 10], "price_growth_pct": 0, "variable_cost_pct": 40},
+    {"name": "Phone & laptop repair", "units_per_day": 4, "price": 1200, "days_per_year": 340,
+     "unit_growth_pct": [0, 25, 20, 15, 10], "price_growth_pct": 3, "variable_cost_pct": 55}
+  ],
+  "fixed_costs_per_year": {
+    "Rent": 240000,
+    "Salaries (incl. founders)": 900000,
+    "Electricity & internet": 120000,
+    "Software, hosting & domains": 30000,
+    "Marketing": 60000,
+    "Repairs & maintenance": 40000,
+    "Miscellaneous": 30000
+  },
+  "fixed_cost_growth_pct": 8,
+  "preoperative_expenses": 50000,
+  "capex": [
+    {"item": "Production printer (B&W)", "cost": 350000, "dep_rate_pct": 15, "year": 1},
+    {"item": "Colour printer", "cost": 150000, "dep_rate_pct": 15, "year": 1},
+    {"item": "Repair bench & tools", "cost": 120000, "dep_rate_pct": 15, "year": 1},
+    {"item": "Computers & server", "cost": 90000, "dep_rate_pct": 40, "year": 1},
+    {"item": "Furniture & fit-out", "cost": 80000, "dep_rate_pct": 10, "year": 1}
+  ],
+  "half_year_depreciation_first_year": false,
+  "working_capital": {"months_of_costs": 1},
+  "funding": {"promoter": 250000, "equity": 0, "grant": 0, "term_loan": 700000},
+  "loan": {"rate_pct": 10.5, "tenure_years": 5, "moratorium_months": 6},
+  "tax": {"rate_pct": 25.17}
+}
