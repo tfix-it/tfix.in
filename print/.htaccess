@@ -9,3 +9,18 @@ Options -Indexes
     Header set Cache-Control "public, max-age=86400"
   </FilesMatch>
 </IfModule>
+
+# Security headers (all responses, including errors).
+<IfModule mod_headers.c>
+  # Always use HTTPS for print.tfix.in (1 year). Other tfix.in sub-sites are not affected.
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Don't guess file types (uploads/JSON can't be treated as scripts).
+  Header always set X-Content-Type-Options "nosniff"
+  # Only this site may show these pages in a frame (stops look-alike/clickjacking pages).
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+  # Never send order links (with their secret) to other sites.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # The page needs no camera, microphone, location or payment APIs.
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+</IfModule>
