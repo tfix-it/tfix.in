@@ -649,3 +649,18 @@ def test_ready_alert_is_sent_once_with_a_valid_vapid_signature(site, tmp_path):
         assert httpx.post(site.base + '/push.php?action=which', json={'endpoint': ep[:-3] + 'gone'}).json()['orders'] == []
     finally:
         srv.shutdown()
+
+
+def test_backup_needs_the_shop_key_and_copies_every_table(site, tmp_path):
+    place_order(site, [(pdf(tmp_path, 2), BW)])
+    with pytest.raises(urllib.error.HTTPError) as e:
+        urllib.request.urlopen(site.base + '/shop.php?action=backup', timeout=5)
+    assert e.value.code == 401
+    hb = site.data / 'heartbeat'
+    if hb.exists():
+        hb.unlink()
+    d = client(site)._json('GET', 'backup')
+    assert not hb.exists()                      # a backup download is not a "server online" heartbeat
+    assert len(d['tables']['orders']) == 1 and len(d['tables']['order_files']) == 1
+    assert {'reward_ledger', 'repairs', 'print_groups', 'push_subs'} <= set(d['tables'])
+    assert d['ledger']['ok'] is True

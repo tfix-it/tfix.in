@@ -16,6 +16,7 @@
  *   POST ?action=cancel  (JSON)       {order_ids:[...]} or {all_open:true} cancel unfinished orders (staff)
  *   GET  ?action=repairs[&all=1]      repair bookings from repair.tfix.in (open ones by default)
  *   POST ?action=repair_update (JSON) {repair_id, status, quote, final_amount, paid, note}; collected+paid -> rewards
+ *   GET  ?action=backup               full copy of every table (JSON) for the owner's backups
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -28,11 +29,11 @@ if ($expected === '' || strlen($provided) < 32 || !hash_equals($expected, hash('
 }
 
 // Heartbeat: the shop server calls this every minute, so the last call time
-// tells customers (and staff) whether T Print on Shop PC 1 is running.
-@file_put_contents(data_dir() . '/heartbeat', (string)time(), LOCK_EX);
+// tells customers (and staff) whether T Print on Shop PC 1 is running. A backup download is not a heartbeat.
+$action = (string)($_GET['action'] ?? '');
+if ($action !== 'backup') @file_put_contents(data_dir() . '/heartbeat', (string)time(), LOCK_EX);
 
 $pdo = db();
-$action = (string)($_GET['action'] ?? '');
 
 function json_body(): array
 {
@@ -325,6 +326,17 @@ switch ($action) {
     case 'ledger_verify':
         require_method('GET');
         send_json(200, ledger_verify());
+
+    case 'backup':
+        require_method('GET');
+        $tables = ['orders', 'order_files', 'reward_credits', 'reward_redemptions', 'reward_ledger', 'repairs',
+                   'repair_credits', 'print_groups', 'push_subs', 'rate_events'];
+        $out = ['generated' => gmdate('c'), 'driver' => $pdo->getAttribute(PDO::ATTR_DRIVER_NAME), 'tables' => [], 'ledger' => ledger_verify()];
+        foreach ($tables as $t) {
+            $out['tables'][$t] = $pdo->query("SELECT * FROM $t ORDER BY 1")->fetchAll(PDO::FETCH_ASSOC);
+        }
+        header('Content-Disposition: attachment; filename="clutchprint-backup-' . gmdate('Ymd-His') . '.json"');
+        send_json(200, $out);
 
     default:
         fail(404, 'Unknown action.');
