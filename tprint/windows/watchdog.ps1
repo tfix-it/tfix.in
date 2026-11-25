@@ -24,15 +24,24 @@ function Write-Log([string]$msg) {
 $mutex = New-Object System.Threading.Mutex($false, 'Global\TPrintWatchdog')
 if (-not $mutex.WaitOne(0)) { exit 0 }
 
-# Load KEY=VALUE settings (PRINTSHOP_CLOUD_URL, PRINTSHOP_CLOUD_TOKEN, ...).
+# Load KEY=VALUE settings (PRINTSHOP_CLOUD_URL, PRINTSHOP_CLOUD_TOKEN, ...). Read again before EVERY
+# start of T Print, so a changed tprint.env (new shop key, password reset) takes effect on the next
+# restart; a line deleted from the file is also dropped (e.g. PRINTSHOP_RESET_ADMIN_PASSWORD).
 $envFile = Join-Path $Root 'tprint.env'
-if (Test-Path $envFile) {
-    foreach ($line in Get-Content $envFile) {
-        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') {
-            [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2].Trim('"', "'"), 'Process')
+$script:EnvKeys = @()
+function Import-TPrintEnv {
+    foreach ($k in $script:EnvKeys) { [Environment]::SetEnvironmentVariable($k, $null, 'Process') }
+    $script:EnvKeys = @()
+    if (Test-Path $envFile) {
+        foreach ($line in Get-Content $envFile) {
+            if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') {
+                [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2].Trim('"', "'"), 'Process')
+                $script:EnvKeys += $Matches[1]
+            }
         }
     }
 }
+Import-TPrintEnv
 $env:PYTHONUNBUFFERED = '1'
 
 $Python = Join-Path $Root 'venv\Scripts\python.exe'
@@ -57,6 +66,7 @@ function Get-OurProcess {
 
 function Start-TPrint {
     if (-not (Test-Path $Python)) { Write-Log "ERROR: $Python not found - set up the venv first (README step 2)"; return }
+    Import-TPrintEnv
     $stamp = Get-Date -Format 'yyyyMMdd'
     $p = Start-Process -FilePath $Python -ArgumentList '-m', 'app.main' -WorkingDirectory $Root `
         -NoNewWindow -PassThru `

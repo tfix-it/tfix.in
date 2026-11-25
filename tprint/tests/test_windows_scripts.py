@@ -103,3 +103,16 @@ def test_venv_is_always_python_3_10_to_3_12():
 def test_env_template_is_ascii():
     # copied to tprint.env on Windows; a non-ASCII dash showed up as "???" there
     assert (ROOT / 'tprint.env.example').read_bytes().isascii()
+
+
+def test_restart_uses_the_current_tprint_env():
+    # The watchdog used to read tprint.env once; 1-Click only killed T Print, so a new shop key or
+    # password reset was ignored until the PC restarted (Shop PC 1, 25 Nov 2026).
+    wd = (ROOT / 'windows' / 'watchdog.ps1').read_text(encoding='ascii')
+    oc = (ROOT / 'windows' / 'one-click.ps1').read_text(encoding='ascii')
+    start = wd.index('function Start-TPrint')
+    assert 'Import-TPrintEnv' in wd[start:start + 400]             # re-read before every start
+    assert "SetEnvironmentVariable($k, $null, 'Process')" in wd     # deleted lines are dropped
+    assert "Stop-ScheduledTask -TaskName 'T Print Server'" in oc and "*watchdog.ps1*" in oc
+    for s in (wd, oc):
+        assert s.count('{') == s.count('}') and s.count('(') == s.count(')')

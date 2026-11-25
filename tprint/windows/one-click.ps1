@@ -209,14 +209,19 @@ if (-not $task) {
     Say '    Installing the "T Print Server" auto-start task for this Windows user...'
     & (Join-Path $PSScriptRoot 'install-autostart.ps1')
 } else {
-    # Restart so the newest code runs: stop the server; the watchdog (or the task) starts it again.
-    $pidFile = Join-Path $Logs 'tprint.pid'
-    if (Test-Path $pidFile) {
-        $old = Get-Content -LiteralPath $pidFile -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($old) { Stop-Process -Id ([int]$old) -Force -ErrorAction SilentlyContinue }
-    }
+    # Full restart so the newest code AND the current tprint.env (shop key, password reset) are used:
+    # stop the task, the watchdog (it holds the settings it read) and T Print, then start the task again.
+    try { Stop-ScheduledTask -TaskName 'T Print Server' -ErrorAction SilentlyContinue } catch { }
+    Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like '*watchdog.ps1*' -and $_.ProcessId -ne $PID } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    $venvRoot = Join-Path $Root 'venv'
+    Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($venvRoot, [StringComparison]::OrdinalIgnoreCase) } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Seconds 3
     Start-ScheduledTask -TaskName 'T Print Server'
-    Say '    Auto-start task found and started.'
+    Say '    T Print restarted with the current settings (tprint.env).'
 }
 
 # ---------------------------------------------------------------- 5. check
