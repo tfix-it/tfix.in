@@ -3,10 +3,11 @@
   "private": true,
   "description": "Builds the CSS for print.tfix.in and repair.tfix.in from the Tailwind classes in their index.html",
   "scripts": {
-    "build": "npm run build:print && npm run build:repair",
+    "build": "npm run build:print && npm run build:repair && npm run build:home",
     "build:print": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --minify",
     "build:repair": "tailwindcss -i in.css -o ../../repair/assets/app.css --content ../../repair/index.html --minify",
-    "watch": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --watch"
+    "watch": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --watch",
+    "build:home": "tailwindcss -i in.css -o ../../home/assets/app.css --content ../../home/index.html --minify"
   },
   "devDependencies": {
     "tailwindcss": "3.4.17"

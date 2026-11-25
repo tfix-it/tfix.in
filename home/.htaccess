@@ -1,0 +1,14 @@
+# tfix.in (public_html root). Subdomains (print., repair.) have their own folders and rules.
+Options -Indexes
+DirectoryIndex index.html
+
+# The T Print source code that was uploaded here is not part of the website: never serve it.
+RedirectMatch 404 ^/(app|agent|deploy|tools|tests|hostinger|static)(/|$)
+RedirectMatch 404 ^/[^/]+\.(md|txt|ini|py|yml|yaml|toml|cfg|log|bak|sql|env|pem|json)$
+RedirectMatch 404 ^/\.git
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html?)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

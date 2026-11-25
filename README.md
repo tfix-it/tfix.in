@@ -7,6 +7,7 @@ Two parts that work together:
 | `print/` | **CLUTCHPRINT website** — print.tfix.in. Customer order page (HTML/JS, Tailwind) + PHP API | Hostinger (PHP 8 + MySQL) |
 | `repair/` | **T FIX® Repair Lab** — repair.tfix.in: Phone Doctor (browser self-check) + repair booking + repair pass. Its PHP uses `print/api/lib.php` (same database, same CLUTCH Rewards) | Hostinger (`public_html/repair/`) |
 | `tprint/` | **T Print shop server** — prints, prices, admin (incl. Repairs panel), pulls online orders | Shop PC 1 (Windows, Python/FastAPI) |
+| `home/` | **tfix.in home page** + root `.htaccess` that hides the T Print source code uploaded to `public_html` (files kept, just not served) | Hostinger (`public_html/` root) |
 | `tools/tailwind/` | Build step for the website CSS | Your computer (Node.js) |
 
 ## print/ — website (frontend + backend)
