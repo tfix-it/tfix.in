@@ -98,3 +98,8 @@ def test_venv_is_always_python_3_10_to_3_12():
     assert 'import fastapi, uvicorn, fitz, img2pdf, win32print' in oc
     for s in (fp, oc, st):
         assert s.count('{') == s.count('}') and s.count('(') == s.count(')')
+
+
+def test_env_template_is_ascii():
+    # copied to tprint.env on Windows; a non-ASCII dash showed up as "???" there
+    assert (ROOT / 'tprint.env.example').read_bytes().isascii()
