@@ -29,6 +29,7 @@
   <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;600;800&display=swap" rel="stylesheet" />
@@ -212,6 +213,15 @@
           </span>
         </div>
 
+        <!-- Joining a class/group order (from the rep's link) -->
+        <div id="group-banner" hidden class="mt-4 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3.5 py-2.5 text-xs leading-relaxed text-sky-100">
+          <div class="flex items-start justify-between gap-2">
+            <p><span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-sky-300" data-i18n="grpJoining">Group order</span><br><b id="group-title" class="text-sm text-white"></b> <span id="group-meta" class="text-sky-200/80"></span></p>
+            <button type="button" id="group-leave" class="shrink-0 rounded px-2 py-0.5 text-sky-200 hover:bg-white/10" data-i18n="grpLeave">Order alone</button>
+          </div>
+          <p id="group-note" class="mt-1 text-sky-100/90"></p>
+        </div>
+
         <!-- Customer details -->
         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label class="block">
@@ -365,6 +375,11 @@
 
           <ul id="pass-file-list" class="mt-3 space-y-1 font-mono-tech text-[11px]"></ul>
           <div id="pay-box"></div>
+          <!-- Ready alert: a phone notification when the order is ready (web push, no app) -->
+          <div id="alert-box" hidden class="mt-3">
+            <button type="button" id="alert-btn" class="w-full rounded-lg border border-sky-400/50 bg-sky-400/10 px-3 py-2 text-xs font-bold text-sky-100 transition hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"></button>
+            <p id="alert-note" hidden class="mt-1.5 text-[11px] leading-relaxed text-zinc-400"></p>
+          </div>
 
           <div class="mt-4 flex gap-2">
             <button id="copy-token-btn" type="button" disabled class="flex-1 rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 font-mono-tech text-xs font-semibold text-[#f3d97d] transition hover:bg-[#d4af37]/25 disabled:opacity-40" data-i18n="copyToken">Copy Token</button>
@@ -399,6 +414,31 @@
     </section>
 
     <!-- 3-step flow -->
+    <!-- Class / group orders: the rep shares one link, everyone orders and pays on their own -->
+    <section id="groups" class="mt-10">
+      <div class="glass-card rounded-2xl p-5 sm:p-6">
+        <div class="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="grpEyebrow">CLASS / GROUP ORDERS</span>
+            <h2 class="mt-1 text-xl font-extrabold text-white" data-i18n="grpTitle">Class rep? One link for the whole class.</h2>
+            <p class="mt-1 max-w-2xl text-sm text-zinc-400" data-i18n="grpSub">Share the link on your class WhatsApp group. Everyone uploads and pays for their own prints; T FIX® keeps them together and you see who has ordered and paid.</p>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <label class="block sm:col-span-1"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="grpName">Group name</span>
+            <input id="grp-title" class="field mt-1.5" maxlength="80" data-i18n-ph="grpNamePh" placeholder="e.g. S6 ECE · DSP lab record" /></label>
+          <label class="block sm:col-span-1"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="grpNote">Instructions (optional)</span>
+            <input id="grp-note" class="field mt-1.5" maxlength="200" data-i18n-ph="grpNotePh" placeholder="e.g. B&W, double-sided, spiral binding" /></label>
+          <label class="block sm:col-span-1"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="grpDeadline">Deadline (optional)</span>
+            <input id="grp-deadline" type="date" class="field mt-1.5" /></label>
+        </div>
+        <p class="mt-2 text-[11px] text-zinc-500" data-i18n="grpUsesYou">Uses your name and mobile number from the order form above.</p>
+        <button type="button" id="grp-create" class="gold-btn mt-3 rounded-xl px-5 py-2.5 text-sm font-extrabold" data-i18n="grpCreate">Create group link</button>
+        <p id="grp-err" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
+        <div id="my-groups" class="mt-5 space-y-4"></div>
+      </div>
+    </section>
+
     <section id="how-it-works" class="mt-16">
       <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
         <div>
@@ -426,6 +466,12 @@
       </div>
 
       <!-- Rates -->
+      <!-- Green counter: paper saved by double-sided, pages-per-sheet and skipped blank pages (collected orders) -->
+      <div id="green" class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.07] px-4 py-3">
+        <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-emerald-300" data-i18n="greenTitle">♻ Green counter</span>
+        <span id="green-text" class="text-sm font-semibold text-emerald-100"></span>
+        <span class="text-[11px] text-emerald-200/60" data-i18n="greenHow">Double-sided, 2-per-sheet and skipped blank pages all count.</span>
+      </div>
       <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" id="rate-cards"></div>
       <p id="rate-note" class="mt-2 font-mono-tech text-[11px] text-zinc-500"></p>
     </section>
@@ -539,7 +585,27 @@
         pPrinting: "Printing now at T FIX® CUSAT.", pReady: "Ready! Collect your pages at the counter.", pCollected: "Collected. Thank you!", pCancelled: "This order was cancelled — please contact the shop.",
         passFiles: "FILES", passTotal: "TOTAL", est: "(est.)", atShop: "priced at the shop", problem: "Problem:",
         copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your tokens",
-        optAll: "Set all files", mixed: "mixed", navRepair: "Repair", fileInk: "Ink", privacy: "We keep your name, mobile number and order history only to run your orders and CLUTCH Rewards.",
+        optAll: "Set all files", mixed: "mixed", navRepair: "Repair",
+        grpJoining: "Group order", grpLeave: "Order alone", grpBy: "by {rep}", grpBefore: "before {d}", grpClosed: "This group order is closed. You can still order on your own.",
+        grpEyebrow: "CLASS / GROUP ORDERS", grpTitle: "Class rep? One link for the whole class.",
+        grpSub: "Share the link on your class WhatsApp group. Everyone uploads and pays for their own prints; T FIX® keeps them together and you see who has ordered and paid.",
+        grpName: "Group name", grpNamePh: "e.g. S6 ECE · DSP lab record", grpNote: "Instructions (optional)", grpNotePh: "e.g. B&W, double-sided, spiral binding", grpDeadline: "Deadline (optional)",
+        grpUsesYou: "Uses your name and mobile number from the order form above.", grpCreate: "Create group link", grpNeedYou: "Enter your name and mobile number in the order form first.",
+        grpCreated: "Group created — share the link with your class", grpYours: "Your group", grpIsClosed: "closed", grpShareWa: "Share on WhatsApp", grpCopy: "Copy link",
+        tLinkGroup: "Group link copied", grpCloseBtn: "Close group", grpOpenBtn: "Reopen", grpStats: "{n} classmate(s) ordered · {p} paid · {amt} in total",
+        grpFiles: "{f} file(s) · {p} pages", grpPaid: "paid", grpUnpaid: "not paid yet", grpOnPass: "👥 Group: {title}.",
+        grpShareMsg: "Print order for {title} — upload your file and pay here, collect at T FIX® CUSAT: {link}",
+        alertBtn: "🔔 Alert me when it's ready", alertOn: "🔔 Alert on — we'll notify this phone when it's ready", alertDone: "Alert on — you'll get a notification when it's ready",
+        alertFail: "Couldn't turn on the alert on this browser", alertNo: "This browser can't show alerts — check this page or WhatsApp us.",
+        alertIos: "On iPhone: tap Share → Add to Home Screen, open CLUTCHPRINT from there, then turn on the alert.", alertBlocked: "Notifications are blocked for this site in your browser settings.",
+        greenTitle: "♻ Green counter", greenHow: "Double-sided, 2-per-sheet and skipped blank pages all count.",
+        greenText: "{n} sheets of paper saved by CLUTCHPRINT students (≈ {kg} kg)", greenZero: "Starts with your first double-sided print — every sheet counts.",
+        greenOrder: "♻ This order saves {n} sheet(s) of paper.",
+        tipTitle: "Smart print check", tipScanning: "Smart print check · reading page {i}/{n}…", tipApply: "Apply", tipSaved: "Saved {rs} on this order",
+        tipBlank: "{n} blank page(s) ({p}) — skip them and save {rs}", tipBw: "No colour found in this file — B&W saves {rs}",
+        tipColourInfo: "Colour on page(s) {p} — in B&W it prints in grey. Choose Color if you need it.",
+        tipDuplex: "Print double-sided — save {rs} and {n} sheet(s) of paper", tipAllGood: "Smart print check: no savings found — good to go",
+        tipPartial: "Checked the first {n} pages.", fileInk: "Ink", privacy: "We keep your name, mobile number and order history only to run your orders and CLUTCH Rewards.",
         srvSufOff: " · SERVER OFFLINE", rwHist: "History · verified receipts", rwChain: "Every entry is sealed to the one before it, so past rewards can't be quietly changed.",
         rwCredit: "{code} · ₹{amt} prints", rwUsed: "Used at counter",
         rwTitle: "CLUTCH Rewards", rwAvail: "available", rwNext: "₹{n} more in prints → next ₹5",
@@ -598,7 +664,27 @@
         pPrinting: "T FIX® CUSAT-ൽ ഇപ്പോൾ പ്രിന്റ് ചെയ്യുന്നു.", pReady: "റെഡി! കൗണ്ടറിൽ നിന്ന് പേജുകൾ വാങ്ങൂ.", pCollected: "കൈപ്പറ്റി. നന്ദി!", pCancelled: "ഈ ഓർഡർ റദ്ദാക്കി — കടയുമായി ബന്ധപ്പെടൂ.",
         passFiles: "ഫയലുകൾ", passTotal: "ആകെ", est: "(ഏകദേശം)", atShop: "തുക കടയിൽ", problem: "പ്രശ്നം:",
         copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ടോക്കണുകൾ",
-        optAll: "എല്ലാ ഫയലുകൾക്കും", mixed: "പലത്", navRepair: "റിപ്പയർ", fileInk: "മഷി", privacy: "നിങ്ങളുടെ പേര്, മൊബൈൽ നമ്പർ, ഓർഡർ വിവരങ്ങൾ ഓർഡറുകൾക്കും CLUTCH Rewards-നും മാത്രം സൂക്ഷിക്കുന്നു.",
+        optAll: "എല്ലാ ഫയലുകൾക്കും", mixed: "പലത്", navRepair: "റിപ്പയർ",
+        grpJoining: "ഗ്രൂപ്പ് ഓർഡർ", grpLeave: "ഒറ്റയ്ക്ക് ഓർഡർ", grpBy: "{rep} നടത്തുന്നത്", grpBefore: "{d}-ന് മുമ്പ്", grpClosed: "ഈ ഗ്രൂപ്പ് ഓർഡർ അടച്ചു. നിങ്ങൾക്ക് സ്വന്തമായി ഓർഡർ ചെയ്യാം.",
+        grpEyebrow: "ക്ലാസ് / ഗ്രൂപ്പ് ഓർഡർ", grpTitle: "ക്ലാസ് റെപ്പാണോ? മുഴുവൻ ക്ലാസിനും ഒരു ലിങ്ക്.",
+        grpSub: "ക്ലാസ് WhatsApp ഗ്രൂപ്പിൽ ലിങ്ക് ഷെയർ ചെയ്യൂ. ഓരോരുത്തരും സ്വന്തം ഫയൽ അപ്‌ലോഡ് ചെയ്ത് പണമടയ്ക്കും; T FIX® എല്ലാം ഒന്നിച്ചാക്കും, ആരൊക്കെ ഓർഡർ ചെയ്തു, പണമടച്ചു എന്ന് നിങ്ങൾക്ക് കാണാം.",
+        grpName: "ഗ്രൂപ്പിന്റെ പേര്", grpNamePh: "ഉദാ: S6 ECE · DSP ലാബ് റെക്കോർഡ്", grpNote: "നിർദേശങ്ങൾ (ഐച്ഛികം)", grpNotePh: "ഉദാ: B&W, ഇരുവശം, സ്പൈറൽ ബൈൻഡിംഗ്", grpDeadline: "അവസാന തീയതി (ഐച്ഛികം)",
+        grpUsesYou: "മുകളിലെ ഓർഡർ ഫോമിലെ നിങ്ങളുടെ പേരും മൊബൈൽ നമ്പറും ഉപയോഗിക്കും.", grpCreate: "ഗ്രൂപ്പ് ലിങ്ക് ഉണ്ടാക്കൂ", grpNeedYou: "ആദ്യം ഓർഡർ ഫോമിൽ പേരും മൊബൈൽ നമ്പറും നൽകൂ.",
+        grpCreated: "ഗ്രൂപ്പ് ഉണ്ടാക്കി — ക്ലാസുമായി ലിങ്ക് ഷെയർ ചെയ്യൂ", grpYours: "നിങ്ങളുടെ ഗ്രൂപ്പ്", grpIsClosed: "അടച്ചു", grpShareWa: "WhatsApp-ൽ ഷെയർ", grpCopy: "ലിങ്ക് കോപ്പി",
+        tLinkGroup: "ഗ്രൂപ്പ് ലിങ്ക് കോപ്പി ചെയ്തു", grpCloseBtn: "ഗ്രൂപ്പ് അടയ്ക്കൂ", grpOpenBtn: "വീണ്ടും തുറക്കൂ", grpStats: "{n} പേർ ഓർഡർ ചെയ്തു · {p} പേർ പണമടച്ചു · ആകെ {amt}",
+        grpFiles: "{f} ഫയൽ · {p} പേജ്", grpPaid: "പണമടച്ചു", grpUnpaid: "പണമടച്ചിട്ടില്ല", grpOnPass: "👥 ഗ്രൂപ്പ്: {title}.",
+        grpShareMsg: "{title} പ്രിന്റ് ഓർഡർ — ഫയൽ അപ്‌ലോഡ് ചെയ്ത് ഇവിടെ പണമടയ്ക്കൂ, T FIX® CUSAT-ൽ നിന്ന് വാങ്ങൂ: {link}",
+        alertBtn: "🔔 റെഡിയാകുമ്പോൾ അറിയിക്കൂ", alertOn: "🔔 അലേർട്ട് ഓൺ — റെഡിയാകുമ്പോൾ ഈ ഫോണിൽ അറിയിക്കും", alertDone: "അലേർട്ട് ഓൺ — റെഡിയാകുമ്പോൾ നോട്ടിഫിക്കേഷൻ വരും",
+        alertFail: "ഈ ബ്രൗസറിൽ അലേർട്ട് ഓണാക്കാനായില്ല", alertNo: "ഈ ബ്രൗസറിന് അലേർട്ട് കാണിക്കാനാവില്ല — ഈ പേജ് നോക്കൂ അല്ലെങ്കിൽ WhatsApp ചെയ്യൂ.",
+        alertIos: "iPhone-ൽ: Share → Add to Home Screen ടാപ്പ് ചെയ്ത്, അവിടെ നിന്ന് CLUTCHPRINT തുറന്ന് അലേർട്ട് ഓണാക്കൂ.", alertBlocked: "ബ്രൗസർ സെറ്റിംഗ്സിൽ ഈ സൈറ്റിന് നോട്ടിഫിക്കേഷൻ തടഞ്ഞിരിക്കുന്നു.",
+        greenTitle: "♻ ഗ്രീൻ കൗണ്ടർ", greenHow: "ഇരുവശം, ഒരു ഷീറ്റിൽ 2 പേജ്, ഒഴിവാക്കിയ ശൂന്യ പേജുകൾ — എല്ലാം കണക്കാക്കും.",
+        greenText: "CLUTCHPRINT വിദ്യാർത്ഥികൾ {n} ഷീറ്റ് പേപ്പർ ലാഭിച്ചു (≈ {kg} കി.ഗ്രാം)", greenZero: "നിങ്ങളുടെ ആദ്യ ഇരുവശ പ്രിന്റിൽ തുടങ്ങും — ഓരോ ഷീറ്റും പ്രധാനം.",
+        greenOrder: "♻ ഈ ഓർഡർ {n} ഷീറ്റ് പേപ്പർ ലാഭിക്കുന്നു.",
+        tipTitle: "സ്മാർട്ട് പ്രിന്റ് ചെക്ക്", tipScanning: "സ്മാർട്ട് പ്രിന്റ് ചെക്ക് · പേജ് {i}/{n} വായിക്കുന്നു…", tipApply: "ചേർക്കൂ", tipSaved: "ഈ ഓർഡറിൽ {rs} ലാഭിച്ചു",
+        tipBlank: "{n} ശൂന്യ പേജ് ({p}) — ഒഴിവാക്കി {rs} ലാഭിക്കൂ", tipBw: "ഈ ഫയലിൽ കളർ ഇല്ല — B&W ആക്കിയാൽ {rs} ലാഭം",
+        tipColourInfo: "{p} പേജുകളിൽ കളർ ഉണ്ട്; B&W-ൽ ചാരനിറത്തിൽ വരും. കളർ വേണമെങ്കിൽ Color തിരഞ്ഞെടുക്കൂ.",
+        tipDuplex: "ഇരുവശം പ്രിന്റ് ചെയ്യൂ — {rs}-ഉം {n} ഷീറ്റ് പേപ്പറും ലാഭം", tipAllGood: "സ്മാർട്ട് പ്രിന്റ് ചെക്ക്: ലാഭിക്കാൻ ഒന്നുമില്ല — റെഡി",
+        tipPartial: "ആദ്യ {n} പേജുകൾ പരിശോധിച്ചു.", fileInk: "മഷി", privacy: "നിങ്ങളുടെ പേര്, മൊബൈൽ നമ്പർ, ഓർഡർ വിവരങ്ങൾ ഓർഡറുകൾക്കും CLUTCH Rewards-നും മാത്രം സൂക്ഷിക്കുന്നു.",
         srvSufOff: " · സെർവർ ഓഫ്‌ലൈൻ", rwHist: "ചരിത്രം · സ്ഥിരീകരിച്ച രസീതുകൾ", rwChain: "ഓരോ എൻട്രിയും മുമ്പത്തേതുമായി സീൽ ചെയ്തിരിക്കുന്നു — പഴയ റിവാർഡുകൾ രഹസ്യമായി മാറ്റാനാവില്ല.",
         rwCredit: "{code} · ₹{amt} പ്രിന്റ്", rwUsed: "കൗണ്ടറിൽ ഉപയോഗിച്ചു",
         rwTitle: "CLUTCH Rewards", rwAvail: "ലഭ്യം", rwNext: "അടുത്ത ₹5-ന് ₹{n} കൂടി പ്രിന്റ് ചെയ്യൂ",
@@ -678,7 +764,7 @@
       $("#lang-btn").textContent = t("langBtn");
       $("#lang-btn").setAttribute("aria-label", lang === "en" ? "മലയാളം" : "English");
       $$("[data-wa]").forEach(a => a.href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(t("waMsg")));
-      renderRates(); updateHours(); renderFiles(); renderPass();
+      renderRates(); updateHours(); renderFiles(); renderPass(); renderGreen(); renderJoin(); renderGroups();
     }
 
     /* ============ shop hours + print server status ============ */
@@ -755,15 +841,100 @@
       });
       return pdfjsReady;
     }
+    /* ---- Smart print check: blank pages and colour content, measured on this phone ---- */
+    const SCAN_MAX_PAGES = 80;
+    // ink = share of pixels that aren't near-white; colour = share of clearly coloured pixels
+    function measure(ctx, w, h) {
+      const d = ctx.getImageData(0, 0, w, h).data; let ink = 0, col = 0, n = w * h;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        if (mn < 235) ink++;
+        if (mx - mn > 48 && mx > 60) col++;
+      }
+      return { ink: ink / n, colour: col / n };
+    }
+    const isBlank = m => m.ink < 0.0015, hasColour = m => m.colour > 0.002;
+    async function scanImage(f) {
+      try {
+        const url = URL.createObjectURL(f.file), img = new Image(); img.src = url; await img.decode();
+        const w = 64, h = Math.max(1, Math.round(64 * img.naturalHeight / img.naturalWidth)), c = document.createElement("canvas"); c.width = w; c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+        const m = measure(ctx, w, h); f.scan = { blank: [], colour: hasColour(m) ? [1] : [], checked: 1, total: 1, done: true };
+      } catch (e) { f.scan = null; }
+    }
+    async function scanPdf(f, doc) {
+      const total = doc.numPages, upto = Math.min(total, SCAN_MAX_PAGES), blank = [], colour = [];
+      const c = document.createElement("canvas"), ctx = c.getContext("2d", { willReadFrequently: true });
+      f.scan = { blank, colour, checked: 0, total, done: false };
+      for (let i = 1; i <= upto; i++) {
+        if (!files.includes(f)) return;                 // removed while scanning
+        const page = await doc.getPage(i), v0 = page.getViewport({ scale: 1 }), v = page.getViewport({ scale: 72 / v0.width });
+        c.width = Math.ceil(v.width); c.height = Math.ceil(v.height);
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        await page.render({ canvasContext: ctx, viewport: v }).promise; page.cleanup();
+        const m = measure(ctx, c.width, c.height);
+        if (isBlank(m)) blank.push(i); else if (hasColour(m)) colour.push(i);
+        f.scan.checked = i;
+        if (i % 8 === 0 || i === upto) renderFiles();
+      }
+      f.scan.done = true;
+    }
     async function countPages(f) {
       const ext = f.ext;
-      if (ext === "jpg" || ext === "jpeg" || ext === "png") { f.pages = 1; return; }
+      if (ext === "jpg" || ext === "jpeg" || ext === "png") { f.pages = 1; await scanImage(f); renderFiles(); return; }
       if (ext !== "pdf") { f.pages = null; return; }
       f.counting = true; renderFiles();
-      try { const lib = await loadPdfJs(); const doc = await lib.getDocument({ data: await f.file.arrayBuffer() }).promise; f.pages = doc.numPages; doc.destroy(); }
+      let doc = null;
+      try { const lib = await loadPdfJs(); doc = await lib.getDocument({ data: await f.file.arrayBuffer() }).promise; f.pages = doc.numPages; }
       catch (e) { f.pages = null; }
       f.counting = false; renderFiles();
+      if (doc) { try { await scanPdf(f, doc); } catch (e) { f.scan = null; } doc.destroy(); renderFiles(); }
     }
+    // [1,2,3,5,7,8] -> "1-3,5,7-8"
+    function toRange(list) {
+      const out = []; let a = null, b = null;
+      for (const p of list) { if (a === null) { a = b = p; } else if (p === b + 1) b = p; else { out.push(a === b ? "" + a : a + "-" + b); a = b = p; } }
+      if (a !== null) out.push(a === b ? "" + a : a + "-" + b);
+      return out.join(",");
+    }
+    const fileCostOf = (f, o) => { const n = selectedPages({ ...f, ...o }); return n == null ? null : tprintCost(n, o.color ?? f.color, o.doubleside ?? f.doubleside, f.copies, opts.paper_size, opts.pps, files[0] === f); };
+    // Suggestions with real savings, from the scan of this file
+    function smartTips(f) {
+      const s = f.scan, tips = [];
+      if (!s || f.pages == null) return tips;
+      const now = fileCostOf(f, {}); if (!now) return tips;
+      const save = o => { const x = fileCostOf(f, o); return x ? { rs: Math.round((now.total - x.total) * 100) / 100, sheets: now.sheets - x.sheets } : null; };
+      if (s.blank.length && !f.range && s.done && s.blank.length < s.total) {
+        const keep = []; for (let i = 1; i <= s.total; i++) if (!s.blank.includes(i)) keep.push(i);
+        const r = toRange(keep), v = save({ range: r });
+        if (v && v.rs > 0) tips.push({ key: "blank", text: t("tipBlank", { n: s.blank.length, p: toRange(s.blank), rs: rupee(v.rs) }), sheets: v.sheets, rs: v.rs,
+          apply: () => { f.range = r; f.rangeOpen = true; f.blankSkipped = s.blank.length; } });
+      }
+      if (f.color && s.done && s.checked === s.total && !s.colour.length) {
+        const v = save({ color: false });
+        if (v && v.rs > 0) tips.push({ key: "bw", text: t("tipBw", { rs: rupee(v.rs) }), sheets: 0, rs: v.rs, apply: () => { f.color = false; } });
+      }
+      if (!f.color && s.colour.length) tips.push({ key: "info", text: t("tipColourInfo", { p: toRange(s.colour.slice(0, 12)) + (s.colour.length > 12 ? "…" : "") }) });
+      if (!f.doubleside && (selectedPages(f) || 0) >= 2) {
+        const v = save({ doubleside: true });
+        if (v && v.rs > 0) tips.push({ key: "duplex", text: t("tipDuplex", { rs: rupee(v.rs), n: v.sheets }), sheets: v.sheets, rs: v.rs, apply: () => { f.doubleside = true; } });
+      }
+      return tips;
+    }
+    function smartBox(f) {
+      const s = f.scan;
+      if (!s) return null;
+      const scanning = !s.done, tips = smartTips(f);
+      if (!scanning && !tips.length) return el("p", { class: "mt-2 font-mono-tech text-[11px] text-emerald-300/90", text: "✓ " + t("tipAllGood") });
+      return el("div", { class: "mt-2 rounded-lg border border-[#d4af37]/30 bg-[#d4af37]/[0.06] px-2.5 py-2" },
+        el("p", { class: "font-mono-tech text-[10px] uppercase tracking-[0.12em] text-[#d4af37]", text: scanning ? t("tipScanning", { i: s.checked, n: Math.min(s.total, SCAN_MAX_PAGES) }) : t("tipTitle") }),
+        ...tips.map(tip => el("div", { class: "mt-1.5 flex items-start justify-between gap-2" },
+          el("span", { class: "min-w-0 text-[11px] leading-snug " + (tip.key === "info" ? "text-zinc-400" : "text-zinc-200"), text: tip.text }),
+          tip.apply ? el("button", { type: "button", class: "shrink-0 rounded border border-[#d4af37]/60 bg-[#d4af37]/15 px-2 py-0.5 text-[11px] font-bold text-[#f3d97d] hover:bg-[#d4af37]/25", text: t("tipApply"),
+            onclick: () => { tip.apply(); smartSaved.rs += tip.rs; smartSaved.sheets += Math.max(0, tip.sheets || 0); toast(t("tipSaved", { rs: rupee(tip.rs) })); renderFiles(); } }) : null)),
+        s.total > SCAN_MAX_PAGES && s.done ? el("p", { class: "mt-1 text-[10px] text-zinc-500", text: t("tipPartial", { n: SCAN_MAX_PAGES }) }) : null);
+    }
+    const smartSaved = { rs: 0, sheets: 0 };
     function addFiles(list) {
       hideError();
       for (const file of list) {
@@ -787,11 +958,11 @@
       const check = () => { const bad = f.range && !parseRange(f.range, f.pages); err.hidden = !bad; err.textContent = f.pages ? t("rangeErr", { n: f.pages }) : t("rangeErrU"); };
       const fileCost = () => { const n = selectedPages(f); return n == null ? "" : rupee(tprintCost(n, f.color, f.doubleside, f.copies, opts.paper_size, opts.pps, files[0] === f).total); };
       const price = el("span", { class: "font-mono-tech text-[11px] text-zinc-300" });
-      range.addEventListener("input", () => { f.range = range.value.trim(); check(); price.textContent = fileCost(); renderSummary(); });
+      range.addEventListener("input", () => { f.range = range.value.trim(); f.blankSkipped = 0; check(); price.textContent = fileCost(); renderSummary(); });
       check();
       const pagesBtn = el("button", { type: "button", class: "rounded border px-2 py-1 text-[11px] " + (f.rangeOpen ? "border-[#d4af37] text-[#f3d97d]" : "border-white/10 text-zinc-300 hover:border-[#d4af37]/50"), text: f.rangeOpen ? t("choosePages") : t("allPages") });
       pagesBtn.addEventListener("click", () => {
-        f.rangeOpen = !f.rangeOpen; if (!f.rangeOpen) f.range = "";
+        f.rangeOpen = !f.rangeOpen; if (!f.rangeOpen) { f.range = ""; f.blankSkipped = 0; }
         renderFiles();
         if (f.rangeOpen) { const i = $('#file-list [data-fid="' + f.id + '"] input'); if (i) i.focus(); }
       });
@@ -815,7 +986,7 @@
             el("button", { type: "button", class: "rounded px-2 py-1 font-mono-tech text-[11px] text-zinc-400 hover:bg-white/10 hover:text-white", "aria-label": t("remove") + " " + f.name, text: "✕",
               onclick: () => { files = files.filter(x => x.id !== f.id); renderFiles(); } }))),
         el("div", { class: "mt-2 flex flex-wrap items-center gap-1.5" }, seg("color", t("bw"), t("color")), seg("doubleside", t("single"), t("duplex")), copies, pagesBtn),
-        range, err);
+        range, err, smartBox(f));
     }
     function renderFiles() { $("#file-list").replaceChildren(...files.map(fileRow)); renderSummary(); }
 
@@ -864,8 +1035,9 @@
       if (files.reduce((s, f) => s + f.file.size, 0) > MAX_ORDER_MB * 1048576) { showError(t("errTotal")); return; }
       const e = estimate(), fd = new FormData();
       fd.append("name", name); fd.append("phone", phone); fd.append("notes", $("#notes").value.trim());
+      if (joinGroup) fd.append("group", joinGroup.code);
       if (!e.unknown) fd.append("est_total", String(e.total));
-      fd.append("options", JSON.stringify(files.map(f => ({ color: f.color, doubleside: f.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: f.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages }))));
+      fd.append("options", JSON.stringify(files.map(f => ({ color: f.color, doubleside: f.doubleside, duplex_edge: "long", paper_size: opts.paper_size, orientation: "portrait", pages_per_sheet: opts.pps, copies: f.copies, pages_range: (f.range || "").replace(/\s+/g, ""), est_pages: f.pages, blank_skipped: f.range ? (f.blankSkipped || 0) : 0 }))));
       files.forEach(f => fd.append("files[]", f.file, f.name));
 
       const btn = $("#send-btn"), bar = $("#progress");
@@ -963,7 +1135,7 @@
         badge("bPreview", "bg-[#d4af37]/20 text-[#f3d97d]");
         $("#pass-line").textContent = t("passEmpty"); $("#pass-status").textContent = "";
         $("#pass-files").textContent = "—"; $("#pass-total").textContent = "—";
-        $("#pass-file-list").replaceChildren(); $("#pay-box").replaceChildren();
+        $("#pass-file-list").replaceChildren(); $("#pay-box").replaceChildren(); renderAlert(null);
         btnTok.disabled = btnLink.disabled = true;
         if (!sending) { setStep(1, "idle"); setStep(2, "idle"); setStep(3, "idle"); engine(srvOnline === false ? t("eSrvOff") : t("eReady"), srvOnline === false ? "red" : "", 0, false); }
         return;
@@ -990,8 +1162,10 @@
 
       const lines = { pending: srvOnline ? "pPendingOn" : "pPendingOff", received: "pReceived", paid: "pPaid", printing: "pPrinting", ready: "pReady", collected: "pCollected", cancelled: "pCancelled" };
       $("#pass-line").textContent = t("passBrand", { tok: T0 });
-      $("#pass-status").textContent = t(lines[status] || lines.pending, { amt });
+      $("#pass-status").textContent = t(lines[status] || lines.pending, { amt }) + (s && s.sheets_saved > 0 ? " " + t("greenOrder", { n: s.sheets_saved }) : "")
+        + (s && s.group ? " " + t("grpOnPass", { title: s.group.title }) : "");
       $("#pay-box").replaceChildren(status === "received" && confirmed && amount > 0 ? upiBlock(o, amount) : "");
+      renderAlert(o, status);
 
       // AI engine steps follow the real order status
       const nFiles = s && s.files ? s.files.length : 0;
@@ -1063,6 +1237,124 @@
         el("span", { class: "shrink-0 text-[10px] text-zinc-600", title: "Receipt", text: "#" + h.receipt.slice(0, 6) }))));
     }
 
+    /* ============ ready alerts (web push) ============ */
+    const ALERT_KEY = "clutch-alerts";
+    const pushOk = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent), standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    const alertsOn = () => { try { return JSON.parse(localStorage.getItem(ALERT_KEY) || "[]"); } catch (e) { return []; } };
+    function renderAlert(o, status) {
+      const box = $("#alert-box"), btn = $("#alert-btn"), note = $("#alert-note");
+      const show = o && o.token && !["ready", "collected", "cancelled"].includes(status);
+      box.hidden = !show; if (!show) return;
+      const on = alertsOn().includes(o.code);
+      note.hidden = true;
+      if (!pushOk || (isIOS && !standalone)) {
+        btn.disabled = true; btn.textContent = t("alertBtn");
+        note.hidden = false; note.textContent = isIOS ? t("alertIos") : t("alertNo"); return;
+      }
+      if (Notification.permission === "denied") { btn.disabled = true; btn.textContent = t("alertBtn"); note.hidden = false; note.textContent = t("alertBlocked"); return; }
+      btn.disabled = on; btn.textContent = on ? t("alertOn") : t("alertBtn");
+      btn.onclick = () => enableAlert(o);
+    }
+    function b64ToBytes(b) { const p = "=".repeat((4 - b.length % 4) % 4), s = atob((b + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(s, c => c.charCodeAt(0)); }
+    async function enableAlert(o) {
+      const btn = $("#alert-btn"); btn.disabled = true;
+      try {
+        if (await Notification.requestPermission() !== "granted") { renderPass(); return; }
+        const reg = await navigator.serviceWorker.register("sw.js");
+        await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          const k = await (await fetch(API + "push.php?action=key", { cache: "no-store" })).json();
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(k.key) });
+        }
+        const r = await fetch(API + "push.php?action=subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: o.code, token: o.token, endpoint: sub.endpoint }) });
+        if (!r.ok) { const d = await r.json().catch(() => ({})); toast(d.error || t("errNet")); return; }
+        try { localStorage.setItem(ALERT_KEY, JSON.stringify([o.code, ...alertsOn().filter(c => c !== o.code)].slice(0, 20))); } catch (e) {}
+        toast(t("alertDone"));
+      } catch (e) { toast(t("alertFail")); }
+      finally { renderPass(); }
+    }
+
+    /* ============ class / group orders ============ */
+    const GRP_KEY = "clutch-groups";
+    let joinGroup = null;                                  // {code, title, rep, note, deadline}
+    const groupLink = code => location.origin + location.pathname + "?group=" + code;
+    const fmtDate = d => d ? new Date(d + "T00:00:00").toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", { day: "numeric", month: "short" }) : "";
+    function renderJoin() {
+      const b = $("#group-banner"); b.hidden = !joinGroup; if (!joinGroup) return;
+      $("#group-title").textContent = joinGroup.title;
+      $("#group-meta").textContent = "· " + t("grpBy", { rep: joinGroup.rep }) + (joinGroup.deadline ? " · " + t("grpBefore", { d: fmtDate(joinGroup.deadline) }) : "");
+      $("#group-note").textContent = joinGroup.note || ""; $("#group-note").hidden = !joinGroup.note;
+    }
+    async function loadJoin(code) {
+      try {
+        const r = await fetch(API + "group.php?action=info&code=" + encodeURIComponent(code), { cache: "no-store" });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { showError(d.error || t("errNet")); return; }
+        if (d.status !== "open") { showError(t("grpClosed")); return; }
+        joinGroup = d; renderJoin();
+      } catch (e) {}
+    }
+    function grpErr(m) { const e = $("#grp-err"); e.textContent = m || ""; e.hidden = !m; }
+    async function createGroup() {
+      grpErr("");
+      const name = $("#name").value.trim(), phone = validPhone($("#phone").value);
+      if (!name || !phone) { grpErr(t("grpNeedYou")); $(name ? "#phone" : "#name").focus(); return; }
+      const btn = $("#grp-create"); btn.disabled = true;
+      try {
+        const r = await fetch(API + "group.php?action=create", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: $("#grp-title").value.trim(), note: $("#grp-note").value.trim(), deadline: $("#grp-deadline").value, rep_name: name, rep_phone: phone }) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status !== 201) { grpErr(d.error || t("errNet")); return; }
+        const list = loadGroups(); list.unshift({ code: d.code, admin: d.admin, title: d.title }); saveGroups(list);
+        $("#grp-title").value = $("#grp-note").value = $("#grp-deadline").value = "";
+        toast(t("grpCreated")); refreshGroups();
+      } finally { btn.disabled = false; }
+    }
+    const loadGroups = () => { try { const v = JSON.parse(localStorage.getItem(GRP_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+    const saveGroups = l => { try { localStorage.setItem(GRP_KEY, JSON.stringify(l.slice(0, 10))); } catch (e) {} };
+    const grpCache = {};
+    async function refreshGroups() {
+      await Promise.all(loadGroups().map(async g => {
+        try { const r = await fetch(API + "group.php?action=manage&code=" + g.code + "&admin=" + g.admin, { cache: "no-store" }); if (r.ok) grpCache[g.code] = await r.json(); } catch (e) {}
+      }));
+      renderGroups();
+    }
+    async function setGroupOpen(g, open) {
+      await fetch(API + "group.php?action=" + (open ? "open" : "close"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: g.code, admin: g.admin }) }).catch(() => null);
+      refreshGroups();
+    }
+    function renderGroups() {
+      $("#my-groups").replaceChildren(...loadGroups().map(g => {
+        const d = grpCache[g.code], members = d ? d.members : [], live = members.filter(m => m.status !== "cancelled");
+        const paid = live.filter(m => m.paid).length, total = live.reduce((a, m) => a + (m.total || 0), 0);
+        const link = groupLink(g.code), wa = "https://wa.me/?text=" + encodeURIComponent(t("grpShareMsg", { title: d ? d.title : g.title, link }));
+        return el("div", { class: "rounded-xl border border-[#d4af37]/30 bg-black/30 p-4" },
+          el("div", { class: "flex flex-wrap items-center justify-between gap-2" },
+            el("div", { class: "min-w-0" },
+              el("p", { class: "font-mono-tech text-[10px] uppercase tracking-[0.14em] text-[#d4af37]", text: t("grpYours") + " · " + g.code + (d && d.status !== "open" ? " · " + t("grpIsClosed") : "") }),
+              el("p", { class: "truncate text-base font-bold text-white", text: d ? d.title : g.title })),
+            el("div", { class: "flex flex-wrap gap-2" },
+              el("a", { class: "rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200", href: wa, target: "_blank", rel: "noopener", text: t("grpShareWa") }),
+              el("button", { type: "button", class: "rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-zinc-200", text: t("grpCopy"), onclick: () => copy(link, t("tLinkGroup")) }),
+              d ? el("button", { type: "button", class: "rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-zinc-200", text: d.status === "open" ? t("grpCloseBtn") : t("grpOpenBtn"), onclick: () => setGroupOpen(g, d.status !== "open") }) : null)),
+          el("p", { class: "mt-2 font-mono-tech text-[11px] text-zinc-400", text: t("grpStats", { n: live.length, p: paid, amt: rupee(total) }) }),
+          live.length ? el("ul", { class: "mt-2 divide-y divide-white/5 font-mono-tech text-[11px]" }, ...members.map(m => el("li", { class: "flex flex-wrap items-center justify-between gap-2 py-1.5" },
+            el("span", { class: "min-w-0 truncate text-zinc-200", text: "#" + m.code + " · " + m.name }),
+            el("span", { class: "text-zinc-400", text: t("grpFiles", { f: m.files, p: m.pages }) + (m.total != null ? " · " + rupee(m.total) : "") }),
+            el("span", { class: m.status === "cancelled" ? "text-red-300" : m.paid ? "text-emerald-300" : "text-[#f3d97d]", text: m.status === "cancelled" ? t("bCancelled") : m.paid ? t("grpPaid") : t("grpUnpaid") })))) : null);
+      }));
+    }
+
+    /* ============ green counter ============ */
+    let green = null;
+    async function loadGreen() { try { const r = await fetch(API + "stats.php", { cache: "no-store" }); if (r.ok) green = await r.json(); } catch (e) {} renderGreen(); }
+    function renderGreen() {
+      $("#green-text").textContent = green && green.sheets_saved > 0
+        ? t("greenText", { n: Number(green.sheets_saved).toLocaleString("en-IN"), kg: green.paper_kg }) : t("greenZero");
+    }
+
     /* ============ rates ============ */
     function renderRates() {
       const cards = [[t("rBw") + " · A4", RATES.A4.bw], [t("rColor") + " · A4", RATES.A4.colour], [t("rBw") + " · A3", RATES.A3.bw], [t("rColor") + " · A3", RATES.A3.colour]];
@@ -1075,6 +1367,9 @@
 
     /* ============ wire up ============ */
     const q = new URLSearchParams(location.search);
+    { const gq = (q.get("group") || "").toUpperCase(); if (/^G[A-Z0-9]{5}$/.test(gq)) { loadJoin(gq); history.replaceState(null, "", location.pathname + "#upload-studio"); } }
+    $("#group-leave").addEventListener("click", () => { joinGroup = null; renderJoin(); });
+    $("#grp-create").addEventListener("click", createGroup);
     const linkCode = (q.get("order") || "").toUpperCase(), linkTok = q.get("t") || "";
     if (CODE_RE.test(linkCode) && /^[a-f0-9]{32}$/.test(linkTok)) {
       if (!loadOrders().some(o => o.code === linkCode)) saveOrder({ code: linkCode, token: linkTok, at: Date.now() });
@@ -1110,7 +1405,7 @@
     });
 
     applyLang();
-    refreshOrders(); checkServer();
+    refreshOrders(); checkServer(); loadGreen(); if (loadGroups().length) refreshGroups();
     setInterval(updateHours, 60000);
     setInterval(() => { if (!document.hidden) { checkServer(); if (loadOrders().length) refreshOrders(); } }, 30000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkServer(); refreshOrders(); } });

@@ -41,9 +41,11 @@ def site(tmp_path):
     data = tmp_path / 'cloud'
     data.mkdir()
     cfg = tmp_path / 'config.php'
+    push_port = _free_port()   # stand-in push service for the ready-alert tests
     cfg.write_text("<?php return " + json.dumps({
         'db_dsn': f'sqlite:{data}/db.sqlite', 'data_dir': str(data),
         'shop_token_sha256': hashlib.sha256(TOKEN.encode()).hexdigest(),
+        'push_test_hosts': [f'127.0.0.1:{push_port}'],
     }).replace('{', '[').replace('}', ']').replace('":', '" =>') + ";")
     port = _free_port()
     proc = subprocess.Popen(['php', '-S', f'127.0.0.1:{port}', '-t', str(SITE)],
@@ -63,7 +65,7 @@ def site(tmp_path):
                 break
             except OSError:
                 time.sleep(0.1)
-    yield types.SimpleNamespace(base=base, rbase=rbase, data=data)
+    yield types.SimpleNamespace(base=base, rbase=rbase, data=data, push_port=push_port)
     for pr in (proc, rproc):
         pr.terminate()
         pr.wait(5)
@@ -377,7 +379,7 @@ def test_rewards_given_before_the_log_are_backfilled(site, tmp_path):
     db_path = site.data / 'db.sqlite'
     with sqlite3.connect(db_path) as con:                      # pretend the log is new
         con.execute('DELETE FROM reward_ledger')
-    (site.data / '.schema-v5').unlink()
+    (site.data / '.schema-v6').unlink()
     info = client(site).rewards('9876543210')
     assert info['ledger']['ok'] and info['ledger']['entries'] == 1
     assert info['history'][0]['points'] == 10 and info['history'][0]['balance'] == 10
@@ -507,3 +509,143 @@ def test_admin_repairs_escape_customer_text():
     admin = (Path(__file__).resolve().parents[1] / 'static' / 'admin' / 'index.html').read_text()
     for needle in ("esc(r.name)", "esc(r.description)", "esc(r.brand)", "esc(r.model)", "esc(v.detail)", "esc(r.note || '')"):
         assert needle in admin, needle
+
+
+# ---------------- green counter ----------------
+def test_green_counter_counts_paper_saved_on_collected_orders(site, tmp_path):
+    def stats():
+        return httpx.get(site.base + '/stats.php').json()
+    assert stats()['sheets_saved'] == 0
+    # 10 pages, double-sided, 2 copies: 20 one-sided sheets -> 10 sheets: saves 10
+    # 6-page file with 2 blank pages skipped (pages 1,3-4,6), 2 per sheet: 6 -> 2 sheets: saves 4
+    o = place_order(site, [(pdf(tmp_path, 10), {**BW, 'doubleside': True, 'copies': 2}),
+                           (pdf(tmp_path, 6, 'b.pdf'), {**BW, 'pages_range': '1,3-4,6', 'pages_per_sheet': 2, 'blank_skipped': 2, 'est_pages': 6})])
+    s = collect(site, o, [20, 5])
+    assert s['sheets_saved'] == 14
+    st = stats()
+    assert (st['sheets_saved'], st['orders']) == (14, 1) and st['paper_kg'] == round(14 * 4.99 / 1000, 1)
+    # a cheeky blank count is capped by the file's page count, and ignored when all pages are printed
+    o2 = place_order(site, [(pdf(tmp_path, 2, 'c.pdf'), {**BW, 'blank_skipped': 999, 'est_pages': 2})])
+    assert collect(site, o2, [10])['sheets_saved'] == 0
+    # not collected yet -> not in the public total
+    o3 = place_order(site, [(pdf(tmp_path, 4, 'd.pdf'), {**BW, 'doubleside': True})])
+    collect(site, o3, [10], pay=False)
+    assert stats()['sheets_saved'] == 14
+
+
+# ---------------- class / group orders ----------------
+def make_group(site, expect=201, **over):
+    body = {'title': 'S6 ECE · DSP lab record', 'rep_name': 'Rahul K', 'rep_phone': '9123456789', 'note': 'B&W double-sided'}
+    body.update(over)
+    r = httpx.post(site.base + '/group.php?action=create', json=body)
+    assert r.status_code == expect, r.text
+    return r.json()
+
+
+def group_order(site, tmp_path, code, phone, name, expect=201):
+    r = httpx.post(site.base + '/order.php', data={'name': name, 'phone': phone, 'group': code, 'options': json.dumps([BW])},
+                   files=[('files[]', ('rec.pdf', pdf(tmp_path, 2).read_bytes(), 'application/pdf'))])
+    assert r.status_code == expect, r.text
+    return r.json()
+
+
+def test_group_order_flow(site, tmp_path):
+    g = make_group(site)
+    assert re.fullmatch(r'G[A-Z0-9]{5}', g['code']) and len(g['admin']) == 32 and g['rep'] == 'Rahul'
+    info = httpx.get(site.base + '/group.php', params={'action': 'info', 'code': g['code']}).json()
+    assert info['title'] == 'S6 ECE · DSP lab record' and 'admin' not in info and 'rep_phone' not in info
+
+    a = group_order(site, tmp_path, g['code'], '9876543210', 'Anu')
+    group_order(site, tmp_path, g['code'].lower(), '9000000001', 'Binu')
+    assert status(site, a)['group']['code'] == g['code']
+
+    # staff: the job label carries the group, so search finds the whole class
+    jobs = cloud_sync.sync_once(client(site))
+    assert all(f"GROUP {g['code']} S6 ECE" in j['original_filename'] for j in jobs)
+    print_service.confirm_payment(jobs[0]['id'], True)
+    cloud_sync.push_statuses(client(site))
+
+    m = httpx.get(site.base + '/group.php', params={'action': 'manage', 'code': g['code'], 'admin': g['admin']}).json()
+    assert [(x['name'], x['paid']) for x in m['members']] == [('Anu', True), ('Binu', False)]
+    assert all(x['phone'].count('*') == 6 for x in m['members'])
+    assert httpx.get(site.base + '/group.php', params={'action': 'manage', 'code': g['code'], 'admin': '0' * 32}).status_code == 404
+
+    # rep closes the group: no more joining
+    assert httpx.post(site.base + '/group.php?action=close', json={'code': g['code'], 'admin': g['admin']}).json()['status'] == 'closed'
+    group_order(site, tmp_path, g['code'], '9000000002', 'Chinnu', expect=400)
+    assert httpx.post(site.base + '/group.php?action=close', json={'code': g['code'], 'admin': '1' * 32}).status_code == 404
+    group_order(site, tmp_path, 'GZZZZZ', '9000000002', 'Chinnu', expect=400)
+
+
+def test_group_validation(site):
+    make_group(site, expect=400, title='')
+    make_group(site, expect=400, rep_phone='123')
+    make_group(site, expect=400, deadline='2001-01-01')
+    assert httpx.get(site.base + '/group.php', params={'action': 'info', 'code': 'nope'}).status_code == 404
+
+
+
+# ---------------- ready alerts (web push) ----------------
+def test_ready_alert_is_sent_once_with_a_valid_vapid_signature(site, tmp_path):
+    import base64
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
+
+    got = []
+
+    class Push(BaseHTTPRequestHandler):
+        def do_POST(self):
+            got.append((self.path, dict(self.headers)))
+            self.send_response(410 if self.path.endswith('/gone') else 201)
+            self.end_headers()
+
+        def log_message(self, *a):
+            pass
+
+    srv = HTTPServer(('127.0.0.1', site.push_port), Push)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        ep = f'http://127.0.0.1:{site.push_port}/push/abc'
+        o = place_order(site, [(pdf(tmp_path, 1), BW)])
+        sub = lambda body: httpx.post(site.base + '/push.php?action=subscribe', json=body)
+        assert sub({'code': o['code'], 'token': '0' * 32, 'endpoint': ep}).status_code == 404       # not the owner
+        assert sub({'code': o['code'], 'token': o['token'], 'endpoint': 'https://evil.example.com/x'}).status_code == 400
+        assert sub({'code': o['code'], 'token': o['token'], 'endpoint': 'http://10.0.0.1/x'}).status_code == 400
+        assert sub({'code': o['code'], 'token': o['token'], 'endpoint': ep}).json()['status'] == 'pending'
+        assert sub({'code': o['code'], 'token': o['token'], 'endpoint': ep[:-3] + 'gone'}).status_code == 200
+        key = httpx.get(site.base + '/push.php?action=key').json()['key']
+
+        [job] = cloud_sync.sync_once(client(site))
+        print_service.confirm_payment(job['id'], True)
+        cloud_sync.push_statuses(client(site))
+        assert got == []                                    # paid is not ready
+        db.update_job(job['id'], status='ready')
+        cloud_sync.push_statuses(client(site))
+        assert sorted(p for p, _ in got) == ['/push/abc', '/push/gone']
+
+        h = next(hd for p, hd in got if p == '/push/abc')
+        assert h['TTL'] == '86400' and h['Urgency'] == 'high'
+        m = re.fullmatch(r'vapid t=([^,]+), k=(\S+)', h['Authorization'])
+        jwt, k = m.group(1), m.group(2)
+        assert k == key
+        b64 = lambda x: base64.urlsafe_b64decode(x + '=' * (-len(x) % 4))
+        head, claims, sig = jwt.split('.')
+        assert json.loads(b64(claims))['aud'] == f'http://127.0.0.1:{site.push_port}'
+        pub = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), b64(k))
+        raw = b64(sig)
+        pub.verify(encode_dss_signature(int.from_bytes(raw[:32], 'big'), int.from_bytes(raw[32:], 'big')),
+                   f'{head}.{claims}'.encode(), ec.ECDSA(hashes.SHA256()))   # raises if the signature is wrong
+
+        # the service worker asks which order it is about
+        which = httpx.post(site.base + '/push.php?action=which', json={'endpoint': ep}).json()
+        assert which['orders'][0] == {'code': o['code'], 'status': 'ready'}
+        # no second alert; the dead (410) subscription was removed
+        got.clear()
+        client(site).push_status([{'order_id': 1, 'status': 'ready', 'files': []}])
+        assert got == []
+        assert httpx.post(site.base + '/push.php?action=which', json={'endpoint': ep[:-3] + 'gone'}).json()['orders'] == []
+    finally:
+        srv.shutdown()

@@ -64,3 +64,11 @@
 - app/cloud_sync.py: CloudClient.repairs()/repair_update(); app/routes_admin.py: GET/POST
   /api/admin/cloud/repairs; admin page: Repairs panel (all customer text HTML-escaped).
 - Tests: 50 pass.
+
+# Smart print check, green counter, group orders, ready alerts
+- Website: Smart print check (blank/colour scan in the browser, savings with Apply), green counter
+  (stats.php; per-order sheets saved from the shop's page counts), class/group orders (group.php),
+  ready alerts (push.php, sw.js, VAPID-signed empty pushes to Google/Mozilla/Apple/Microsoft only).
+- Schema v6: order_files.blank_skipped, orders.group_id, print_groups, push_subs.
+- app/cloud_sync.py: online job label shows "GROUP <code> <name>" for class orders (searchable).
+- Tests: 54 pass (incl. VAPID signature verified with the public key).

@@ -145,7 +145,9 @@ def is_configured() -> bool:
 
 # ---------------------------------------------------------------- import
 def _job_label(order: dict, original_name: str) -> str:
-    label = f"[{order['code']} · {order['name']}] {original_name}"
+    group = order.get("group") or None
+    tag = f" · GROUP {group['code']} {group['title'][:40]}" if isinstance(group, dict) and group.get("code") else ""
+    label = f"[{order['code']} · {order['name']}{tag}] {original_name}"
     if order.get("notes"):
         label += f" — Note: {order['notes'][:150]}"
     return label

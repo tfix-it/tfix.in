@@ -218,3 +218,11 @@ bookings with the customer's details and their Phone Doctor results (red = probl
 
 The Phone Doctor can't test battery health, buttons, SIM, Wi-Fi hardware or fingerprint — always check
 the device yourself before quoting.
+
+## 11. Class / group orders and ready alerts
+
+- **Group orders:** a class rep makes one link on print.tfix.in and shares it. Each classmate's job shows
+  `GROUP G7K2QX S6 ECE · DSP…` in its name — type the group code in the search box to see the whole class.
+  Each classmate pays for their own job as usual.
+- **Ready alerts:** customers can tap "Alert me when it's ready" on their pass. When all of an order's jobs
+  are marked **ready** here, their phone gets a notification automatically. Nothing extra to do.

@@ -60,6 +60,15 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
   battery level, vibration, motion). Always say what it can't test; the technician confirms at the counter.
 - Repairs earn the same CLUTCH Rewards (₹5 per ₹100) on the same mobile number.
 
+## Student features
+- **Smart print check:** reads every PDF page on the customer's phone; finds blank pages and colour; offers
+  "skip blanks", "B&W instead of colour" and "double-sided" with the exact rupee saving (shop prices).
+- **Green counter:** sheets of paper saved (double-sided, pages-per-sheet, skipped blanks) on collected orders,
+  counted from the shop's page counts; shown on the site and on each pass. Shown in sheets and kg (80 gsm).
+- **Class / group orders:** a rep creates one link; classmates order and pay on their own; staff see
+  "GROUP Gxxxxx <name>" on each job; the rep sees who ordered and paid.
+- **Ready alerts:** "🔔 Alert me when it's ready" on the pass (web push, no app; iPhone needs Add to Home Screen).
+
 ## Search appearance
 - Google site name: **ClutchPrint AI** (WebSite structured data + og:site_name in `index.html`), page title
   "CLUTCHPRINT AI — T FIX® CUSAT | print.tfix.in", 192 px icon for search results.

@@ -19,7 +19,10 @@ Two parts that work together:
 | `api/order.php` | Customer places an order (name, mobile, files, options per file). |
 | `api/status.php` | Customer tracks an order (needs code + secret link) incl. rewards + history. |
 | `api/server.php` | Public "print server online/offline". |
-| `api/shop.php` | Shop-only API (needs the shop token): pending, file, ack, status, rewards, redeem, ledger_verify, cancel. |
+| `api/shop.php` | Shop-only API (needs the shop token): pending, file, ack, status, rewards, redeem, ledger_verify, cancel, repairs. Sends ready alerts when an order turns ready. |
+| `api/group.php` | Class/group orders: create (rep), info, manage (rep's secret link), close/open. |
+| `api/push.php` + `sw.js` + `manifest.webmanifest` | Ready alerts (web push, no app): VAPID key, subscribe, which-order lookup for the service worker. Only real push services are accepted. |
+| `api/stats.php` | Green counter: sheets of paper saved on collected orders. |
 | `_private/config.sample.php` | Copy to `_private/config.php` on the server and fill in DB + shop token hash. **Never commit config.php.** |
 | `.htaccess`, `api/.htaccess`, `_private/.htaccess` | Cache rules, block lib.php and _private from the web. |
 | `BRAND.md` | Brand brief and copy rules. |

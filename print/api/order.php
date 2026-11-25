@@ -8,7 +8,7 @@
  *   files[]   — up to MAX_FILES_PER_ORDER files (pdf, jpg, png, docx, pptx, ppt)
  *   options   — JSON array, one object per file, same order as files[]:
  *               {color, doubleside, duplex_edge, paper_size, orientation,
- *                pages_per_sheet, copies, pages_range, est_pages}
+ *                pages_per_sheet, copies, pages_range, est_pages, blank_skipped}
  *
  * Returns {code, token}. code = pickup token (CP-105); token = secret for
  * the per-order status link (only its hash is stored).
@@ -43,6 +43,21 @@ if ($name === '') {
 }
 if ($phone === null) {
     fail(400, 'Please enter a valid 10-digit mobile number.');
+}
+// Group (class) order: ?group=CODE link from the class rep. Each classmate still pays for their own order.
+$groupId = null;
+if (!empty($_POST['group'])) {
+    $gc = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)$_POST['group']) ?? '');
+    $st = $pdo->prepare('SELECT id, status FROM print_groups WHERE code = ?');
+    $st->execute([$gc]);
+    $g = $st->fetch();
+    if (!$g) {
+        fail(400, 'This group link is not valid. Check it with your class rep.');
+    }
+    if ($g['status'] !== 'open') {
+        fail(400, 'This group order is closed. Ask your class rep, or order on your own.');
+    }
+    $groupId = (int)$g['id'];
 }
 $estTotal = is_numeric($_POST['est_total'] ?? null) ? max(0, min(1000000, (float)$_POST['est_total'])) : null;
 
@@ -94,12 +109,14 @@ for ($i = 0; $i < $count; $i++) {
         fail(400, "Print options for “{$orig}” are not valid.");
     }
     $estPages = isset($o['est_pages']) && is_numeric($o['est_pages']) ? max(0, min(100000, (int)$o['est_pages'])) : null;
+    // Blank pages the customer chose to skip (Smart print check) — counted by the green counter.
+    $blank = isset($o['blank_skipped']) && is_numeric($o['blank_skipped']) ? max(0, min($estPages ?? 0, 2000, (int)$o['blank_skipped'])) : 0;
 
     $items[] = [
         'tmp' => $files['tmp_name'][$i], 'orig' => $orig, 'ext' => $ext, 'size' => $size,
         'color' => !empty($o['color']) ? 1 : 0, 'doubleside' => !empty($o['doubleside']) ? 1 : 0,
         'duplex_edge' => $edge, 'paper_size' => $paper, 'orientation' => $orient,
-        'pps' => $pps, 'copies' => $copies, 'range' => $range, 'est_pages' => $estPages,
+        'pps' => $pps, 'copies' => $copies, 'range' => $range, 'est_pages' => $estPages, 'blank' => $range === '' ? 0 : $blank,
     ];
 }
 if ($totalBytes > MAX_ORDER_BYTES) {
@@ -132,11 +149,11 @@ try {
     // Pickup token shown to the customer and staff: #CP-104, #CP-105, ...
     // (short enough to say at the counter; status lookups still need the secret token)
     $code = 'CP-' . ($orderId + 100);
-    $pdo->prepare('UPDATE orders SET code = ? WHERE id = ?')->execute([$code, $orderId]);
+    $pdo->prepare('UPDATE orders SET code = ?, group_id = ? WHERE id = ?')->execute([$code, $groupId, $orderId]);
 
     $ins = $pdo->prepare('INSERT INTO order_files (order_id, original_name, ext, stored_name, size_bytes, color, doubleside,
-        duplex_edge, paper_size, orientation, pages_per_sheet, copies, pages_range, est_pages)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        duplex_edge, paper_size, orientation, pages_per_sheet, copies, pages_range, est_pages, blank_skipped)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     foreach ($items as $it) {
         $stored = bin2hex(random_bytes(16));   // no extension: never executable, never guessable
         if (!move_uploaded_file($it['tmp'], $uploads . $stored)) {
@@ -145,7 +162,7 @@ try {
         @chmod($uploads . $stored, 0600);
         $moved[] = $uploads . $stored;
         $ins->execute([$orderId, $it['orig'], $it['ext'], $stored, $it['size'], $it['color'], $it['doubleside'],
-            $it['duplex_edge'], $it['paper_size'], $it['orientation'], $it['pps'], $it['copies'], $it['range'], $it['est_pages']]);
+            $it['duplex_edge'], $it['paper_size'], $it['orientation'], $it['pps'], $it['copies'], $it['range'], $it['est_pages'], $it['blank']]);
     }
     $pdo->prepare('INSERT INTO rate_events (ip, created_at) VALUES (?, ?)')->execute([$ip, $now]);
     $pdo->commit();

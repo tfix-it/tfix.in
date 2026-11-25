@@ -67,7 +67,7 @@ function db(): PDO
 
 function ensure_schema(PDO $pdo): void
 {
-    $flag = data_dir() . '/.schema-v5';
+    $flag = data_dir() . '/.schema-v6';
     if (is_file($flag)) {
         return;
     }
@@ -188,6 +188,44 @@ function ensure_schema(PDO $pdo): void
             // already there
         }
     }
+    // v6: green counter (blank pages the customer skipped), group/class orders, ready alerts (web push).
+    foreach (['ALTER TABLE order_files ADD COLUMN blank_skipped INT NOT NULL DEFAULT 0',
+              'ALTER TABLE orders ADD COLUMN group_id INT NULL'] as $sql) {
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // column already there
+        }
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS print_groups (
+        id $pk,
+        code VARCHAR(12) NOT NULL UNIQUE,
+        admin_hash CHAR(64) NOT NULL,
+        title VARCHAR(80) NOT NULL,
+        rep_name VARCHAR(60) NOT NULL,
+        rep_phone VARCHAR(15) NOT NULL,
+        note VARCHAR(200) NOT NULL DEFAULT '',
+        deadline DATE NULL,
+        status VARCHAR(10) NOT NULL DEFAULT 'open',
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL
+    )$tail");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS push_subs (
+        id $pk,
+        order_id INT NOT NULL,
+        endpoint_hash CHAR(64) NOT NULL,
+        endpoint VARCHAR(700) NOT NULL,
+        created_at DATETIME NOT NULL,
+        notified_at DATETIME NULL
+    )$tail");
+    foreach (['CREATE INDEX idx_orders_group ON orders (group_id)', 'CREATE UNIQUE INDEX idx_push_unique ON push_subs (order_id, endpoint_hash)',
+              'CREATE INDEX idx_push_endpoint ON push_subs (endpoint_hash)'] as $sql) {
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // already there
+        }
+    }
     $pdo->exec("CREATE TABLE IF NOT EXISTS rate_events (
         id $pk,
         ip VARCHAR(45) NOT NULL,
@@ -299,6 +337,8 @@ function public_order(array $o, array $files): array
         'confirmed_total' => $o['confirmed_total'] !== null ? (float)$o['confirmed_total'] : null,
         'created_at' => iso($o['created_at']),
         'updated_at' => iso($o['updated_at']),
+        'sheets_saved' => sheets_saved_order($files),
+        'group' => order_group($o),
         'files' => array_map(fn($f) => [
             'name' => $f['original_name'],
             'color' => (bool)$f['color'],
@@ -538,6 +578,185 @@ function ledger_for(string $phone, int $limit = 20): array
         'points' => (float)$e['points'], 'balance' => (float)$e['balance_after'], 'note' => $e['note'],
         'at' => iso($e['created_at']), 'receipt' => substr($e['hash'], 0, 12),
     ], $st->fetchAll());
+}
+
+function order_group(array $o): ?array
+{
+    if (empty($o['group_id'])) {
+        return null;
+    }
+    $st = db()->prepare('SELECT code, title FROM print_groups WHERE id = ?');
+    $st->execute([(int)$o['group_id']]);
+    $g = $st->fetch();
+    return $g ?: null;
+}
+
+/* ---------------- ready alerts: web push (no app, no payload) ---------------- */
+
+// Only the browsers' own push services may receive our requests (no other hosts: no SSRF).
+const PUSH_HOSTS = '/^(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9.-]+\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com)$/';
+
+function b64url(string $bin): string
+{
+    return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
+}
+
+function push_endpoint_ok(string $endpoint): bool
+{
+    if (strlen($endpoint) > 700) {
+        return false;
+    }
+    $u = parse_url($endpoint);
+    if (!$u || empty($u['host'])) {
+        return false;
+    }
+    $test = cfg()['push_test_hosts'] ?? [];   // only set in local tests
+    if (in_array(($u['host'] ?? '') . ':' . ($u['port'] ?? ''), (array)$test, true) && ($u['scheme'] ?? '') === 'http') {
+        return true;
+    }
+    return ($u['scheme'] ?? '') === 'https' && empty($u['port']) && preg_match(PUSH_HOSTS, strtolower($u['host'])) === 1;
+}
+
+/** VAPID key pair (P-256), created once and kept outside the web root. */
+function vapid_keys(): array
+{
+    $path = data_dir() . '/vapid.pem';
+    if (!is_file($path)) {
+        $k = openssl_pkey_new(['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC]);
+        openssl_pkey_export($k, $pem);
+        $tmp = $path . '.' . bin2hex(random_bytes(4));
+        file_put_contents($tmp, $pem);
+        @chmod($tmp, 0600);
+        if (!@rename($tmp, $path)) {
+            @unlink($tmp);
+        }
+    }
+    $key = openssl_pkey_get_private((string)file_get_contents($path));
+    $d = openssl_pkey_get_details($key)['ec'];
+    $pub = "\x04" . str_pad($d['x'], 32, "\0", STR_PAD_LEFT) . str_pad($d['y'], 32, "\0", STR_PAD_LEFT);
+    return ['key' => $key, 'public' => b64url($pub)];
+}
+
+/** DER ECDSA signature -> raw 64-byte r||s (what JWT ES256 needs). */
+function der_to_raw(string $der): string
+{
+    $pos = 2;
+    if (ord($der[1]) & 0x80) {
+        $pos += ord($der[1]) & 0x7f;
+    }
+    $out = '';
+    for ($i = 0; $i < 2; $i++) {
+        $len = ord($der[$pos + 1]);
+        $int = substr($der, $pos + 2, $len);
+        $out .= str_pad(ltrim($int, "\0"), 32, "\0", STR_PAD_LEFT);
+        $pos += 2 + $len;
+    }
+    return $out;
+}
+
+function vapid_header(string $endpoint): string
+{
+    $u = parse_url($endpoint);
+    $keys = vapid_keys();
+    $aud = $u['scheme'] . '://' . $u['host'] . (isset($u['port']) ? ':' . $u['port'] : '');
+    $data = b64url(json_encode(['typ' => 'JWT', 'alg' => 'ES256'])) . '.'
+        . b64url(json_encode(['aud' => $aud, 'exp' => time() + 12 * 3600, 'sub' => 'https://print.tfix.in/']));
+    openssl_sign($data, $sig, $keys['key'], OPENSSL_ALGO_SHA256);
+    return 'vapid t=' . $data . '.' . b64url(der_to_raw($sig)) . ', k=' . $keys['public'];
+}
+
+/** Send one empty push. Returns the HTTP status (0 on network error). */
+function push_send(string $endpoint): int
+{
+    if (!push_endpoint_ok($endpoint) || !function_exists('curl_init')) {
+        return 0;
+    }
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true, CURLOPT_POSTFIELDS => '', CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 6, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
+        CURLOPT_HTTPHEADER => ['TTL: 86400', 'Urgency: high', 'Content-Length: 0', 'Authorization: ' . vapid_header($endpoint)],
+    ]);
+    curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+    return $code;
+}
+
+/** Tell every phone that asked for an alert that this order is ready (once each). */
+function notify_ready(int $orderId): int
+{
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM push_subs WHERE order_id = ? AND notified_at IS NULL');
+    $st->execute([$orderId]);
+    $sent = 0;
+    foreach ($st->fetchAll() as $sub) {
+        $code = push_send($sub['endpoint']);
+        if ($code >= 200 && $code < 300) {
+            $pdo->prepare('UPDATE push_subs SET notified_at = ? WHERE id = ?')->execute([now(), (int)$sub['id']]);
+            $sent++;
+        } elseif ($code === 404 || $code === 410) {
+            $pdo->prepare('DELETE FROM push_subs WHERE id = ?')->execute([(int)$sub['id']]);   // unsubscribed
+        } else {
+            error_log('[tprint push] ' . $code . ' for subscription ' . $sub['id']);
+        }
+    }
+    return $sent;
+}
+
+/* ---------------- green counter: paper saved ---------------- */
+
+const SHEET_GRAMS = ['A4' => 4.99, 'A3' => 9.98];   // 80 gsm paper
+
+/**
+ * Sheets one file saves compared with printing every page one-sided, one page per sheet:
+ * double-sided, several pages per sheet, and blank pages the customer skipped (Smart print check).
+ * Uses the page count the shop measured (T Print), not the customer's browser.
+ */
+function sheets_saved_file(array $f): int
+{
+    if ($f['pages'] === null || $f['error'] !== null) {
+        return 0;
+    }
+    $pages = max(0, (int)$f['pages']);
+    $copies = max(1, (int)$f['copies']);
+    $pps = max(1, (int)$f['pages_per_sheet']);
+    $printed = (int)ceil($pages / $pps);
+    $actual = (int)$f['doubleside'] ? (int)ceil($printed / 2) : $printed;
+    $baseline = $pages + min(max(0, (int)($f['blank_skipped'] ?? 0)), 2000);
+    return max(0, ($baseline - $actual) * $copies);
+}
+
+function sheets_saved_order(array $files): int
+{
+    return array_sum(array_map('sheets_saved_file', $files));
+}
+
+/** Totals over collected orders (cached for 5 minutes). */
+function green_stats(): array
+{
+    $cache = data_dir() . '/green-stats.json';
+    if (is_file($cache) && filemtime($cache) > time() - 300) {
+        $c = json_decode((string)file_get_contents($cache), true);
+        if (is_array($c)) {
+            return $c;
+        }
+    }
+    $rows = db()->query("SELECT f.* FROM order_files f JOIN orders o ON o.id = f.order_id
+                         WHERE o.status = 'collected' AND f.paid = 1")->fetchAll();
+    $sheets = 0;
+    $grams = 0.0;
+    $orders = [];
+    foreach ($rows as $f) {
+        $n = sheets_saved_file($f);
+        $sheets += $n;
+        $grams += $n * (SHEET_GRAMS[$f['paper_size']] ?? SHEET_GRAMS['A4']);
+        $orders[(int)$f['order_id']] = true;
+    }
+    $out = ['sheets_saved' => $sheets, 'paper_kg' => round($grams / 1000, 1), 'orders' => count($orders), 'at' => gmdate('c')];
+    @file_put_contents($cache, json_encode($out), LOCK_EX);
+    return $out;
 }
 
 /* ---------------- repairs (repair.tfix.in) ---------------- */

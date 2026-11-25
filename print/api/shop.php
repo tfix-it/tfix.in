@@ -70,9 +70,15 @@ switch ($action) {
                     'pages_range' => $f['pages_range'], 'available' => (int)$f['file_deleted'] === 0,
                 ];
             }
+            $group = null;
+            if (!empty($o['group_id'])) {
+                $gs = $pdo->prepare('SELECT code, title FROM print_groups WHERE id = ?');
+                $gs->execute([(int)$o['group_id']]);
+                $group = $gs->fetch() ?: null;
+            }
             $out[] = [
                 'order_id' => (int)$o['id'], 'code' => $o['code'], 'phone' => $o['phone'], 'name' => $o['name'],
-                'notes' => $o['notes'], 'created_at' => iso($o['created_at']), 'files' => $files,
+                'notes' => $o['notes'], 'created_at' => iso($o['created_at']), 'files' => $files, 'group' => $group,
             ];
         }
         send_json(200, ['orders' => $out]);
@@ -153,6 +159,9 @@ switch ($action) {
                 continue;   // unknown or cancelled order: ignore the update
             }
             $setOrder->execute([$status, now(), $oid]);
+            if ($status === 'ready') {
+                notify_ready($oid);   // ready alert to the customer's phone (only phones not yet told)
+            }
             $costs = false;
             foreach ((array)($o['files'] ?? []) as $f) {
                 $fid = (int)($f['file_id'] ?? 0);
@@ -171,6 +180,7 @@ switch ($action) {
             }
             if ($status === 'collected') {
                 credit_order($oid);
+                @unlink(data_dir() . '/green-stats.json');   // green counter refreshes
             }
             $n++;
         }

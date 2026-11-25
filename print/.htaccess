@@ -10,6 +10,14 @@ Options -Indexes
   </FilesMatch>
 </IfModule>
 
+# Ready alerts: the service worker must always be fresh; the app manifest needs its type.
+AddType application/manifest+json .webmanifest
+<IfModule mod_headers.c>
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
 # Security headers (all responses, including errors).
 <IfModule mod_headers.c>
   # Always use HTTPS for print.tfix.in (1 year). Other tfix.in sub-sites are not affected.
