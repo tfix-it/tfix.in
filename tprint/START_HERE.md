@@ -9,11 +9,21 @@ permission. It:
    `uploads`, `cert.pem`/`key.pem`, `app\config.py` or `tprint.env`);
 2. creates/updates the Python environment (needs Python 3.12 from python.org the first time);
 3. creates `tprint.env` if missing and opens Notepad so you can paste the shop token;
+   finds **SumatraPDF** (prints the files) and **LibreOffice** (Word/PowerPoint) wherever they are
+   installed, saves their paths in `tprint.env`, and lists the printers Windows has;
 4. installs the auto-start task if needed and (re)starts T Print;
 5. waits until it answers, opens the admin page and checks print.tfix.in shows it **online**.
 
 Use it for the first setup, after every update zip, or whenever the website shows the server offline.
 Log: `logs\one-click.log`. Sign in to Windows as the user that has the printers before running it.
+
+### Printing online orders
+- Install the printer in Windows first (Settings > Printers & scanners) and print a Windows test page.
+- In the admin page, **Printers** shows every Windows printer: keep the shop printers enabled.
+- Online orders arrive as UNPAID jobs named `[CP-123 · name] file.pdf`. Check the payment, mark **Paid**,
+  pick the printer, **Print**. SumatraPDF prints silently (no window).
+- Optional **Auto-print**: prints a job by itself as soon as it is marked Paid, if it matches your rules
+  (e.g. B&W only, up to 50 sheets). Leave it off for the first test.
 
 
 This update adds a separate MCP listener and a shared printing gate. It is source code, not a deployed service. Your Android APK does not need rebuilding for these backend changes.

@@ -35,12 +35,31 @@ ENABLE_HTTP_REDIRECT = os.environ.get("PRINTSHOP_ENABLE_HTTP_REDIRECT", "1") == 
 HTTP_REDIRECT_PORT = int(os.environ.get("PRINTSHOP_HTTP_REDIRECT_PORT", 80))
 
 # --- External tools — EDIT THESE PATHS for your Windows machine ---
-SUMATRA_PATH = os.environ.get(
-    "SUMATRA_PATH", r"C:\Program Files\SumatraPDF\SumatraPDF.exe"
-)
-LIBREOFFICE_PATH = os.environ.get(
-    "LIBREOFFICE_PATH", r"C:\Program Files\LibreOffice\program\soffice.exe"
-)
+# Found automatically in the usual install places; set SUMATRA_PATH / LIBREOFFICE_PATH
+# in tprint.env only if they are somewhere else. (The SumatraPDF installer puts it in
+# the user's AppData\Local by default, not in Program Files.)
+def _find_exe(env_name, candidates):
+    given = os.environ.get(env_name, "").strip().strip('"')
+    if given:
+        return given
+    for c in candidates:
+        p = os.path.expandvars(c)
+        if "%" not in p and os.path.isfile(p):
+            return p
+    return os.path.expandvars(candidates[0])
+
+
+SUMATRA_PATH = _find_exe("SUMATRA_PATH", [
+    r"C:\Program Files\SumatraPDF\SumatraPDF.exe",
+    r"%LOCALAPPDATA%\SumatraPDF\SumatraPDF.exe",
+    r"C:\Program Files (x86)\SumatraPDF\SumatraPDF.exe",
+    str(BASE_DIR / "SumatraPDF.exe"),
+    str(BASE_DIR / "tools" / "SumatraPDF.exe"),
+])
+LIBREOFFICE_PATH = _find_exe("LIBREOFFICE_PATH", [
+    r"C:\Program Files\LibreOffice\program\soffice.exe",
+    r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
+])
 
 # --- Admin auth ---
 ADMIN_USERNAME = os.environ.get("PRINTSHOP_ADMIN_USER", "admin")

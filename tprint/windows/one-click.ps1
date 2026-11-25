@@ -137,6 +137,47 @@ else { Say '    Online orders: OFF - tprint.env has no shop token yet. T Print s
 $port = 443
 if ($envText -match '(?m)^\s*PRINTSHOP_PORT\s*=\s*(\d+)') { $port = [int]$Matches[1] }
 
+# ---------------------------------------------------------------- 3b. printing tools
+Step '3b' 'Checking SumatraPDF (sends files to the printer), LibreOffice (Word/PowerPoint) and printers'
+function Set-EnvLine([string]$name, [string]$value) {
+    $lines = @(Get-Content -LiteralPath $envFile | Where-Object { $_ -notmatch ('^\s*#?\s*' + $name + '\s*=') })
+    $lines += ($name + '=' + $value)
+    Set-Content -LiteralPath $envFile -Value $lines -Encoding ASCII
+}
+function Find-Tool([string]$name, [string[]]$places, [string]$label, [string]$help) {
+    $cur = ''
+    if ($envText -match ('(?m)^\s*' + $name + '\s*=\s*(.+?)\s*$')) { $cur = $Matches[1].Trim('"') }
+    if ($cur -and (Test-Path -LiteralPath $cur)) { Say "    $label OK: $cur" 'Green'; return }
+    $found = $places | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+    if ($found) {
+        Set-EnvLine $name $found
+        Say "    $label found: $found (saved in tprint.env)" 'Green'
+    } else {
+        Say "    $label NOT found. $help" 'Yellow'
+    }
+}
+Find-Tool 'SUMATRA_PATH' @(
+    "$env:ProgramFiles\SumatraPDF\SumatraPDF.exe",
+    "$env:LOCALAPPDATA\SumatraPDF\SumatraPDF.exe",
+    "${env:ProgramFiles(x86)}\SumatraPDF\SumatraPDF.exe",
+    (Join-Path $Root 'SumatraPDF.exe'),
+    (Join-Path $Root 'tools\SumatraPDF.exe')
+) 'SumatraPDF' 'Nothing can print until it is installed: sumatrapdfreader.org (or put SumatraPDF.exe in this T Print folder).'
+Find-Tool 'LIBREOFFICE_PATH' @(
+    "$env:ProgramFiles\LibreOffice\program\soffice.exe",
+    "${env:ProgramFiles(x86)}\LibreOffice\program\soffice.exe"
+) 'LibreOffice' 'PDF and photos still print; Word/PowerPoint files need LibreOffice (libreoffice.org).'
+$envText = Get-Content -LiteralPath $envFile -Raw
+try {
+    $printers = @(Get-Printer -ErrorAction Stop | Where-Object { $_.Name -notmatch 'Microsoft Print to PDF|Microsoft XPS|OneNote|Fax' })
+    if ($printers.Count) {
+        Say '    Printers on this PC (T Print shows these in the admin page):'
+        foreach ($p in $printers) { Say ("      - {0}  [{1}]" -f $p.Name, $p.PrinterStatus) 'White' }
+    } else {
+        Say '    No real printer found. Install the printer in Windows Settings > Printers & scanners first.' 'Yellow'
+    }
+} catch { Say '    Could not list printers (Get-Printer not available).' 'Yellow' }
+
 # ---------------------------------------------------------------- 4. start
 Step 4 'Starting T Print (auto-start at every sign-in)'
 $task = Get-ScheduledTask -TaskName 'T Print Server' -ErrorAction SilentlyContinue

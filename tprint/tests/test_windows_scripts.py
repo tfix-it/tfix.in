@@ -30,3 +30,22 @@ def test_one_click_keeps_shop_data():
         assert f"Remove-Item -LiteralPath (Join-Path $Root '{keep}')" not in s
     # braces and parentheses balance (cheap guard against a broken edit)
     assert s.count('{') == s.count('}') and s.count('(') == s.count(')')
+
+
+def test_one_click_finds_sumatra_and_saves_it_in_tprint_env():
+    s = (ROOT / 'windows' / 'one-click.ps1').read_text(encoding='ascii')
+    assert "$env:LOCALAPPDATA\\SumatraPDF\\SumatraPDF.exe" in s      # the installer's default (per user)
+    assert "Set-EnvLine $name $found" in s and 'Get-Printer' in s
+
+
+def test_config_finds_tools_or_uses_the_env_setting(monkeypatch, tmp_path):
+    import importlib
+    from app import config
+    exe = tmp_path / 'SumatraPDF.exe'
+    exe.write_text('x')
+    monkeypatch.setenv('SUMATRA_PATH', str(exe))
+    assert importlib.reload(config).SUMATRA_PATH == str(exe)
+    monkeypatch.delenv('SUMATRA_PATH')
+    assert config._find_exe('NOPE_X', ['/no/such', str(exe)]) == str(exe)
+    assert config._find_exe('NOPE_X', ['/no/a', '/no/b']) == '/no/a'
+    importlib.reload(config)
