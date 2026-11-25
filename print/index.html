@@ -415,6 +415,28 @@
 
     <!-- 3-step flow -->
     <!-- Class / group orders: the rep shares one link, everyone orders and pays on their own -->
+    <!-- Print tools: make a print-ready file on the phone; the result joins the order above -->
+    <section id="tools" class="mt-10">
+      <div class="glass-card rounded-2xl p-5 sm:p-6">
+        <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="tlEyebrow">PRINT TOOLS</span>
+        <h2 class="mt-1 text-xl font-extrabold text-white" data-i18n="tlTitle">Make it print-ready, right here.</h2>
+        <p class="mt-1 max-w-2xl text-sm text-zinc-400" data-i18n="tlSub">Works on your phone. Nothing is uploaded until you send the order — the finished PDF goes straight into your order above.</p>
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3" role="group">
+          <button type="button" data-tool="img" class="tool-btn rounded-xl border border-white/10 bg-[#0d0e12]/70 p-4 text-left transition hover:border-[#d4af37]/50">
+            <span class="block text-2xl" aria-hidden="true">📷</span><span class="mt-1 block text-sm font-bold text-white" data-i18n="tlImg">Photos → PDF</span>
+            <span class="mt-0.5 block text-[11px] leading-relaxed text-zinc-400" data-i18n="tlImgD">Notes, certificates, hall tickets — clean "scan" look, A4 pages.</span></button>
+          <button type="button" data-tool="passport" class="tool-btn rounded-xl border border-white/10 bg-[#0d0e12]/70 p-4 text-left transition hover:border-[#d4af37]/50">
+            <span class="block text-2xl" aria-hidden="true">🪪</span><span class="mt-1 block text-sm font-bold text-white" data-i18n="tlPass">Passport photo sheet</span>
+            <span class="mt-0.5 block text-[11px] leading-relaxed text-zinc-400" data-i18n="tlPassD">35×45 mm and more, cut lines, many copies on one sheet.</span></button>
+          <button type="button" data-tool="merge" class="tool-btn rounded-xl border border-white/10 bg-[#0d0e12]/70 p-4 text-left transition hover:border-[#d4af37]/50">
+            <span class="block text-2xl" aria-hidden="true">📎</span><span class="mt-1 block text-sm font-bold text-white" data-i18n="tlMerge">Merge PDFs</span>
+            <span class="mt-0.5 block text-[11px] leading-relaxed text-zinc-400" data-i18n="tlMergeD">Join record pages or chapters into one file, in your order.</span></button>
+        </div>
+        <div id="tool-panel" hidden class="mt-4 rounded-xl border border-[#d4af37]/30 bg-black/30 p-4"></div>
+        <p id="tool-err" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
+      </div>
+    </section>
+
     <section id="groups" class="mt-10">
       <div class="glass-card rounded-2xl p-5 sm:p-6">
         <div class="flex flex-wrap items-end justify-between gap-2">
@@ -586,6 +608,22 @@
         passFiles: "FILES", passTotal: "TOTAL", est: "(est.)", atShop: "priced at the shop", problem: "Problem:",
         copyToken: "Copy Token", copyLink: "Copy Link", recent: "Your tokens",
         optAll: "Set all files", mixed: "mixed", navRepair: "Repair",
+        tlEyebrow: "PRINT TOOLS", tlTitle: "Make it print-ready, right here.",
+        tlSub: "Works on your phone. Nothing is uploaded until you send the order — the finished PDF goes straight into your order above.",
+        tlImg: "Photos → PDF", tlImgD: "Notes, certificates, hall tickets — clean \"scan\" look, A4 pages.",
+        tlPass: "Passport photo sheet", tlPassD: "35×45 mm and more, cut lines, many copies on one sheet.",
+        tlMerge: "Merge PDFs", tlMergeD: "Join record pages or chapters into one file, in your order.",
+        tlAddPhotos: "Add photos", tlCamera: "Take photo", tlAddPdfs: "Add PDFs", tlScan: "Scan look (black & white, sharper text — cheaper to print)",
+        tlMargin: "White margin", tlFileName: "File name", tlMake: "Make PDF & add to order", tlMakeMerge: "Merge & add to order", tlMakePass: "Make sheet & add to order",
+        tlWorking: "Working…", tlAdded: "{f} added to your order", tlUp: "Move up", tlDown: "Move down", tlRemove: "Remove", tlClose: "Close",
+        tlNeedImg: "Add at least one photo.", tlNeedPdf: "Add at least two PDFs.", tlNeedPhoto: "Choose a photo first.", tlBadPdf: "“{f}” could not be opened (password-protected or damaged).",
+        tlLibFail: "Could not load the PDF tool. Check your internet and try again.", tlTooBig: "The result is too large (over {n} MB). Use fewer or smaller photos.",
+        tlPhoto: "Photo", tlSize: "Size", tlSheet: "Paper", tlCopies: "Copies", tlCut: "Cut lines", tlFill: "Fill the sheet",
+        tlDrag: "Drag to move · slider to zoom. Face centred, plain light background.", tlZoom: "Zoom",
+        tlPassNote: "Passport photos {s} ×{n} — print on photo paper", tlPassPrice: "Photo-paper price is confirmed at the counter.",
+        tlFits: "{n} fit on one {p} sheet", tlPages: "{n} pages",
+        tlP1: "35×45 mm — passport, visa, most forms", tlP2: "51×51 mm (2×2 in) — US visa, OCI", tlP3: "25×35 mm — PAN card, stamp size",
+        tlPaper46: "4×6 in photo paper", tlPaperA4: "A4 sheet", tlFace: "Face", tlNotLoaded: "This photo could not be opened. Try a JPG or PNG.",
         grpJoining: "Group order", grpLeave: "Order alone", grpBy: "by {rep}", grpBefore: "before {d}", grpClosed: "This group order is closed. You can still order on your own.",
         grpEyebrow: "CLASS / GROUP ORDERS", grpTitle: "Class rep? One link for the whole class.",
         grpSub: "Share the link on your class WhatsApp group. Everyone uploads and pays for their own prints; T FIX® keeps them together and you see who has ordered and paid.",
@@ -665,6 +703,22 @@
         passFiles: "ഫയലുകൾ", passTotal: "ആകെ", est: "(ഏകദേശം)", atShop: "തുക കടയിൽ", problem: "പ്രശ്നം:",
         copyToken: "ടോക്കൺ കോപ്പി", copyLink: "ലിങ്ക് കോപ്പി", recent: "നിങ്ങളുടെ ടോക്കണുകൾ",
         optAll: "എല്ലാ ഫയലുകൾക്കും", mixed: "പലത്", navRepair: "റിപ്പയർ",
+        tlEyebrow: "പ്രിന്റ് ടൂളുകൾ", tlTitle: "ഇവിടെ തന്നെ പ്രിന്റിന് റെഡിയാക്കൂ.",
+        tlSub: "ഫോണിൽ തന്നെ പ്രവർത്തിക്കും. ഓർഡർ അയയ്ക്കും വരെ ഒന്നും അപ്‌ലോഡ് ചെയ്യില്ല — തയ്യാറായ PDF നേരെ മുകളിലെ ഓർഡറിലേക്ക്.",
+        tlImg: "ഫോട്ടോ → PDF", tlImgD: "നോട്ടുകൾ, സർട്ടിഫിക്കറ്റുകൾ, ഹാൾ ടിക്കറ്റ് — വൃത്തിയുള്ള \"സ്കാൻ\" ലുക്ക്, A4 പേജുകൾ.",
+        tlPass: "പാസ്‌പോർട്ട് ഫോട്ടോ ഷീറ്റ്", tlPassD: "35×45 mm തുടങ്ങിയവ, കട്ട് ലൈനുകൾ, ഒരു ഷീറ്റിൽ പല കോപ്പികൾ.",
+        tlMerge: "PDF-കൾ ചേർക്കൂ", tlMergeD: "റെക്കോർഡ് പേജുകളോ അധ്യായങ്ങളോ ക്രമത്തിൽ ഒറ്റ ഫയലാക്കൂ.",
+        tlAddPhotos: "ഫോട്ടോ ചേർക്കൂ", tlCamera: "ഫോട്ടോ എടുക്കൂ", tlAddPdfs: "PDF ചേർക്കൂ", tlScan: "സ്കാൻ ലുക്ക് (കറുപ്പും വെളുപ്പും, വ്യക്തമായ അക്ഷരം — പ്രിന്റ് ചെലവ് കുറവ്)",
+        tlMargin: "വെള്ള മാർജിൻ", tlFileName: "ഫയലിന്റെ പേര്", tlMake: "PDF ഉണ്ടാക്കി ഓർഡറിൽ ചേർക്കൂ", tlMakeMerge: "ചേർത്ത് ഓർഡറിലാക്കൂ", tlMakePass: "ഷീറ്റ് ഉണ്ടാക്കി ഓർഡറിൽ ചേർക്കൂ",
+        tlWorking: "തയ്യാറാക്കുന്നു…", tlAdded: "{f} ഓർഡറിൽ ചേർത്തു", tlUp: "മുകളിലേക്ക്", tlDown: "താഴേക്ക്", tlRemove: "നീക്കം ചെയ്യൂ", tlClose: "അടയ്ക്കൂ",
+        tlNeedImg: "ഒരു ഫോട്ടോയെങ്കിലും ചേർക്കൂ.", tlNeedPdf: "രണ്ട് PDF-എങ്കിലും ചേർക്കൂ.", tlNeedPhoto: "ആദ്യം ഒരു ഫോട്ടോ തിരഞ്ഞെടുക്കൂ.", tlBadPdf: "“{f}” തുറക്കാനായില്ല (പാസ്‌വേഡ് ഉള്ളതോ കേടായതോ).",
+        tlLibFail: "PDF ടൂൾ ലോഡ് ചെയ്യാനായില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.", tlTooBig: "ഫലം വളരെ വലുതാണ് ({n} MB-ൽ കൂടുതൽ). ഫോട്ടോകൾ കുറയ്ക്കൂ.",
+        tlPhoto: "ഫോട്ടോ", tlSize: "വലിപ്പം", tlSheet: "പേപ്പർ", tlCopies: "കോപ്പികൾ", tlCut: "കട്ട് ലൈനുകൾ", tlFill: "ഷീറ്റ് മുഴുവൻ",
+        tlDrag: "നീക്കാൻ വലിക്കൂ · സൂം ചെയ്യാൻ സ്ലൈഡർ. മുഖം നടുവിൽ, ഇളം നിറമുള്ള പശ്ചാത്തലം.", tlZoom: "സൂം",
+        tlPassNote: "പാസ്‌പോർട്ട് ഫോട്ടോ {s} ×{n} — ഫോട്ടോ പേപ്പറിൽ പ്രിന്റ് ചെയ്യണം", tlPassPrice: "ഫോട്ടോ പേപ്പറിന്റെ വില കൗണ്ടറിൽ ഉറപ്പാക്കും.",
+        tlFits: "ഒരു {p} ഷീറ്റിൽ {n} എണ്ണം", tlPages: "{n} പേജ്",
+        tlP1: "35×45 mm — പാസ്‌പോർട്ട്, വിസ, മിക്ക ഫോമുകൾ", tlP2: "51×51 mm (2×2 ഇഞ്ച്) — US വിസ, OCI", tlP3: "25×35 mm — PAN കാർഡ്, സ്റ്റാമ്പ് സൈസ്",
+        tlPaper46: "4×6 ഇഞ്ച് ഫോട്ടോ പേപ്പർ", tlPaperA4: "A4 ഷീറ്റ്", tlFace: "മുഖം", tlNotLoaded: "ഈ ഫോട്ടോ തുറക്കാനായില്ല. JPG അല്ലെങ്കിൽ PNG ശ്രമിക്കൂ.",
         grpJoining: "ഗ്രൂപ്പ് ഓർഡർ", grpLeave: "ഒറ്റയ്ക്ക് ഓർഡർ", grpBy: "{rep} നടത്തുന്നത്", grpBefore: "{d}-ന് മുമ്പ്", grpClosed: "ഈ ഗ്രൂപ്പ് ഓർഡർ അടച്ചു. നിങ്ങൾക്ക് സ്വന്തമായി ഓർഡർ ചെയ്യാം.",
         grpEyebrow: "ക്ലാസ് / ഗ്രൂപ്പ് ഓർഡർ", grpTitle: "ക്ലാസ് റെപ്പാണോ? മുഴുവൻ ക്ലാസിനും ഒരു ലിങ്ക്.",
         grpSub: "ക്ലാസ് WhatsApp ഗ്രൂപ്പിൽ ലിങ്ക് ഷെയർ ചെയ്യൂ. ഓരോരുത്തരും സ്വന്തം ഫയൽ അപ്‌ലോഡ് ചെയ്ത് പണമടയ്ക്കും; T FIX® എല്ലാം ഒന്നിച്ചാക്കും, ആരൊക്കെ ഓർഡർ ചെയ്തു, പണമടച്ചു എന്ന് നിങ്ങൾക്ക് കാണാം.",
@@ -1365,6 +1419,237 @@
       $("#rate-note").textContent = t("rateNote", { a4: RATES.A4.bw.min, a3: RATES.A3.bw.min });
     }
 
+    /* ============ Print tools: Photos -> PDF, passport sheet, merge (all on this device) ============ */
+    let pdfLibReady = null;
+    function loadPdfLib() {
+      if (!pdfLibReady) pdfLibReady = new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js";
+        s.onload = () => window.PDFLib ? res(window.PDFLib) : rej(new Error("pdf-lib"));
+        s.onerror = () => { pdfLibReady = null; s.remove(); rej(new Error("pdf-lib")); };
+        document.head.append(s);
+      });
+      return pdfLibReady;
+    }
+    const MM = 72 / 25.4;                                       // PDF points per mm
+    const PASS_SIZES = { p1: [35, 45], p2: [51, 51], p3: [25, 35] };
+    const SHEETS = { "4x6": [101.6, 152.4], A4: [210, 297] };
+    const tool = { kind: null, busy: false, imgs: [], scan: true, margin: true, imgName: "photos",
+                   pdfs: [], mergeName: "merged",
+                   pass: { file: null, img: null, size: "p1", sheet: "4x6", copies: 0, cut: true, zoom: 1, ox: 0, oy: 0 } };
+    let toolNextId = 1;
+    const toolErr = m => { const e = $("#tool-err"); e.textContent = m || ""; e.hidden = !m; };
+    const safeName = (v, dflt) => (String(v || "").replace(/\.pdf$/i, "").replace(/[^\w\- .()]+/g, "").trim().slice(0, 60) || dflt) + ".pdf";
+    const canvasBytes = (c, q) => new Promise((res, rej) => c.toBlob(b => b ? b.arrayBuffer().then(x => res(new Uint8Array(x)), rej) : rej(new Error("canvas")), "image/jpeg", q));
+    async function decodeImage(file) {
+      // createImageBitmap honours the photo's rotation (EXIF) on current browsers
+      try { return await createImageBitmap(file, { imageOrientation: "from-image" }); }
+      catch (e) { const u = URL.createObjectURL(file), i = new Image(); i.src = u; try { await i.decode(); return i; } finally { setTimeout(() => URL.revokeObjectURL(u), 1000); } }
+    }
+    const dims = im => [im.naturalWidth || im.width, im.naturalHeight || im.height];
+    // Clean "scan" look: grey, paper pushed to white, text darkened. Cheaper B&W print.
+    function scanLook(ctx, w, h) {
+      const d = ctx.getImageData(0, 0, w, h), p = d.data, hist = new Uint32Array(256), n = w * h;
+      for (let i = 0; i < p.length; i += 4) { const g = (p[i] * 299 + p[i + 1] * 587 + p[i + 2] * 114) / 1000 | 0; p[i] = g; hist[g]++; }
+      const pct = q => { let a = 0; for (let v = 0; v < 256; v++) { a += hist[v]; if (a >= n * q) return v; } return 255; };
+      const lo = Math.min(pct(0.01), 90), wp = Math.max(pct(0.80) - 12, lo + 40);
+      const lut = new Uint8ClampedArray(256);
+      for (let v = 0; v < 256; v++) { const x = Math.min(1, Math.max(0, (v - lo) / (wp - lo))); lut[v] = 255 * Math.pow(x, 1.6); }
+      for (let i = 0; i < p.length; i += 4) { const g = lut[p[i]]; p[i] = p[i + 1] = p[i + 2] = g; }
+      ctx.putImageData(d, 0, 0);
+    }
+    async function finishTool(bytes, name, opts2 = {}) {
+      if (bytes.length > MAX_FILE_MB * 1048576) { toolErr(t("tlTooBig", { n: MAX_FILE_MB })); return false; }
+      if (files.length >= MAX_FILES) { toolErr(t("errMany")); return false; }
+      const file = new File([bytes], name, { type: "application/pdf" });
+      addFiles([file]);
+      const f = files.find(x => x.file === file);
+      if (f && opts2.color != null) { f.color = opts2.color; renderFiles(); }
+      toast(t("tlAdded", { f: name }));
+      $("#upload-studio").scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    }
+    async function runTool(fn) {
+      if (tool.busy) return;
+      toolErr(""); tool.busy = true; renderTool();
+      try { await fn(); }
+      catch (e) { toolErr(e && e.userMsg ? e.userMsg : t("tlLibFail")); }
+      finally { tool.busy = false; renderTool(); }
+    }
+    const userErr = m => Object.assign(new Error(m), { userMsg: m });
+    async function libOrFail() { try { return await loadPdfLib(); } catch (e) { throw userErr(t("tlLibFail")); } }
+
+    /* -- Photos -> PDF -- */
+    async function makeImagesPdf() {
+      if (!tool.imgs.length) throw userErr(t("tlNeedImg"));
+      const L = await libOrFail(), doc = await L.PDFDocument.create();
+      const c = document.createElement("canvas"), ctx = c.getContext("2d", { willReadFrequently: true });
+      for (const it of tool.imgs) {
+        let im; try { im = await decodeImage(it.file); } catch (e) { throw userErr(t("tlNotLoaded") + " (" + it.file.name + ")"); }
+        const [w0, h0] = dims(im), k = Math.min(1, 2000 / Math.max(w0, h0));
+        c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(im, 0, 0, c.width, c.height);
+        if (im.close) im.close();
+        if (tool.scan) scanLook(ctx, c.width, c.height);
+        const jpg = await doc.embedJpg(await canvasBytes(c, tool.scan ? 0.8 : 0.85));
+        const land = c.width > c.height, pw = (land ? 297 : 210) * MM, ph = (land ? 210 : 297) * MM, m = tool.margin ? 10 * MM : 0;
+        const s2 = Math.min((pw - 2 * m) / c.width, (ph - 2 * m) / c.height), dw = c.width * s2, dh = c.height * s2;
+        doc.addPage([pw, ph]).drawImage(jpg, { x: (pw - dw) / 2, y: (ph - dh) / 2, width: dw, height: dh });
+      }
+      if (await finishTool(await doc.save(), safeName(tool.imgName, "photos"), tool.scan ? { color: false } : {})) {
+        tool.imgs.forEach(x => URL.revokeObjectURL(x.url)); tool.imgs = [];
+      }
+    }
+
+    /* -- PDF merge -- */
+    async function addMergePdfs(list) {
+      const L = await libOrFail();
+      for (const file of list) {
+        if (extOf(file.name) !== "pdf") { toolErr(t("errType", { f: file.name })); continue; }
+        if (file.size > MAX_FILE_MB * 1048576) { toolErr(t("errBig", { f: file.name })); continue; }
+        try { const d = await L.PDFDocument.load(await file.arrayBuffer()); tool.pdfs.push({ id: toolNextId++, file, pages: d.getPageCount() }); }
+        catch (e) { toolErr(t("tlBadPdf", { f: file.name })); }
+      }
+    }
+    async function makeMerged() {
+      if (tool.pdfs.length < 2) throw userErr(t("tlNeedPdf"));
+      const L = await libOrFail(), out = await L.PDFDocument.create();
+      for (const it of tool.pdfs) {
+        let src; try { src = await L.PDFDocument.load(await it.file.arrayBuffer()); } catch (e) { throw userErr(t("tlBadPdf", { f: it.file.name })); }
+        (await out.copyPages(src, src.getPageIndices())).forEach(pg => out.addPage(pg));
+      }
+      if (await finishTool(await out.save(), safeName(tool.mergeName, "merged"))) tool.pdfs = [];
+    }
+
+    /* -- Passport photo sheet -- */
+    function passLayout() {
+      const [pw, ph] = PASS_SIZES[tool.pass.size], [sw, sh] = SHEETS[tool.pass.sheet], m = 3, g = 1.5;
+      const fit = (W, H) => { const c = Math.floor((W - 2 * m + g) / (pw + g)), r = Math.floor((H - 2 * m + g) / (ph + g)); return { c: Math.max(0, c), r: Math.max(0, r), W, H }; };
+      const a = fit(sw, sh), b = fit(sh, sw);                  // portrait or landscape sheet, whichever holds more
+      const L = a.c * a.r >= b.c * b.r ? a : b;
+      return { ...L, pw, ph, g, max: L.c * L.r };
+    }
+    function passCopies() { const max = passLayout().max; return tool.pass.copies > 0 ? Math.min(tool.pass.copies, max) : max; }
+    function passClamp() {
+      const P = tool.pass; if (!P.img) return;
+      const [pw, ph] = PASS_SIZES[P.size], [iw, ih] = dims(P.img);
+      const base = Math.max(pw / iw, ph / ih), sc = base * P.zoom;   // mm per image pixel
+      const mx = Math.max(0, (iw * sc - pw) / 2), my = Math.max(0, (ih * sc - ph) / 2);
+      P.ox = Math.max(-mx, Math.min(mx, P.ox)); P.oy = Math.max(-my, Math.min(my, P.oy));
+      return sc;
+    }
+    // Draw the cropped photo into a canvas of size w x h pixels
+    function passDraw(ctx, w, h) {
+      const P = tool.pass, [pw] = PASS_SIZES[P.size], sc = passClamp(), [iw, ih] = dims(P.img), k = w / pw;   // px per mm
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+      const dw = iw * sc * k, dh = ih * sc * k;
+      ctx.drawImage(P.img, (w - dw) / 2 + P.ox * k, (h - dh) / 2 + P.oy * k, dw, dh);
+    }
+    function passPreview() {
+      const c = $("#pass-canvas"); if (!c || !tool.pass.img) return;
+      const ctx = c.getContext("2d"); passDraw(ctx, c.width, c.height);
+      // face guide: head about 70-80% of the photo height (passport rule of thumb)
+      ctx.save(); ctx.strokeStyle = "rgba(212,175,55,.9)"; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(c.width / 2, c.height * 0.46, c.width * 0.27, c.height * 0.36, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    }
+    async function makePassSheet() {
+      const P = tool.pass; if (!P.img) throw userErr(t("tlNeedPhoto"));
+      const L = await libOrFail(), lay = passLayout(), n = passCopies();
+      const c = document.createElement("canvas"); c.width = Math.round(lay.pw / 25.4 * 300); c.height = Math.round(lay.ph / 25.4 * 300);   // 300 dpi
+      passDraw(c.getContext("2d"), c.width, c.height);
+      const doc = await L.PDFDocument.create(), jpg = await doc.embedJpg(await canvasBytes(c, 0.93));
+      const page = doc.addPage([lay.W * MM, lay.H * MM]);
+      const gw = lay.c * lay.pw + (lay.c - 1) * lay.g, gh = lay.r * lay.ph + (lay.r - 1) * lay.g;
+      const x0 = (lay.W - gw) / 2, y0 = (lay.H - gh) / 2;
+      for (let i = 0; i < n; i++) {
+        const col = i % lay.c, row = Math.floor(i / lay.c);
+        const x = (x0 + col * (lay.pw + lay.g)) * MM, y = (lay.H - y0 - (row + 1) * lay.ph - row * lay.g) * MM;
+        page.drawImage(jpg, { x, y, width: lay.pw * MM, height: lay.ph * MM });
+        if (P.cut) page.drawRectangle({ x, y, width: lay.pw * MM, height: lay.ph * MM, borderColor: L.rgb(0.6, 0.6, 0.6), borderWidth: 0.35 });
+      }
+      const [a, b] = PASS_SIZES[P.size], sz = a + "x" + b + "mm";
+      if (await finishTool(await doc.save(), "passport-" + sz + "-x" + n + ".pdf", { color: true })) {
+        const note = t("tlPassNote", { s: sz, n }), ne = $("#notes");
+        if (!ne.value.includes(note) && (ne.value + " " + note).length <= 400) ne.value = (ne.value ? ne.value.trim() + " · " : "") + note;
+        toast(t("tlPassPrice"));
+      }
+    }
+
+    /* -- panel UI -- */
+    const tbtn = (text, onclick, extra = "") => el("button", { type: "button", class: "rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs text-zinc-200 hover:border-[#d4af37]/50 disabled:opacity-40 " + extra, text, onclick });
+    const goBtn = (text, fn) => el("button", { type: "button", class: "gold-btn mt-4 w-full rounded-xl px-5 py-3 text-sm font-extrabold sm:w-auto", text: tool.busy ? t("tlWorking") : text, ...(tool.busy ? { disabled: "" } : {}), onclick: () => runTool(fn) });
+    const picker = (label, accept, multiple, onfiles, capture) => {
+      const inp = el("input", { type: "file", accept, class: "hidden", ...(multiple ? { multiple: "" } : {}), ...(capture ? { capture } : {}) });
+      inp.addEventListener("change", () => { const l = [...inp.files]; inp.value = ""; if (l.length) onfiles(l); });
+      return el("label", { class: "inline-flex cursor-pointer items-center rounded-md border border-[#d4af37]/50 bg-[#d4af37]/10 px-3 py-1.5 text-xs font-bold text-[#f3d97d] hover:bg-[#d4af37]/20" }, label, inp);
+    };
+    const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; renderTool(); };
+    const listRow = (arr, i, thumb, label) => el("li", { class: "flex items-center gap-2 rounded-lg border border-white/10 bg-[#0d0e12]/70 px-2 py-1.5" },
+      el("span", { class: "w-5 text-center font-mono-tech text-[11px] text-zinc-500", text: String(i + 1) }), thumb,
+      el("span", { class: "min-w-0 flex-1 truncate font-mono-tech text-[11px] text-zinc-300", text: label }),
+      tbtn("↑", () => move(arr, i, -1), "!px-2 !py-1"), tbtn("↓", () => move(arr, i, 1), "!px-2 !py-1"),
+      tbtn("✕", () => { const [x] = arr.splice(i, 1); if (x && x.url) URL.revokeObjectURL(x.url); renderTool(); }, "!px-2 !py-1"));
+    const check = (label, key, obj = tool) => { const i = el("input", { type: "checkbox", class: "accent-[#d4af37]" }); i.checked = !!obj[key];
+      i.addEventListener("change", () => { obj[key] = i.checked; renderTool(); }); return el("label", { class: "flex items-start gap-2 text-xs text-zinc-300" }, i, el("span", { text: label })); };
+    const nameField = key => { const i = el("input", { class: "field mt-1 !min-h-[38px] !text-sm", type: "text", maxlength: "60", value: tool[key], "aria-label": t("tlFileName") });
+      i.addEventListener("input", () => { tool[key] = i.value; }); return el("label", { class: "mt-3 block text-[11px] text-zinc-400" }, t("tlFileName"), i); };
+    const select = (label, value, options, onchange) => { const s = el("select", { class: "field mt-1 !min-h-[38px] !text-sm" }, ...options.map(([v, txt]) => { const o = el("option", { value: v, text: txt }); if (String(v) === String(value)) o.selected = true; return o; }));
+      s.addEventListener("change", () => onchange(s.value)); return el("label", { class: "block text-[11px] text-zinc-400" }, label, s); };
+    const head = title => el("div", { class: "flex items-center justify-between gap-2" }, el("h3", { class: "text-sm font-bold text-white", text: title }),
+      tbtn(t("tlClose"), () => { tool.kind = null; toolErr(""); renderTool(); }));
+
+    function renderTool() {
+      $$(".tool-btn").forEach(b => { const on = b.dataset.tool === tool.kind; b.classList.toggle("border-[#d4af37]", on); b.setAttribute("aria-pressed", String(on)); });
+      const box = $("#tool-panel"); box.hidden = !tool.kind; if (!tool.kind) { box.replaceChildren(); return; }
+      if (tool.kind === "img") {
+        box.replaceChildren(head(t("tlImg")),
+          el("div", { class: "mt-3 flex flex-wrap gap-2" },
+            picker(t("tlAddPhotos"), "image/*", true, l => { l.forEach(file => { if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) return; tool.imgs.push({ id: toolNextId++, file, url: URL.createObjectURL(file) }); }); renderTool(); }),
+            picker(t("tlCamera"), "image/*", false, l => { tool.imgs.push({ id: toolNextId++, file: l[0], url: URL.createObjectURL(l[0]) }); renderTool(); }, "environment")),
+          tool.imgs.length ? el("ol", { class: "mt-3 space-y-1.5" }, ...tool.imgs.map((it, i) => listRow(tool.imgs, i,
+            el("img", { src: it.url, alt: "", class: "h-10 w-8 shrink-0 rounded object-cover", loading: "lazy" }), it.file.name))) : null,
+          tool.imgs.length ? el("p", { class: "mt-1 font-mono-tech text-[11px] text-zinc-500", text: t("tlPages", { n: tool.imgs.length }) + " · A4" }) : null,
+          el("div", { class: "mt-3 space-y-2" }, check(t("tlScan"), "scan"), check(t("tlMargin"), "margin")),
+          nameField("imgName"), goBtn(t("tlMake"), makeImagesPdf));
+      } else if (tool.kind === "merge") {
+        const total = tool.pdfs.reduce((a, x) => a + x.pages, 0);
+        box.replaceChildren(head(t("tlMerge")),
+          el("div", { class: "mt-3" }, picker(t("tlAddPdfs"), "application/pdf,.pdf", true, l => runTool(() => addMergePdfs(l)))),
+          tool.pdfs.length ? el("ol", { class: "mt-3 space-y-1.5" }, ...tool.pdfs.map((it, i) => listRow(tool.pdfs, i, null, it.file.name + " · " + t("tlPages", { n: it.pages })))) : null,
+          tool.pdfs.length ? el("p", { class: "mt-1 font-mono-tech text-[11px] text-zinc-500", text: "= " + t("tlPages", { n: total }) }) : null,
+          nameField("mergeName"), goBtn(t("tlMakeMerge"), makeMerged));
+      } else {
+        const P = tool.pass, lay = passLayout(), n = passCopies();
+        const [pw, ph] = PASS_SIZES[P.size], cw = 210, chh = Math.round(cw * ph / pw);
+        const canvas = el("canvas", { id: "pass-canvas", width: String(cw * 2), height: String(chh * 2), class: "touch-none rounded-md border border-white/20 bg-white", style: "width:" + cw + "px;height:" + chh + "px;max-width:100%;cursor:grab", "aria-label": t("tlDrag") });
+        let drag = null;
+        canvas.addEventListener("pointerdown", e => { if (!P.img) return; drag = { x: e.clientX, y: e.clientY, ox: P.ox, oy: P.oy }; canvas.setPointerCapture(e.pointerId); });
+        canvas.addEventListener("pointermove", e => { if (!drag) return; const k = pw / canvas.getBoundingClientRect().width; P.ox = drag.ox + (e.clientX - drag.x) * k; P.oy = drag.oy + (e.clientY - drag.y) * k; passPreview(); });
+        const end = () => { drag = null; }; canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end);
+        const zoom = el("input", { type: "range", min: "1", max: "4", step: "0.02", value: String(P.zoom), class: "w-full accent-[#d4af37]", "aria-label": t("tlZoom") });
+        zoom.addEventListener("input", () => { P.zoom = +zoom.value; passPreview(); });
+        const counts = []; for (let i = 1; i <= lay.max; i++) counts.push([i, i === lay.max ? i + " · " + t("tlFill") : String(i)]);
+        box.replaceChildren(head(t("tlPass")),
+          el("div", { class: "mt-3" }, picker(P.img ? "↺ " + t("tlPhoto") : t("tlPhoto"), "image/*", false, l => runTool(async () => {
+            try { const im = await decodeImage(l[0]); if (P.img && P.img.close) P.img.close(); Object.assign(P, { file: l[0], img: im, zoom: 1, ox: 0, oy: 0 }); }
+            catch (e) { throw userErr(t("tlNotLoaded")); } }))),
+          el("div", { class: "mt-3 grid gap-4 sm:grid-cols-[auto_1fr]" },
+            P.img ? el("div", {}, canvas, el("label", { class: "mt-2 block text-[11px] text-zinc-400" }, t("tlZoom"), zoom),
+              el("p", { class: "mt-1 max-w-[210px] text-[11px] leading-snug text-zinc-500", text: t("tlDrag") })) : null,
+            el("div", { class: "space-y-3" },
+              select(t("tlSize"), P.size, [["p1", t("tlP1")], ["p2", t("tlP2")], ["p3", t("tlP3")]], v => { P.size = v; P.copies = 0; renderTool(); }),
+              select(t("tlSheet"), P.sheet, [["4x6", t("tlPaper46")], ["A4", t("tlPaperA4")]], v => { P.sheet = v; P.copies = 0; renderTool(); }),
+              select(t("tlCopies"), n, counts, v => { P.copies = +v; renderTool(); }),
+              el("p", { class: "font-mono-tech text-[11px] text-zinc-500", text: t("tlFits", { n: lay.max, p: P.sheet === "A4" ? "A4" : "4×6" }) }),
+              check(t("tlCut"), "cut", P),
+              el("p", { class: "text-[11px] text-[#f3d97d]/80", text: t("tlPassPrice") }))),
+          goBtn(t("tlMakePass"), makePassSheet));
+        passPreview();
+      }
+    }
+    $$(".tool-btn").forEach(b => b.addEventListener("click", () => { tool.kind = tool.kind === b.dataset.tool ? null : b.dataset.tool; toolErr(""); renderTool();
+      if (tool.kind) { loadPdfLib().catch(() => {}); $("#tool-panel").scrollIntoView({ behavior: "smooth", block: "nearest" }); } }));
+
     /* ============ wire up ============ */
     const q = new URLSearchParams(location.search);
     { const gq = (q.get("group") || "").toUpperCase(); if (/^G[A-Z0-9]{5}$/.test(gq)) { loadJoin(gq); history.replaceState(null, "", location.pathname + "#upload-studio"); } }
@@ -1401,7 +1686,7 @@
     $("#lang-btn").addEventListener("click", () => {
       lang = lang === "en" ? "ml" : "en";
       try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {}
-      applyLang();
+      applyLang(); renderTool();
     });
 
     applyLang();
