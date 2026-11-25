@@ -1,11 +1,11 @@
 <#
-  T Print watchdog — keeps the T Print shop server running on Shop PC 1.
+  T Print watchdog - keeps the T Print shop server running on Shop PC 1.
 
   Started automatically at Windows sign-in by the "T Print Server" scheduled
   task (see install-autostart.ps1). Every minute it checks that the server
   answers on its port; if it doesn't, it starts it (or restarts a frozen one).
 
-  Settings (cloud URL/token, port) are read from ..\tprint.env — see
+  Settings (cloud URL/token, port) are read from ..\tprint.env - see
   tprint.env.example. Logs go to ..\logs\.
 #>
 param([int]$IntervalSec = 60, [int]$StartupGraceSec = 45)
@@ -56,7 +56,7 @@ function Get-OurProcess {
 }
 
 function Start-TPrint {
-    if (-not (Test-Path $Python)) { Write-Log "ERROR: $Python not found — set up the venv first (README step 2)"; return }
+    if (-not (Test-Path $Python)) { Write-Log "ERROR: $Python not found - set up the venv first (README step 2)"; return }
     $stamp = Get-Date -Format 'yyyyMMdd'
     $p = Start-Process -FilePath $Python -ArgumentList '-m', 'app.main' -WorkingDirectory $Root `
         -NoNewWindow -PassThru `
@@ -72,16 +72,16 @@ $failures = 0
 while ($true) {
     try {
         if (Test-ServerPort) {
-            $failures = 0                                   # server answers — all good
+            $failures = 0                                   # server answers - all good
         } else {
             $ours = Get-OurProcess
             if (-not $ours) {
-                Write-Log 'T Print is not running — starting it'
+                Write-Log 'T Print is not running - starting it'
                 Start-TPrint
             } else {
                 $failures++
                 if ($failures -ge 3) {                      # running but frozen for ~3 minutes
-                    Write-Log "T Print (pid $($ours.Id)) not answering — restarting"
+                    Write-Log "T Print (pid $($ours.Id)) not answering - restarting"
                     Stop-Process -Id $ours.Id -Force -ErrorAction SilentlyContinue
                     Start-Sleep -Seconds 3
                     Start-TPrint

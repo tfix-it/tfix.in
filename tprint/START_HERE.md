@@ -1,5 +1,21 @@
 # TPrint + Claude MCP — installation guide
 
+## ⭐ One click (Shop PC 1)
+
+Double-click **`T-Print-1-Click.bat`** in the T Print folder and press **Yes** when Windows asks for
+permission. It:
+1. installs an update if a newer `tprint-server*.zip` is in this folder or in **Downloads**
+   (backs up the old `app`, `static`, `windows` to `backup\<date>`; never touches `printshop.db`,
+   `uploads`, `cert.pem`/`key.pem`, `app\config.py` or `tprint.env`);
+2. creates/updates the Python environment (needs Python 3.12 from python.org the first time);
+3. creates `tprint.env` if missing and opens Notepad so you can paste the shop token;
+4. installs the auto-start task if needed and (re)starts T Print;
+5. waits until it answers, opens the admin page and checks print.tfix.in shows it **online**.
+
+Use it for the first setup, after every update zip, or whenever the website shows the server offline.
+Log: `logs\one-click.log`. Sign in to Windows as the user that has the printers before running it.
+
+
 This update adds a separate MCP listener and a shared printing gate. It is source code, not a deployed service. Your Android APK does not need rebuilding for these backend changes.
 
 ## 1. Back up and update the existing shop server

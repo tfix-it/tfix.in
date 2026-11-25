@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 $watchdog = Join-Path $PSScriptRoot 'watchdog.ps1'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path (Join-Path $root 'venv\Scripts\python.exe'))) {
-    throw "venv not found in $root — finish the T Print setup (README step 2) first."
+    throw "venv not found in $root - finish the T Print setup (README step 2) first."
 }
 if (-not (Test-Path (Join-Path $root 'tprint.env'))) {
     Write-Warning "No tprint.env yet: online orders stay off until you create it (copy tprint.env.example)."
