@@ -157,30 +157,24 @@ if ($HereMode) {
 
 # ------------------------------------------------------------------ 2. Python
 Step '2. Python'
-function Test-Python {
-    $code = 'import sys; print(sys.version.split()[0])'
-    $v = $null
-    try { if (Get-Command py.exe -ErrorAction SilentlyContinue) { $v = (& py.exe -3 -c $code 2>$null | Select-Object -First 1) } } catch { }
-    if ("$v" -match '^3\.\d+') { return $v }
-    $v = $null
-    try { if (Get-Command python.exe -ErrorAction SilentlyContinue) { $v = (& python.exe -c $code 2>$null | Select-Object -First 1) } } catch { }
-    if ("$v" -match '^3\.\d+') { return $v }
-    return $null
-}
+. (Join-Path $PSScriptRoot 'find-python.ps1')
 $venvPy = Join-Path $Target 'venv\Scripts\python.exe'
-$pyv = Test-Python
-if (Test-Path -LiteralPath $venvPy) {
-    Say "    T Print's own Python (venv) is there." 'Green'
-} elseif ($pyv) {
-    Say "    Python $pyv is installed." 'Green'
+$vv = if (Test-Path -LiteralPath $venvPy) { Get-PyVersion $venvPy @() } else { $null }
+if ($vv -and $vv -match $script:PyOk) {
+    Say "    T Print's own Python (venv) is there: Python $vv." 'Green'
 } else {
-    Say '    Python is not installed (the "python" in the Microsoft Store shortcut does not count).' 'Yellow'
-    if (Winget-Install 'Python.Python.3.12' 'Python 3.12') { $pyv = Test-Python }
-    if ($pyv) { Say "    Python $pyv installed." 'Green' }
+    if ($vv) { Say "    The venv uses Python $vv - too new for T Print's packages; it will be remade with Python 3.12." 'Yellow' }
+    $base = Find-SupportedPython
+    if ($base) { Say "    Python $($base.Version) is installed (T Print uses 3.10-3.12)." 'Green' }
     else {
-        Say '    Please install Python 3.12 from python.org: tick "Add python.exe to PATH", then run T-Print-Setup.bat again.' 'Red'
-        Start-Process 'https://www.python.org/downloads/windows/'
-        Done 1
+        Say '    No Python 3.12 yet (3.13/3.14 or the Microsoft Store shortcut cannot run T Print).' 'Yellow'
+        $base = Install-Python312
+        if ($base) { Say "    Python $($base.Version) installed." 'Green' }
+        else {
+            Say '    Please install Python 3.12 from python.org: tick "Add python.exe to PATH", then run T-Print-Setup.bat again.' 'Red'
+            Start-Process 'https://www.python.org/downloads/release/python-31210/'
+            Done 1
+        }
     }
 }
 

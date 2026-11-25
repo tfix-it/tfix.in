@@ -99,25 +99,44 @@ if (-not $zip) {
 
 # ---------------------------------------------------------------- 2. python
 Step 2 'Checking Python and the T Print environment (venv)'
-$py = Join-Path $Root 'venv\Scripts\python.exe'
-if (-not (Test-Path $py)) {
-    Say '    No venv yet - creating it.'
-    if (Get-Command py.exe -ErrorAction SilentlyContinue) {
-        & py.exe -3 -m venv (Join-Path $Root 'venv')
-    } elseif (Get-Command python.exe -ErrorAction SilentlyContinue) {
-        & python.exe -m venv (Join-Path $Root 'venv')
-    } else {
-        Fail 'Python is not installed. Install Python 3.12 from python.org (tick "Add python.exe to PATH"), then double-click T-Print-1-Click.bat again.'
+. (Join-Path $PSScriptRoot 'find-python.ps1')
+$venvDir = Join-Path $Root 'venv'
+$py = Join-Path $venvDir 'Scripts\python.exe'
+if (Test-Path $py) {
+    $vv = Get-PyVersion $py @()
+    if ($vv -and $vv -notmatch $script:PyOk) {
+        # e.g. made with Python 3.14: its packages cannot install. The venv holds no shop data - remake it.
+        Say "    The venv uses Python $vv; T Print needs Python 3.12 - remaking the venv." 'Yellow'
+        Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
+            Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($venvDir, [StringComparison]::OrdinalIgnoreCase) } |
+            ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+        Start-Sleep -Seconds 2
+        Remove-Item -LiteralPath $venvDir -Recurse -Force
     }
+}
+if (-not (Test-Path $py)) {
+    $base = Find-SupportedPython
+    if (-not $base) { $base = Install-Python312 }
+    if (-not $base) {
+        Fail 'Python 3.12 is not installed (Python 3.13/3.14 cannot run T Print). Install Python 3.12 from python.org (tick "Add python.exe to PATH"), then double-click T-Print-1-Click.bat again.'
+    }
+    Say "    Creating the venv with Python $($base.Version)..."
+    $a = @($base.Pre) + @('-m', 'venv', $venvDir)
+    & $base.Exe @a
     if (-not (Test-Path $py)) { Fail 'Could not create the venv. See logs\one-click.log.' }
 }
-Say '    Installing/updating the required packages (needs internet; skips if offline)...'
-& $py -m pip install -r (Join-Path $Root 'requirements.txt') --disable-pip-version-check -q
-if ($LASTEXITCODE -ne 0) {
-    Say '    Could not update packages (offline?). Continuing with what is installed.' 'Yellow'
-} else {
-    Say '    Packages OK.' 'Green'
+Say '    Installing/updating the required packages (needs internet)...'
+$ErrorActionPreference = 'Continue'   # pip prints warnings on stderr; judge by exit codes instead
+& $py -m pip install --upgrade pip --disable-pip-version-check -q 2>&1 | Out-Null
+& $py -m pip install -r (Join-Path $Root 'requirements.txt') --disable-pip-version-check -q --only-binary=pymupdf,pywin32
+$pipOk = ($LASTEXITCODE -eq 0)
+& $py -c 'import fastapi, uvicorn, fitz, img2pdf, win32print' 2>&1 | Out-Null
+$importOk = ($LASTEXITCODE -eq 0)
+$ErrorActionPreference = 'Stop'
+if (-not $importOk) {
+    Fail 'The required packages are not installed (no internet, or the install failed - see the messages above and logs\one-click.log). Check the internet and run this again.'
 }
+if ($pipOk) { Say '    Packages OK.' 'Green' } else { Say '    Could not update packages (offline?) - the installed ones work, continuing.' 'Yellow' }
 if (-not ((Test-Path (Join-Path $Root 'cert.pem')) -and (Test-Path (Join-Path $Root 'key.pem')))) {
     Say '    No HTTPS certificate yet (cert.pem/key.pem) - making one for this PC...'
     & $py -m pip install cryptography --disable-pip-version-check -q

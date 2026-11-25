@@ -54,7 +54,7 @@ def test_config_finds_tools_or_uses_the_env_setting(monkeypatch, tmp_path):
 def test_setup_script_is_balanced_and_never_prints_the_key():
     s = (ROOT / 'windows' / 'setup.ps1').read_text(encoding='ascii')
     assert s.count('{') == s.count('}') and s.count('(') == s.count(')')
-    assert 'windows\\one-click.ps1' in s and "'SumatraPDF.SumatraPDF'" in s and "'Python.Python.3.12'" in s
+    assert 'windows\\one-click.ps1' in s and "'SumatraPDF.SumatraPDF'" in s and 'Install-Python312' in s
     # the report on the Desktop must not contain the shop key: only "is set / not set"
     assert 'Say $envText' not in s and 'Write-Host $envText' not in s
     b = (ROOT / 'T-Print-Setup.bat').read_bytes()
@@ -83,3 +83,18 @@ def test_setup_new_folder_mode_moves_data_and_the_task():
         assert f"'{f}'" in s
     assert 'Remove-Item -LiteralPath $Old' not in s          # the old folder is only copied from, never deleted
     assert "MOVED-TO-NEW-FOLDER.txt" in s and 'last-update.txt' in s
+
+
+def test_venv_is_always_python_3_10_to_3_12():
+    # pymupdf 1.24.10 and pywin32 306 have Windows wheels only up to cp312: Python 3.13/3.14
+    # makes pip compile them and fail ("Unable to find Visual Studio"), as happened on Shop PC 1.
+    fp = (ROOT / 'windows' / 'find-python.ps1').read_text(encoding='ascii')
+    oc = (ROOT / 'windows' / 'one-click.ps1').read_text(encoding='ascii')
+    st = (ROOT / 'windows' / 'setup.ps1').read_text(encoding='ascii')
+    assert r"'^3\.(10|11|12)\.'" in fp and "@('-3.12')" in fp and 'py.exe install 3.12' in fp
+    assert 'py.exe -3 -m venv' not in oc                      # never "newest Python"
+    assert "find-python.ps1" in oc and "find-python.ps1" in st
+    assert '--only-binary=pymupdf,pywin32' in oc               # never try to compile them
+    assert 'import fastapi, uvicorn, fitz, img2pdf, win32print' in oc
+    for s in (fp, oc, st):
+        assert s.count('{') == s.count('}') and s.count('(') == s.count(')')
