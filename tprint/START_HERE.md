@@ -1,5 +1,13 @@
 # TPrint + Claude MCP — installation guide
 
+## ⭐ First time on a PC: T-Print-Setup.bat
+
+Extract the **T-Print-Setup** zip and double-click **`T-Print-Setup.bat`** (press **Yes**). It finds the T Print
+folder on the PC (or installs a fresh copy in `C:\TPrint`), installs Python 3.12 and SumatraPDF with winget if
+they are missing, makes the HTTPS certificate if there is none, lists the printers, then runs the one-click
+update/start below and puts a **T Print 1-Click** shortcut on the Desktop. Its report is saved on the Desktop as
+`T-Print-setup-report.txt` (it never contains the shop key).
+
 ## ⭐ One click (Shop PC 1)
 
 Double-click **`T-Print-1-Click.bat`** in the T Print folder and press **Yes** when Windows asks for

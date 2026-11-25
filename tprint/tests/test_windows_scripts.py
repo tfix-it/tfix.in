@@ -49,3 +49,28 @@ def test_config_finds_tools_or_uses_the_env_setting(monkeypatch, tmp_path):
     assert config._find_exe('NOPE_X', ['/no/such', str(exe)]) == str(exe)
     assert config._find_exe('NOPE_X', ['/no/a', '/no/b']) == '/no/a'
     importlib.reload(config)
+
+
+def test_setup_script_is_balanced_and_never_prints_the_key():
+    s = (ROOT / 'windows' / 'setup.ps1').read_text(encoding='ascii')
+    assert s.count('{') == s.count('}') and s.count('(') == s.count(')')
+    assert 'windows\\one-click.ps1' in s and "'SumatraPDF.SumatraPDF'" in s and "'Python.Python.3.12'" in s
+    # the report on the Desktop must not contain the shop key: only "is set / not set"
+    assert 'Say $envText' not in s and 'Write-Host $envText' not in s
+    b = (ROOT / 'T-Print-Setup.bat').read_bytes()
+    assert b'windows\\setup.ps1' in b and b'net session >nul' in b
+
+
+def test_one_click_prefers_the_highest_zip_version():
+    s = (ROOT / 'windows' / 'one-click.ps1').read_text(encoding='ascii')
+    assert "-match '-v(\\d+)'" in s
+
+
+def test_make_cert_writes_a_certificate(tmp_path):
+    import subprocess, sys
+    r = subprocess.run([sys.executable, str(ROOT / 'windows' / 'make-cert.py'), str(tmp_path)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert (tmp_path / 'cert.pem').read_text().startswith('-----BEGIN CERTIFICATE-----')
+    assert 'PRIVATE KEY' in (tmp_path / 'key.pem').read_text()
+    r2 = subprocess.run([sys.executable, str(ROOT / 'windows' / 'make-cert.py'), str(tmp_path)], capture_output=True, text=True)
+    assert 'kept' in r2.stdout                      # never overwrites an existing certificate

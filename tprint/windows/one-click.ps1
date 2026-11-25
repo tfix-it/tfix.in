@@ -41,8 +41,10 @@ if (-not (Test-Path (Join-Path $Root 'app\main.py'))) {
 # ---------------------------------------------------------------- 1. update
 Step 1 'Checking for a T Print update (tprint-server*.zip)'
 $downloads = Join-Path $env:USERPROFILE 'Downloads'
+# Highest version number wins (tprint-server-v10 beats a v8 that was downloaded later), then the newest file.
 $zip = Get-ChildItem -Path @($Root, $downloads) -Filter 'tprint-server*.zip' -File -ErrorAction SilentlyContinue |
-    Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    Sort-Object @{ e = { if ($_.Name -match '-v(\d+)') { [int]$Matches[1] } else { 0 } }; Descending = $true }, @{ e = 'LastWriteTime'; Descending = $true } |
+    Select-Object -First 1
 $marker = Join-Path $Logs 'last-update.txt'
 if (-not $zip) {
     Say '    No update zip found - keeping the current version.'
@@ -116,9 +118,12 @@ if ($LASTEXITCODE -ne 0) {
 } else {
     Say '    Packages OK.' 'Green'
 }
-foreach ($c in @('cert.pem', 'key.pem')) {
-    if (-not (Test-Path (Join-Path $Root $c))) {
-        Say "    Note: $c is missing. T Print uses HTTPS on port 443 and needs cert.pem and key.pem (see README)." 'Yellow'
+if (-not ((Test-Path (Join-Path $Root 'cert.pem')) -and (Test-Path (Join-Path $Root 'key.pem')))) {
+    Say '    No HTTPS certificate yet (cert.pem/key.pem) - making one for this PC...'
+    & $py -m pip install cryptography --disable-pip-version-check -q
+    & $py (Join-Path $PSScriptRoot 'make-cert.py') $Root
+    if (-not (Test-Path (Join-Path $Root 'cert.pem'))) {
+        Fail 'Could not make cert.pem/key.pem (needs internet once for the cryptography package). See logs\one-click.log.'
     }
 }
 
