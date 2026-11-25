@@ -203,3 +203,18 @@ To use rewards at the counter: open **CLUTCH Rewards** in /admin, enter the mobi
 **Check rewards**, take the amount off the bill, then enter it and press **Use rewards**. Do this
 only for the customer who is collecting an online order on that number. This needs the
 online-order settings from section 7 (tprint.env) on this PC.
+
+## 10. Repairs from repair.tfix.in
+
+Customers can run the **Phone Doctor** (a 2-minute self-check in the browser) and book a repair on
+repair.tfix.in. Each booking gets a **#RP-101** style token. In /admin, the **Repairs** panel lists open
+bookings with the customer's details and their Phone Doctor results (red = problem found).
+
+1. When the device arrives, set **Received** (or **Repairing** / **Waiting for parts**), and type an
+   **Estimate** and a **Note** — the customer sees them on their repair pass.
+2. When it's fixed, set **Ready for pickup** and the **Final** amount.
+3. At handover: tick **Paid**, choose **Collected**, Save. This adds the customer's CLUTCH Rewards
+   (₹5 per ₹100, the same balance as print) and can't be undone.
+
+The Phone Doctor can't test battery health, buttons, SIM, Wi-Fi hardware or fingerprint — always check
+the device yourself before quoting.

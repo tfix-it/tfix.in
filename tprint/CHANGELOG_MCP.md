@@ -56,3 +56,11 @@
   lookups return the history and the log check. Customers see verified receipts on their pass.
 - Admin CLUTCH Rewards panel: full history with receipt codes and a "Rewards log verified" line.
 - Website: per-file ink / sides / copies / pages (T Print already took options per file).
+
+# repair.tfix.in: Phone Doctor + repair booking
+- New site `repair/`: browser Phone Doctor, booking (#RP tokens), repair pass; shares the database
+  and CLUTCH Rewards with print.tfix.in (lib.php schema v5: repairs, repair_credits).
+- shop.php: repairs, repair_update (collected + paid credits rewards once, logged in the hash chain).
+- app/cloud_sync.py: CloudClient.repairs()/repair_update(); app/routes_admin.py: GET/POST
+  /api/admin/cloud/repairs; admin page: Repairs panel (all customer text HTML-escaped).
+- Tests: 50 pass.

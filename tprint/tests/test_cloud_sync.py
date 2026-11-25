@@ -50,16 +50,23 @@ def site(tmp_path):
                             env={**os.environ, 'TPRINT_CLOUD_CONFIG': str(cfg)},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     base = f'http://127.0.0.1:{port}/api'
-    for _ in range(50):
-        try:
-            urllib.request.urlopen(base + '/status.php', timeout=1)
-        except urllib.error.HTTPError:
-            break
-        except OSError:
-            time.sleep(0.1)
-    yield types.SimpleNamespace(base=base, data=data)
-    proc.terminate()
-    proc.wait(5)
+    rport = _free_port()   # repair.tfix.in (shares the same database and rewards)
+    rproc = subprocess.Popen(['php', '-S', f'127.0.0.1:{rport}', '-t', str(SITE.parent / 'repair')],
+                             env={**os.environ, 'TPRINT_CLOUD_CONFIG': str(cfg)},
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    rbase = f'http://127.0.0.1:{rport}/api'
+    for b in (base, rbase):
+        for _ in range(50):
+            try:
+                urllib.request.urlopen(b + '/status.php', timeout=1)
+            except urllib.error.HTTPError:
+                break
+            except OSError:
+                time.sleep(0.1)
+    yield types.SimpleNamespace(base=base, rbase=rbase, data=data)
+    for pr in (proc, rproc):
+        pr.terminate()
+        pr.wait(5)
 
 
 @pytest.fixture(autouse=True)
@@ -370,7 +377,7 @@ def test_rewards_given_before_the_log_are_backfilled(site, tmp_path):
     db_path = site.data / 'db.sqlite'
     with sqlite3.connect(db_path) as con:                      # pretend the log is new
         con.execute('DELETE FROM reward_ledger')
-    (site.data / '.schema-v4').unlink()
+    (site.data / '.schema-v5').unlink()
     info = client(site).rewards('9876543210')
     assert info['ledger']['ok'] and info['ledger']['entries'] == 1
     assert info['history'][0]['points'] == 10 and info['history'][0]['balance'] == 10
@@ -404,3 +411,99 @@ def test_cancelled_order_stays_cancelled_when_shop_pushes(site, tmp_path):
     print_service.confirm_payment(job['id'], True)
     cloud_sync.push_statuses(client(site))
     assert status(site, o)['status'] == 'cancelled'
+
+
+
+# ---------------- repair.tfix.in: booking, staff updates, shared rewards ----------------
+def book_repair(site, expect=201, **over):
+    body = {'name': 'Anu', 'phone': '9876543210', 'device_type': 'phone', 'brand': 'Samsung', 'model': 'A54',
+            'issues': ['screen', 'charging'], 'description': 'lines on screen',
+            'diagnosis': {'tests': {'touch': {'result': 'fail', 'detail': '3/48 zones not touched'},
+                                    'speaker': {'result': 'pass', 'detail': 'tone heard'},
+                                    'bogus key!': {'result': 'pass'}, 'mic': {'result': 'weird'}},
+                          'device': {'model': 'SM-A546E', 'screen': '1080x2340'}}}
+    body.update(over)
+    r = httpx.post(site.rbase + '/book.php', json=body)
+    assert r.status_code == expect, r.text
+    return r.json()
+
+
+def rstatus(site, b):
+    return httpx.get(site.rbase + '/status.php', params={'code': b['code'], 't': b['token']}).json()
+
+
+def test_repair_booking_and_status(site):
+    b = book_repair(site)
+    assert re.fullmatch(r'RP-\d{3,}', b['code'])
+    s = rstatus(site, b)
+    assert s['status'] == 'requested' and s['issues'] == ['screen', 'charging'] and s['has_diagnosis']
+    assert 'phone' not in s and s['rewards']['phone'] == '98******10'
+    # private link needed
+    assert httpx.get(site.rbase + '/status.php', params={'code': b['code'], 't': '0' * 32}).status_code == 404
+    # validation
+    book_repair(site, expect=400, phone='123')
+    book_repair(site, expect=400, name='')
+    book_repair(site, expect=400, device_type='car')
+    book_repair(site, expect=400, issues=[], description='')
+    book_repair(site, expect=400, visit_date='2001-01-01')
+    # lib.php is never served from the repair site either
+    assert httpx.get(site.rbase.replace('/api', '') + '/../print/api/lib.php').status_code in (403, 404)
+
+
+def test_staff_sees_report_and_collect_earns_shared_rewards(site, tmp_path):
+    c = client(site)
+    b = book_repair(site)
+    [r] = c.repairs()
+    assert r['code'] == b['code'] and r['phone'] == '9876543210'
+    assert set(r['diagnosis']['tests']) == {'touch', 'speaker'}          # bad keys/values dropped
+    assert r['diagnosis']['tests']['touch']['result'] == 'fail'
+    rid = r['repair_id']
+    c.repair_update(rid, status='received', quote=1500, note='Screen + charging port')
+    with pytest.raises(cloud_sync.CloudError, match='400'):
+        c.repair_update(rid, status='collected')                         # needs final amount + paid
+    c.repair_update(rid, status='ready', final_amount=1450)
+    s = rstatus(site, b)
+    assert (s['status'], s['quote'], s['final_amount'], s['note']) == ('ready', 1500, 1450, 'Screen + charging port')
+    out = c.repair_update(rid, status='collected', paid=True)
+    assert out['reward'] == 70                                           # ₹1450 -> 14 x ₹5
+    with pytest.raises(cloud_sync.CloudError, match='409'):
+        c.repair_update(rid, status='ready')
+    c.repair_update(rid, status='collected', paid=True)                  # again: no double credit
+    assert c.repairs() == [] and len(c.repairs(include_finished=True)) == 1
+
+    # print + repair share one rewards balance and one verified log
+    collect(site, place_order(site, [(pdf(tmp_path, 1), BW)]), [60])     # 1450 + 60 = 1510 -> 75
+    info = c.rewards('9876543210')
+    assert (info['spent'], info['earned'], info['balance']) == (1510, 75, 75)
+    assert [h['code'][:3] for h in info['history']] == ['CP-', 'RP-'] and info['ledger']['ok']
+    assert rstatus(site, b)['rewards']['balance'] == 75
+    with pytest.raises(cloud_sync.CloudError, match='401'):
+        client(site, token='x' * 40).repairs()
+
+
+def test_admin_repair_routes(site, monkeypatch):
+    import asyncio
+    from fastapi import HTTPException
+    from app.routes_admin import admin_repairs, admin_repair_update
+    monkeypatch.setenv('PRINTSHOP_CLOUD_URL', site.base + '/shop.php')
+    monkeypatch.setenv('PRINTSHOP_CLOUD_TOKEN', TOKEN)
+    for name in ('CLOUD_URL', 'CLOUD_TOKEN'):
+        monkeypatch.delattr(config, name, raising=False)
+    book_repair(site)
+    [r] = asyncio.run(admin_repairs(0))['repairs']
+    out = asyncio.run(admin_repair_update(r['repair_id'], 'ready', '', '999.5', 0, 'ok'))
+    assert out['final_amount'] == 999.5 and out['status'] == 'ready'
+    with pytest.raises(HTTPException) as e:
+        asyncio.run(admin_repair_update(r['repair_id'], 'collected', '', '', 0, ''))
+    assert e.value.status_code == 400
+    with pytest.raises(HTTPException) as e:
+        asyncio.run(admin_repair_update(r['repair_id'], 'nope', '', '', 0, ''))
+    assert e.value.status_code == 400
+    out = asyncio.run(admin_repair_update(r['repair_id'], 'collected', '', '999.5', 1, ''))
+    assert out['reward'] == 45
+
+
+def test_admin_repairs_escape_customer_text():
+    admin = (Path(__file__).resolve().parents[1] / 'static' / 'admin' / 'index.html').read_text()
+    for needle in ("esc(r.name)", "esc(r.description)", "esc(r.brand)", "esc(r.model)", "esc(v.detail)", "esc(r.note || '')"):
+        assert needle in admin, needle

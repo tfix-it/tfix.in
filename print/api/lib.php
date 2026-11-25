@@ -67,7 +67,7 @@ function db(): PDO
 
 function ensure_schema(PDO $pdo): void
 {
-    $flag = data_dir() . '/.schema-v4';
+    $flag = data_dir() . '/.schema-v5';
     if (is_file($flag)) {
         return;
     }
@@ -146,6 +146,42 @@ function ensure_schema(PDO $pdo): void
     )$tail");
     foreach (['CREATE INDEX idx_credit_phone ON reward_credits (phone)', 'CREATE INDEX idx_redeem_phone ON reward_redemptions (phone)',
               'CREATE INDEX idx_ledger_phone ON reward_ledger (phone)'] as $sql) {
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // already there
+        }
+    }
+    // v5: repair.tfix.in bookings (same customer = same mobile number, same CLUTCH Rewards).
+    $pdo->exec("CREATE TABLE IF NOT EXISTS repairs (
+        id $pk,
+        code VARCHAR(12) NOT NULL UNIQUE,
+        token_hash CHAR(64) NOT NULL,
+        phone VARCHAR(15) NOT NULL,
+        name VARCHAR(60) NOT NULL,
+        device_type VARCHAR(12) NOT NULL,
+        brand VARCHAR(40) NOT NULL DEFAULT '',
+        model VARCHAR(60) NOT NULL DEFAULT '',
+        issues VARCHAR(300) NOT NULL DEFAULT '',
+        description VARCHAR(600) NOT NULL DEFAULT '',
+        visit_date DATE NULL,
+        diagnosis TEXT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'requested',
+        quote DECIMAL(10,2) NULL,
+        final_amount DECIMAL(10,2) NULL,
+        paid TINYINT NOT NULL DEFAULT 0,
+        staff_note VARCHAR(300) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL
+    )$tail");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS repair_credits (
+        repair_id INT NOT NULL PRIMARY KEY,
+        phone VARCHAR(15) NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        reward DECIMAL(10,2) NOT NULL,
+        created_at DATETIME NOT NULL
+    )$tail");
+    foreach (['CREATE INDEX idx_repair_phone ON repairs (phone)', 'CREATE INDEX idx_rcredit_phone ON repair_credits (phone)'] as $sql) {
         try {
             $pdo->exec($sql);
         } catch (PDOException $e) {
@@ -311,8 +347,11 @@ function rewards_earned_for(float $spent): float
 function rewards_for(string $phone): array
 {
     $pdo = db();
-    $st = $pdo->prepare('SELECT COALESCE(SUM(amount), 0), COALESCE(SUM(reward), 0) FROM reward_credits WHERE phone = ?');
-    $st->execute([$phone]);
+    // Print orders and repairs both count towards the same rewards.
+    $st = $pdo->prepare('SELECT COALESCE(SUM(amount), 0), COALESCE(SUM(reward), 0) FROM (
+                             SELECT amount, reward FROM reward_credits WHERE phone = ?
+                             UNION ALL SELECT amount, reward FROM repair_credits WHERE phone = ?) t');
+    $st->execute([$phone, $phone]);
     [$spent, $earned] = array_map('floatval', $st->fetch(PDO::FETCH_NUM));
     $st = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM reward_redemptions WHERE phone = ?');
     $st->execute([$phone]);
@@ -367,9 +406,7 @@ function credit_order(int $orderId): void
         $chk = $pdo->prepare('SELECT 1 FROM reward_credits WHERE order_id = ?');
         $chk->execute([$orderId]);
         if (!$chk->fetchColumn()) {
-            $sum = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM reward_credits WHERE phone = ?');
-            $sum->execute([$o['phone']]);
-            $before = (float)$sum->fetchColumn();
+            $before = rewards_for($o['phone'])['spent'];
             $reward = rewards_earned_for($before + $amount) - rewards_earned_for($before);
             $pdo->prepare('INSERT INTO reward_credits (order_id, phone, amount, reward, created_at) VALUES (?, ?, ?, ?, ?)')
                 ->execute([$orderId, $o['phone'], $amount, $reward, now()]);
@@ -428,6 +465,9 @@ function ledger_backfill(PDO $pdo): void
     $rows = $pdo->query("SELECT c.phone, 'credit' AS kind, c.order_id, c.amount, c.reward AS points, COALESCE(o.code, '') AS note, c.created_at
                          FROM reward_credits c LEFT JOIN orders o ON o.id = c.order_id
                          UNION ALL
+                         SELECT c.phone, 'credit', NULL, c.amount, c.reward, COALESCE(r.code, ''), c.created_at
+                         FROM repair_credits c LEFT JOIN repairs r ON r.id = c.repair_id
+                         UNION ALL
                          SELECT phone, 'redeem', NULL, amount, -amount, note, created_at FROM reward_redemptions
                          ORDER BY created_at")->fetchAll();
     if (!$rows) {
@@ -477,7 +517,8 @@ function ledger_verify(): array
             $used += (float)$e['amount'];
         }
     }
-    $tc = (float)$pdo->query('SELECT COALESCE(SUM(reward), 0) FROM reward_credits')->fetchColumn();
+    $tc = (float)$pdo->query('SELECT COALESCE(SUM(reward), 0) FROM reward_credits')->fetchColumn()
+        + (float)$pdo->query('SELECT COALESCE(SUM(reward), 0) FROM repair_credits')->fetchColumn();
     $tu = (float)$pdo->query('SELECT COALESCE(SUM(amount), 0) FROM reward_redemptions')->fetchColumn();
     if (abs($tc - $credit) > 0.009 || abs($tu - $used) > 0.009) {
         return ['ok' => false, 'entries' => $n, 'head' => $prev, 'problem' => 'rewards totals do not match the log'];
@@ -492,10 +533,73 @@ function ledger_for(string $phone, int $limit = 20): array
                          WHERE l.phone = ? ORDER BY l.seq DESC LIMIT ' . max(1, min(100, $limit)));
     $st->execute([$phone]);
     return array_map(fn($e) => [
-        'seq' => (int)$e['seq'], 'kind' => $e['kind'], 'code' => $e['code'], 'amount' => (float)$e['amount'],
+        'seq' => (int)$e['seq'], 'kind' => $e['kind'],
+        'code' => $e['code'] ?? ($e['kind'] === 'credit' && $e['note'] !== '' ? $e['note'] : null), 'amount' => (float)$e['amount'],
         'points' => (float)$e['points'], 'balance' => (float)$e['balance_after'], 'note' => $e['note'],
         'at' => iso($e['created_at']), 'receipt' => substr($e['hash'], 0, 12),
     ], $st->fetchAll());
+}
+
+/* ---------------- repairs (repair.tfix.in) ---------------- */
+
+const REPAIR_STATUSES = ['requested', 'received', 'repairing', 'waiting_parts', 'ready', 'collected', 'cancelled'];
+const REPAIR_DEVICES = ['phone', 'laptop', 'tablet', 'other'];
+const REPAIR_ISSUES = ['screen', 'battery', 'charging', 'speaker', 'mic', 'camera', 'water', 'buttons', 'software', 'network', 'other'];
+
+function public_repair(array $r): array
+{
+    return [
+        'code' => $r['code'], 'name' => $r['name'], 'status' => $r['status'],
+        'device_type' => $r['device_type'], 'brand' => $r['brand'], 'model' => $r['model'],
+        'issues' => $r['issues'] === '' ? [] : explode(',', $r['issues']), 'description' => $r['description'],
+        'visit_date' => $r['visit_date'], 'has_diagnosis' => $r['diagnosis'] !== null && $r['diagnosis'] !== '',
+        'quote' => $r['quote'] !== null ? (float)$r['quote'] : null,
+        'final_amount' => $r['final_amount'] !== null ? (float)$r['final_amount'] : null,
+        'paid' => (bool)$r['paid'], 'note' => $r['staff_note'],
+        'created_at' => iso($r['created_at']), 'updated_at' => iso($r['updated_at']),
+    ];
+}
+
+function repair_reward(int $repairId): float
+{
+    $st = db()->prepare('SELECT reward FROM repair_credits WHERE repair_id = ?');
+    $st->execute([$repairId]);
+    $r = $st->fetchColumn();
+    return $r === false ? 0.0 : (float)$r;
+}
+
+/** Credit a collected, paid repair to the customer's rewards (once). */
+function credit_repair(int $repairId): void
+{
+    $pdo = db();
+    $st = $pdo->prepare('SELECT * FROM repairs WHERE id = ?');
+    $st->execute([$repairId]);
+    $r = $st->fetch();
+    if (!$r || $r['status'] !== 'collected' || (int)$r['paid'] !== 1 || $r['final_amount'] === null) {
+        return;
+    }
+    $amount = round((float)$r['final_amount'], 2);
+    if ($amount <= 0) {
+        return;
+    }
+    $pdo->beginTransaction();
+    try {
+        $chk = $pdo->prepare('SELECT 1 FROM repair_credits WHERE repair_id = ?');
+        $chk->execute([$repairId]);
+        if (!$chk->fetchColumn()) {
+            $before = rewards_for($r['phone'])['spent'];
+            $reward = rewards_earned_for($before + $amount) - rewards_earned_for($before);
+            $pdo->prepare('INSERT INTO repair_credits (repair_id, phone, amount, reward, created_at) VALUES (?, ?, ?, ?, ?)')
+                ->execute([$repairId, $r['phone'], $amount, $reward, now()]);
+            ledger_append($r['phone'], 'credit', null, $amount, $reward, $r['code']);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[tprint repair rewards] ' . $e->getMessage());
+    }
 }
 
 function masked_phone(string $phone): string

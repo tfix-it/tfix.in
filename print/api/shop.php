@@ -14,6 +14,8 @@
  *   POST ?action=redeem  (JSON)       {phone, amount, note} use rewards at the counter (staff)
  *   GET  ?action=ledger_verify        check the tamper-evident rewards log (hash chain)
  *   POST ?action=cancel  (JSON)       {order_ids:[...]} or {all_open:true} cancel unfinished orders (staff)
+ *   GET  ?action=repairs[&all=1]      repair bookings from repair.tfix.in (open ones by default)
+ *   POST ?action=repair_update (JSON) {repair_id, status, quote, final_amount, paid, note}; collected+paid -> rewards
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
@@ -202,6 +204,63 @@ switch ($action) {
             }
         }
         send_json(200, ['ok' => true, 'cancelled' => $done]);
+
+    case 'repairs':
+        // Staff: repair bookings from repair.tfix.in. ?all=1 includes finished ones (latest 100).
+        require_method('GET');
+        $sql = !empty($_GET['all'])
+            ? 'SELECT * FROM repairs ORDER BY id DESC LIMIT 100'
+            : "SELECT * FROM repairs WHERE status NOT IN ('collected', 'cancelled') ORDER BY id LIMIT 200";
+        $out = [];
+        foreach ($pdo->query($sql)->fetchAll() as $r) {
+            $diag = $r['diagnosis'] !== null ? json_decode((string)$r['diagnosis'], true) : null;
+            $out[] = ['repair_id' => (int)$r['id'], 'phone' => $r['phone'], 'diagnosis' => is_array($diag) ? $diag : null,
+                      'reward' => repair_reward((int)$r['id'])] + public_repair($r);
+        }
+        send_json(200, ['repairs' => $out]);
+
+    case 'repair_update':
+        // Staff: {repair_id, status?, quote?, final_amount?, paid?, note?}. Collected + paid credits rewards.
+        require_method('POST');
+        $body = json_body();
+        $rid = (int)($body['repair_id'] ?? 0);
+        $st = $pdo->prepare('SELECT * FROM repairs WHERE id = ?');
+        $st->execute([$rid]);
+        $r = $st->fetch();
+        if (!$r) {
+            fail(404, 'Repair not found.');
+        }
+        $money = function ($v) {
+            if ($v === null || $v === '') {
+                return null;
+            }
+            if (!is_numeric($v) || (float)$v < 0 || (float)$v > 1000000) {
+                fail(400, 'Enter amounts in rupees.');
+            }
+            return round((float)$v, 2);
+        };
+        $status = array_key_exists('status', $body) ? (string)$body['status'] : $r['status'];
+        if (!in_array($status, REPAIR_STATUSES, true)) {
+            fail(400, 'Unknown repair status.');
+        }
+        if ($r['status'] === 'collected' && $status !== 'collected') {
+            fail(409, 'This repair is already collected.');
+        }
+        $quote = array_key_exists('quote', $body) ? $money($body['quote']) : ($r['quote'] !== null ? (float)$r['quote'] : null);
+        $final = array_key_exists('final_amount', $body) ? $money($body['final_amount']) : ($r['final_amount'] !== null ? (float)$r['final_amount'] : null);
+        $paid = array_key_exists('paid', $body) ? (!empty($body['paid']) ? 1 : 0) : (int)$r['paid'];
+        $note = array_key_exists('note', $body) ? clean_text((string)$body['note'], 300) : $r['staff_note'];
+        if ($status === 'collected' && ($final === null || !$paid)) {
+            fail(400, 'Enter the final amount and mark it paid before collected.');
+        }
+        $pdo->prepare('UPDATE repairs SET status = ?, quote = ?, final_amount = ?, paid = ?, staff_note = ?, updated_at = ? WHERE id = ?')
+            ->execute([$status, $quote, $final, $paid, $note, now(), $rid]);
+        if ($status === 'collected') {
+            credit_repair($rid);
+        }
+        $st->execute([$rid]);
+        $r = $st->fetch();
+        send_json(200, ['ok' => true, 'repair_id' => $rid, 'phone' => $r['phone'], 'reward' => repair_reward($rid)] + public_repair($r));
 
     case 'rewards':
         require_method('GET');

@@ -242,6 +242,64 @@ async def admin_redeem_rewards(phone: str = Form(...), amount: float = Form(...)
         raise _cloud_error(e)
 
 
+REPAIR_STATUSES = ("requested", "received", "repairing", "waiting_parts", "ready", "collected", "cancelled")
+
+
+@router.get("/api/admin/cloud/repairs", dependencies=[Depends(require_admin)])
+async def admin_repairs(all: int = 0):
+    """Repair bookings from repair.tfix.in, with each customer's Phone Doctor report."""
+    import asyncio
+
+    cloud_sync, client = _cloud_client()
+    try:
+        return {"repairs": await asyncio.to_thread(client.repairs, bool(all))}
+    except cloud_sync.CloudError as e:
+        raise _cloud_error(e)
+
+
+@router.post("/api/admin/cloud/repairs/{repair_id}", dependencies=[Depends(require_admin)])
+async def admin_repair_update(
+    repair_id: int,
+    status: str = Form(...),
+    quote: str = Form(""),
+    final_amount: str = Form(""),
+    paid: int = Form(0),
+    note: str = Form(""),
+):
+    """Update a repair booking. Marking it collected (with final amount, paid) adds CLUTCH Rewards."""
+    import asyncio
+
+    if status not in REPAIR_STATUSES:
+        raise HTTPException(status_code=400, detail="Unknown repair status.")
+
+    def money(v: str):
+        v = (v or "").strip()
+        if not v:
+            return None
+        try:
+            x = round(float(v), 2)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Enter amounts in rupees.")
+        if x < 0 or x > 1000000:
+            raise HTTPException(status_code=400, detail="Enter amounts in rupees.")
+        return x
+
+    fields = {"status": status, "quote": money(quote), "final_amount": money(final_amount),
+              "paid": bool(paid), "note": note.strip()[:300]}
+    cloud_sync, client = _cloud_client()
+    try:
+        return await asyncio.to_thread(client.repair_update, repair_id, **fields)
+    except cloud_sync.CloudError as e:
+        msg = str(e)
+        if "HTTP 400" in msg:
+            raise HTTPException(status_code=400, detail="Check the amounts: collected needs a final amount and paid.")
+        if "HTTP 409" in msg:
+            raise HTTPException(status_code=409, detail="This repair is already collected.")
+        if "HTTP 404" in msg:
+            raise HTTPException(status_code=404, detail="Repair not found.")
+        raise _cloud_error(e)
+
+
 @router.websocket("/ws/admin")
 async def ws_admin(websocket: WebSocket):
     # Same session check as require_admin, done manually: FastAPI's

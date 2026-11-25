@@ -1,9 +1,11 @@
 {
   "name": "clutchprint-css",
   "private": true,
-  "description": "Builds print/assets/app.css from the Tailwind classes used in print/index.html",
+  "description": "Builds the CSS for print.tfix.in and repair.tfix.in from the Tailwind classes in their index.html",
   "scripts": {
-    "build": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --minify",
+    "build": "npm run build:print && npm run build:repair",
+    "build:print": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --minify",
+    "build:repair": "tailwindcss -i in.css -o ../../repair/assets/app.css --content ../../repair/index.html --minify",
     "watch": "tailwindcss -i in.css -o ../../print/assets/app.css --content ../../print/index.html --watch"
   },
   "devDependencies": {

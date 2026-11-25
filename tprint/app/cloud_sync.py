@@ -121,6 +121,14 @@ class CloudClient:
         """CLUTCH Rewards of a mobile number: balance, spend, recent credits/uses."""
         return self._json("GET", "rewards", {"phone": phone})
 
+    def repairs(self, include_finished: bool = False) -> list:
+        """Repair bookings from repair.tfix.in (open ones unless include_finished)."""
+        return self._json("GET", "repairs", {"all": 1} if include_finished else None).get("repairs", [])
+
+    def repair_update(self, repair_id: int, **fields) -> dict:
+        """Update a repair: status, quote, final_amount, paid, note. Collected + paid earns rewards."""
+        return self._json("POST", "repair_update", body={"repair_id": repair_id, **fields})
+
     def redeem(self, phone: str, amount: float, note: str = "") -> dict:
         """Use a customer's rewards at the counter; returns {used, balance}."""
         return self._json("POST", "redeem", body={"phone": phone, "amount": amount, "note": note})

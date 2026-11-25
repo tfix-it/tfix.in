@@ -54,6 +54,12 @@ Source: owner's finalized brief. Keep wording exactly as written unless the owne
   short receipt codes; T Print admin shows "Rewards log verified" or what was changed. A future on-chain
   token can be built from this log without losing history.
 
+## T FIX® Repair Lab (repair.tfix.in)
+- Same brand system (gold ▽, dark charcoal), wordmark "REPAIR LAB". Tokens **#RP-<number>**.
+- **Phone Doctor**: honest browser self-check (display, touch, multi-touch, speaker, mic, cameras, charging,
+  battery level, vibration, motion). Always say what it can't test; the technician confirms at the counter.
+- Repairs earn the same CLUTCH Rewards (₹5 per ₹100) on the same mobile number.
+
 ## Search appearance
 - Google site name: **ClutchPrint AI** (WebSite structured data + og:site_name in `index.html`), page title
   "CLUTCHPRINT AI — T FIX® CUSAT | print.tfix.in", 192 px icon for search results.

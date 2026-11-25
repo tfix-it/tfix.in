@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>T FIX® Repair — Phone Doctor &amp; repair booking | repair.tfix.in</title>
+  <meta name="description" content="Check your phone in the browser with the T FIX® Phone Doctor, then book a repair at T FIX® CUSAT, Pipeline Road, Kalamassery. Same mobile number, same CLUTCH Rewards." />
+  <meta name="theme-color" content="#07080a" />
+  <link rel="canonical" href="https://repair.tfix.in/" />
+  <meta property="og:site_name" content="T FIX® Repair" />
+  <meta property="og:title" content="T FIX® Repair — Phone Doctor" />
+  <meta property="og:description" content="Free 2-minute phone check in your browser. Book a repair at T FIX® CUSAT." />
+  <meta property="og:url" content="https://repair.tfix.in/" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    :root { --bg-deep: #07080a; --bg-radial: #181a20; --surface: rgba(20,22,27,.86); --border-subtle: rgba(255,255,255,.09); --border-gold: rgba(212,175,55,.36); }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; color: #f8f9fa; font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse 80% 55% at 50% -10%, rgba(212,175,55,.13) 0%, rgba(212,175,55,.03) 38%, transparent 70%),
+        radial-gradient(circle at 50% 20%, var(--bg-radial) 0%, #0d0e12 52%, var(--bg-deep) 100%) fixed, var(--bg-deep); }
+    body { margin: 0; min-height: 100vh; overflow-x: hidden; background: transparent; }
+    section[id] { scroll-margin-top: 84px; }
+    html[lang="ml"] { font-family: 'Inter', 'Noto Sans Malayalam', system-ui, sans-serif; }
+    html[lang="ml"] [class*="tracking-"] { letter-spacing: normal !important; }
+    .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, 'Noto Sans Malayalam', monospace; }
+    /* Steady background: ▽ lattice (T FIX® emblem), locked in place */
+    .tri-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='48.5' viewBox='0 0 56 48.5'%3E%3Cpath d='M0 .5H56M0 .5L28 49M56 .5L28 49' fill='none' stroke='%23d4af37' stroke-opacity='.1' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 56px 48.5px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%); }
+    .gold-text { background: linear-gradient(135deg, #fff0b3 0%, #e5c158 38%, #c99b26 72%, #f5dc82 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gold-btn { background: linear-gradient(135deg, #f3d97d 0%, #d4af37 52%, #b5891d 100%); color: #0b0c0e; box-shadow: 0 8px 28px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,255,255,.45); transition: transform .18s ease, filter .18s ease; }
+    .gold-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .gold-btn[disabled] { opacity: .7; cursor: progress; transform: none; }
+    .glass { background: var(--surface); border: 1px solid var(--border-subtle); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .glass-gold { background: linear-gradient(160deg, rgba(31,28,20,.92) 0%, rgba(16,17,21,.95) 60%); border: 1px solid var(--border-gold); box-shadow: 0 20px 60px rgba(0,0,0,.55); }
+    .field { width: 100%; min-height: 44px; border-radius: .6rem; border: 1px solid rgba(255,255,255,.1); background: rgba(13,14,18,.8); color: #fff; padding: .55rem .8rem; font: inherit; font-size: 16px; }
+    .field:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,.18); }
+    .field::placeholder { color: #71717a; }
+    .chip { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: #d4d4d8; border-radius: .6rem; padding: .45rem .7rem; font-size: 13px; }
+    .chip[aria-pressed="true"] { border-color: #d4af37; background: rgba(212,175,55,.15); color: #f3d97d; font-weight: 600; }
+    .logo-sym { width: 26px; height: auto; display: block; }
+    .t-pass { color: #6ee7b7; } .t-fail { color: #fca5a5; } .t-skip { color: #a1a1aa; }
+    /* full-screen test layers */
+    .overlay { position: fixed; inset: 0; z-index: 60; background: #000; touch-action: none; user-select: none; -webkit-user-select: none; }
+    /* The grid stops above the button strip, so every box can be reached. */
+    #touch-grid { display: grid; width: 100%; height: calc(100% - 64px - env(safe-area-inset-bottom)); }
+    #ov-touch .ov-bar { background: #000; height: calc(64px + env(safe-area-inset-bottom)); padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+    #touch-grid div { border: 1px solid rgba(255,255,255,.08); background: #111; }
+    #touch-grid div.on { background: #22c55e; }
+    .ov-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; justify-content: center; background: linear-gradient(transparent, rgba(0,0,0,.85)); }
+    .ov-hint { position: absolute; left: 0; right: 0; top: calc(12px + env(safe-area-inset-top)); text-align: center; font: 600 13px 'Inter', sans-serif; color: #fff; text-shadow: 0 1px 3px #000; pointer-events: none; padding: 0 16px; }
+    video.cam { width: 100%; max-height: 220px; border-radius: .75rem; background: #000; object-fit: cover; }
+    .meter { height: 8px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; }
+    .meter > div { height: 100%; width: 0; background: linear-gradient(90deg, #9c7518, #d4af37, #fff0b3); transition: width .08s linear; }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#d4af37]/30 selection:text-[#f3d97d]">
+  <div class="tri-bg" aria-hidden="true"></div>
+
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#08090c]/85 backdrop-blur-md">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <a href="https://tfix.in" target="_blank" rel="noopener noreferrer" class="flex min-w-0 items-center gap-3" aria-label="T FIX Repair — tfix.in">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d4af37]/40 bg-[#0b0b0d]">
+          <svg viewBox="-6 -6 301 260" class="logo-sym" aria-hidden="true"><defs><linearGradient id="g-hd" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="247"><stop offset="0" stop-color="#FCE379"/><stop offset=".5" stop-color="#F5D466"/><stop offset="1" stop-color="#DEB23A"/></linearGradient></defs><path d="M0 0.3H288.7L144.3 246.6Z M31.1 18.5L144.5 212L257.9 18.5Z M92 37H198V59H158V171H131V59H92Z" fill="url(#g-hd)" fill-rule="nonzero"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="whitespace-nowrap text-[11px] font-bold tracking-[0.18em] text-[#f3d97d] sm:text-xs">T FIX® CUSAT</div>
+          <div class="whitespace-nowrap text-lg font-black italic leading-none tracking-tight sm:text-xl"><span class="gold-text">REPAIR</span> <span class="font-light text-white">LAB</span></div>
+        </div>
+      </a>
+      <nav class="hidden items-center gap-5 text-sm text-zinc-300 md:flex" aria-label="Main">
+        <a href="#doctor" class="hover:text-[#f3d97d]" data-i18n="navDoctor">Phone Doctor</a>
+        <a href="#book" class="hover:text-[#f3d97d]" data-i18n="navBook">Book repair</a>
+        <a href="#mine" class="hover:text-[#f3d97d]" data-i18n="navMine">My repairs</a>
+        <a href="https://print.tfix.in" class="hover:text-[#f3d97d]">CLUTCHPRINT ↗</a>
+      </nav>
+      <div class="flex shrink-0 items-center gap-2">
+        <button id="lang-btn" type="button" class="rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-xs font-bold text-zinc-200 hover:border-[#d4af37]/60 hover:text-[#f3d97d]" aria-label="മലയാളം">മല</button>
+        <a href="#book" class="gold-btn rounded-lg px-3 py-2 text-xs font-bold sm:px-4 sm:text-sm" data-i18n="ctaBook">Book repair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
+    <!-- Hero -->
+    <section class="mx-auto max-w-3xl text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-[#d4af37]/35 bg-[#14130f]/90 px-3.5 py-1.5">
+        <span id="shop-dot" class="h-2 w-2 rounded-full bg-zinc-500"></span>
+        <span id="shop-pill" class="font-mono-tech text-[11px] font-semibold tracking-[0.1em] text-[#f3d97d] sm:text-xs">…</span>
+      </span>
+      <h1 class="mt-6 text-3xl font-extrabold tracking-tight text-white sm:text-5xl"><span data-i18n="h1a">Phone acting up?</span> <span class="gold-text" data-i18n="h1b">Check it in 2 minutes.</span></h1>
+      <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg" data-i18n="heroSub">The T FIX® Phone Doctor tests your screen, touch, speaker, mic, camera, charging and sensors right here in your browser — then book the repair in one tap.</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="#doctor" class="gold-btn rounded-xl px-5 py-3 text-sm font-extrabold" data-i18n="ctaDoctor">Start Phone Doctor</a>
+        <a href="#book" class="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-zinc-100 hover:border-[#d4af37]/50" data-i18n="ctaSkip">Skip — book a repair</a>
+      </div>
+      <p class="mt-4 font-mono-tech text-[11px] text-zinc-500" data-i18n="heroNote">Same mobile number as CLUTCHPRINT · repairs earn CLUTCH Rewards too</p>
+    </section>
+
+    <!-- Phone Doctor -->
+    <section id="doctor" class="mt-12">
+      <div class="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <span class="font-mono-tech text-xs uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="docEyebrow">T FIX® PHONE DOCTOR · BETA</span>
+          <h2 class="mt-1 text-2xl font-extrabold text-white" data-i18n="docTitle">Self-check on this phone</h2>
+        </div>
+        <span id="doc-score" class="font-mono-tech text-xs text-zinc-400"></span>
+      </div>
+      <p class="mt-2 text-sm leading-relaxed text-zinc-400" data-i18n="docSub">Open this page on the phone you want to check. Tap each test. Nothing is uploaded until you book — camera and mic are only used during their test.</p>
+      <div id="device-info" class="mt-4 rounded-xl border border-white/10 bg-[#0d0e12]/70 p-3 font-mono-tech text-[11px] leading-relaxed text-zinc-400"></div>
+      <div id="tests" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"></div>
+      <div id="doc-result" hidden class="glass-gold mt-5 rounded-2xl p-5">
+        <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="resEyebrow">PHONE DOCTOR REPORT</span>
+        <p id="doc-summary" class="mt-2 text-base font-bold text-white"></p>
+        <ul id="doc-findings" class="mt-2 space-y-1 text-sm text-zinc-300"></ul>
+        <p class="mt-3 text-[11px] leading-relaxed text-zinc-500" data-i18n="docLimits">A browser can't test battery health, buttons, SIM, Wi-Fi hardware or fingerprint. Our technician confirms everything at the counter before any work or charge.</p>
+        <a href="#book" id="doc-book" class="gold-btn mt-4 inline-block rounded-xl px-5 py-3 text-sm font-extrabold" data-i18n="resBook">Book repair with this report</a>
+      </div>
+    </section>
+
+    <!-- Booking -->
+    <section id="book" class="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+      <form id="book-form" class="glass rounded-2xl p-5 sm:p-6 lg:col-span-7" novalidate onsubmit="return false">
+        <h2 class="text-lg font-bold text-white" data-i18n="bookTitle">Book a repair</h2>
+        <p class="text-xs text-zinc-400" data-i18n="bookSub">Free check at the counter. You approve the price before we start.</p>
+
+        <span class="mt-5 block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fDevice">Device</span>
+        <div id="device-chips" class="mt-2 flex flex-wrap gap-2"></div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="block"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fBrand">Brand</span>
+            <input id="brand" class="field mt-1.5" list="brands" maxlength="40" autocomplete="off" placeholder="e.g. Samsung" /></label>
+          <label class="block"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fModel">Model</span>
+            <input id="model" class="field mt-1.5" maxlength="60" autocomplete="off" placeholder="e.g. Galaxy A54" /></label>
+        </div>
+        <datalist id="brands"><option>Samsung</option><option>Apple</option><option>Xiaomi / Redmi</option><option>Realme</option><option>OnePlus</option><option>Vivo</option><option>Oppo</option><option>Motorola</option><option>Google Pixel</option><option>Nothing</option><option>iQOO</option><option>Poco</option><option>HP</option><option>Dell</option><option>Lenovo</option><option>Asus</option><option>Acer</option></datalist>
+
+        <span class="mt-4 block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fIssues">What's wrong? (pick all that apply)</span>
+        <div id="issue-chips" class="mt-2 flex flex-wrap gap-2"></div>
+        <label class="mt-3 block"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fDesc">Describe it (optional)</span>
+          <textarea id="desc" class="field mt-1.5 min-h-[80px]" maxlength="600" data-i18n-ph="descPh" placeholder="e.g. fell from bike, lines on screen, charges only at an angle"></textarea></label>
+
+        <span class="mt-4 block font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fVisit">When will you come?</span>
+        <div id="visit-chips" class="mt-2 flex flex-wrap items-center gap-2"></div>
+        <input id="visit-date" type="date" class="field mt-2 !w-auto" hidden />
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="block"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fName">Your name</span>
+            <input id="name" class="field mt-1.5" autocomplete="name" maxlength="60" placeholder="e.g. Anu" /></label>
+          <label class="block"><span class="font-mono-tech text-[11px] uppercase tracking-wider text-zinc-400" data-i18n="fPhone">Mobile number</span>
+            <input id="phone" class="field mt-1.5" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" /></label>
+        </div>
+
+        <label id="attach-wrap" hidden class="mt-4 flex items-start gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+          <input id="attach" type="checkbox" checked class="mt-0.5" /><span data-i18n="attach">Attach my Phone Doctor report (helps the technician)</span></label>
+
+        <button id="book-btn" type="button" class="gold-btn mt-5 w-full rounded-xl px-5 py-3 text-sm font-extrabold" data-i18n="bookBtn">Book repair</button>
+        <p id="book-err" role="alert" hidden class="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"></p>
+        <p class="mt-3 text-[10px] leading-relaxed text-zinc-500" data-i18n="privacy">We keep your name, mobile number and repair details only to handle your repair and CLUTCH Rewards. Back up your phone before handing it over.</p>
+      </form>
+
+      <!-- My repairs -->
+      <div id="mine" class="glass-gold rounded-2xl p-5 lg:col-span-5">
+        <span class="font-mono-tech text-[10px] uppercase tracking-[0.16em] text-[#d4af37]" data-i18n="mineTitle">T FIX® REPAIR PASS</span>
+        <div id="mine-empty" class="mt-2 text-sm text-zinc-400" data-i18n="mineEmpty">Book a repair and your #RP token appears here. Show it at the counter.</div>
+        <div id="mine-list" class="mt-2 space-y-3"></div>
+        <div id="rw" hidden class="mt-4 rounded-xl border border-[#d4af37]/35 bg-gradient-to-br from-[#d4af37]/15 to-transparent p-3">
+          <div class="flex items-center justify-between"><span class="font-mono-tech text-[10px] uppercase tracking-[0.14em] text-[#d4af37]">CLUTCH Rewards</span><span id="rw-phone" class="font-mono-tech text-[10px] text-zinc-500"></span></div>
+          <div class="mt-1 flex items-baseline gap-2"><span id="rw-balance" class="font-mono-tech text-2xl font-bold text-[#f3d97d]">₹0</span><span class="text-[11px] text-zinc-400" data-i18n="rwAvail">available</span></div>
+          <p class="mt-1 text-[11px] leading-relaxed text-zinc-400" data-i18n="rwHow">Every ₹100 you spend on prints or repairs earns ₹5. Use it at the T FIX® counter.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visit -->
+    <section class="glass mt-14 flex flex-col items-start justify-between gap-4 rounded-2xl p-6 sm:flex-row sm:items-center">
+      <div>
+        <div class="flex items-center gap-2"><span class="text-sm font-extrabold tracking-[0.16em] text-[#f3d97d]">T FIX® CUSAT</span><span class="rounded bg-white/5 px-2 py-0.5 font-mono-tech text-[10px] text-zinc-400">T = Trouble &amp; Tech</span></div>
+        <h3 class="mt-2 text-xl font-bold text-white" data-i18n="visitH">Pipeline Road, Kalamassery</h3>
+        <p class="mt-1 text-sm text-zinc-400" data-i18n="visitP">South Pipeline Road, CUSAT PO, Kalamassery 682022 · Open daily till 9:30 PM</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a id="map-link" href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 hover:border-[#d4af37]/50" data-i18n="directions">Directions</a>
+        <a id="wa-link" href="#" target="_blank" rel="noopener" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-100 hover:border-emerald-400/50"><span class="text-emerald-400">●</span> WhatsApp</a>
+        <a href="https://print.tfix.in" class="gold-btn rounded-xl px-4 py-2.5 text-xs font-extrabold">CLUTCHPRINT ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-[#060709] py-6">
+    <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-4 text-center text-xs text-zinc-500 sm:flex-row sm:px-6 sm:text-left">
+      <p>© <span id="year">2026</span> <strong class="text-zinc-300">T FIX® CUSAT</strong> · Repair Lab. T FIX® is a registered trademark.</p>
+      <p class="font-mono-tech text-[11px]"><a href="https://tfix.in" class="hover:text-[#f3d97d]">tfix.in ↗</a> · <a href="https://print.tfix.in" class="hover:text-[#f3d97d]">print.tfix.in</a> · repair.tfix.in</p>
+    </div>
+  </footer>
+
+  <!-- Full-screen test layers -->
+  <div id="ov-touch" class="overlay" hidden><div id="touch-grid"></div><div class="ov-hint" id="touch-hint"></div><div class="ov-bar"><button type="button" class="chip !bg-black/70" data-ov="cancel">✕</button><button type="button" class="gold-btn rounded-lg px-4 py-2 text-sm font-bold" data-ov="done"></button></div></div>
+  <div id="ov-color" class="overlay" hidden><div class="ov-hint" id="color-hint"></div><div class="ov-bar"><button type="button" class="chip !bg-black/70" data-ov="bad"></button><button type="button" class="gold-btn rounded-lg px-4 py-2 text-sm font-bold" data-ov="next"></button></div></div>
+  <div id="ov-multi" class="overlay" hidden><div class="ov-hint" id="multi-hint"></div><div id="multi-count" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 96px 'JetBrains Mono',monospace;color:#f3d97d;pointer-events:none">0</div><div class="ov-bar"><button type="button" class="chip !bg-black/70" data-ov="cancel">✕</button><button type="button" class="gold-btn rounded-lg px-4 py-2 text-sm font-bold" data-ov="done"></button></div></div>
+
+  <div id="toast" role="status" class="pointer-events-none fixed inset-x-4 bottom-5 z-50 mx-auto max-w-sm translate-y-4 rounded-xl border border-[#d4af37]/45 bg-[#121318]/95 px-4 py-2.5 text-center font-mono-tech text-xs text-[#f3d97d] opacity-0 shadow-2xl transition-all duration-200"></div>
+
+  <script>
+  (function () {
+    "use strict";
+    const SHOP = {
+      whatsapp: "919656369773",
+      mapQuery: "T FIX CUSAT, South Pipeline Road, CUSAT PO, Kalamassery 682022",
+      hours: { 0: ["09:30", "21:30"], 1: ["08:30", "21:30"], 2: ["08:30", "21:30"], 3: ["08:30", "21:30"], 4: ["08:30", "21:30"], 5: ["08:30", "21:30"], 6: ["08:30", "21:30"] }
+    };
+    const API = "api/", STORE = "tfix-repairs", ME_KEY = "clutch-me", DOC_KEY = "tfix-doctor";
+
+    const T = {
+      en: {
+        navDoctor: "Phone Doctor", navBook: "Book repair", navMine: "My repairs", ctaBook: "Book repair", langBtn: "മല",
+        h1a: "Phone acting up?", h1b: "Check it in 2 minutes.",
+        heroSub: "The T FIX® Phone Doctor tests your screen, touch, speaker, mic, camera, charging and sensors right here in your browser — then book the repair in one tap.",
+        ctaDoctor: "Start Phone Doctor", ctaSkip: "Skip — book a repair", heroNote: "Same mobile number as CLUTCHPRINT · repairs earn CLUTCH Rewards too",
+        pillOpen: "T FIX® REPAIR LAB · OPEN TILL {c}", pillClosed: "T FIX® REPAIR LAB · CLOSED · OPENS {when}", today: "today", tomorrow: "tomorrow",
+        docEyebrow: "T FIX® PHONE DOCTOR · BETA", docTitle: "Self-check on this phone",
+        docSub: "Open this page on the phone you want to check. Tap each test. Nothing is uploaded until you book — camera and mic are only used during their test.",
+        start: "Start", again: "Again", yes: "Yes", no: "No", skip: "Skip", done: "Done", next: "Next", bad: "I see spots / lines",
+        notAvail: "Not supported on this phone/browser", score: "{p} passed · {f} problems · {s} skipped",
+        tDisplay: "Display", tDisplayD: "Full-screen colours — look for dead pixels, lines or patches.",
+        tTouch: "Touch screen", tTouchD: "Swipe over every box until all are green.",
+        tMulti: "Multi-touch", tMultiD: "Put up to 5 fingers on the screen.",
+        tSpeaker: "Speaker", tSpeakerD: "Plays a short tone. Did you hear it clearly?",
+        tMic: "Microphone", tMicD: "Say \"hello T FIX\" for 3 seconds.",
+        tCamBack: "Back camera", tCamFront: "Front camera", tCamD: "Is the picture clear (no blur, spots or black screen)?",
+        tCharge: "Charging port", tChargeD: "Plug in your charger within 30 seconds.",
+        tBattery: "Battery", tBatteryD: "Reads the battery level the phone reports.",
+        tVibra: "Vibration", tVibraD: "Did the phone vibrate?",
+        tMotion: "Motion sensors", tMotionD: "Tilt and turn the phone for 3 seconds.",
+        touchHint: "Swipe over every box · {n} left", colorHint: "Look closely at the whole screen ({i}/{n})", multiHint: "Put as many fingers as you can (up to 5)",
+        heard: "Heard it", notHeard: "No sound", clear: "Clear", notClear: "Problem", vibrated: "It vibrated", noVibra: "Nothing",
+        listening: "Listening…", waitingPlug: "Waiting for the charger… {s}s", level: "Level {l}% · {c}", charging: "charging", notCharging: "not charging",
+        allGood: "No problems found in the tests you ran.", someBad: "{n} possible problem(s) found:",
+        fx_display: "Display: dead pixels, lines or patches → screen / display panel check",
+        fx_touch: "Touch: dead zones → touch screen (digitizer) check",
+        fx_multi: "Multi-touch: fewer than 2 fingers detected → touch screen check",
+        fx_speaker: "Speaker: no sound → speaker / audio check", fx_mic: "Microphone: no sound picked up → mic check",
+        fx_cam_back: "Back camera not working → camera check", fx_cam_front: "Front camera not working → camera check",
+        fx_charge: "Didn't start charging → charging port / cable check", fx_battery: "Battery level very low → battery / charging check",
+        fx_vibra: "No vibration → vibration motor check", fx_motion: "No motion readings → sensor check",
+        resEyebrow: "PHONE DOCTOR REPORT", resBook: "Book repair with this report",
+        docLimits: "A browser can't test battery health, buttons, SIM, Wi-Fi hardware or fingerprint. Our technician confirms everything at the counter before any work or charge.",
+        bookTitle: "Book a repair", bookSub: "Free check at the counter. You approve the price before we start.",
+        fDevice: "Device", dev_phone: "Phone", dev_laptop: "Laptop", dev_tablet: "Tablet", dev_other: "Other",
+        fBrand: "Brand", fModel: "Model", fIssues: "What's wrong? (pick all that apply)",
+        is_screen: "Screen / display", is_battery: "Battery drains", is_charging: "Not charging", is_speaker: "Speaker", is_mic: "Mic", is_camera: "Camera",
+        is_water: "Water damage", is_buttons: "Buttons", is_software: "Software / slow / virus", is_network: "Network / SIM", is_other: "Other",
+        fDesc: "Describe it (optional)", descPh: "e.g. fell from bike, lines on screen, charges only at an angle",
+        fVisit: "When will you come?", v_today: "Today", v_tomorrow: "Tomorrow", v_pick: "Pick a date", v_later: "Not sure",
+        fName: "Your name", fPhone: "Mobile number", attach: "Attach my Phone Doctor report (helps the technician)",
+        bookBtn: "Book repair", booking: "Booking…", privacy: "We keep your name, mobile number and repair details only to handle your repair and CLUTCH Rewards. Back up your phone before handing it over.",
+        errName: "Please enter your name.", errPhone: "Please enter a valid 10-digit mobile number.", errIssue: "Pick a problem or write a short note.", errNet: "Network problem. Please try again.",
+        mineTitle: "T FIX® REPAIR PASS", mineEmpty: "Book a repair and your #RP token appears here. Show it at the counter.",
+        booked: "Booked! Show {c} at the T FIX® counter.",
+        st_requested: "Booked — bring your device", st_received: "At the shop — being checked", st_repairing: "Being repaired", st_waiting_parts: "Waiting for parts",
+        st_ready: "Ready — come and collect", st_collected: "Collected. Thank you!", st_cancelled: "Cancelled",
+        quote: "Estimate {a}", final: "Final {a}", paid: "paid", earned: "+₹{r} rewards", copyLink: "Copy link", linkCopied: "Link copied — open it on any phone to track this repair",
+        rwAvail: "available", rwHow: "Every ₹100 you spend on prints or repairs earns ₹5. Use it at the T FIX® counter.",
+        visitH: "Pipeline Road, Kalamassery", visitP: "South Pipeline Road, CUSAT PO, Kalamassery 682022 · Open daily till 9:30 PM", directions: "Directions",
+        waMsg: "Hi T FIX® CUSAT, I have a question about a repair."
+      },
+      ml: {
+        navDoctor: "ഫോൺ ഡോക്ടർ", navBook: "റിപ്പയർ ബുക്ക്", navMine: "എന്റെ റിപ്പയറുകൾ", ctaBook: "റിപ്പയർ ബുക്ക് ചെയ്യൂ", langBtn: "EN",
+        h1a: "ഫോണിന് പ്രശ്നമുണ്ടോ?", h1b: "2 മിനിറ്റിൽ പരിശോധിക്കൂ.",
+        heroSub: "T FIX® ഫോൺ ഡോക്ടർ നിങ്ങളുടെ സ്ക്രീൻ, ടച്ച്, സ്പീക്കർ, മൈക്ക്, ക്യാമറ, ചാർജിംഗ്, സെൻസറുകൾ എന്നിവ ബ്രൗസറിൽ തന്നെ പരിശോധിക്കും — പിന്നെ ഒറ്റ ടാപ്പിൽ റിപ്പയർ ബുക്ക് ചെയ്യാം.",
+        ctaDoctor: "ഫോൺ ഡോക്ടർ തുടങ്ങൂ", ctaSkip: "നേരിട്ട് റിപ്പയർ ബുക്ക് ചെയ്യൂ", heroNote: "CLUTCHPRINT-ലെ അതേ മൊബൈൽ നമ്പർ · റിപ്പയറിനും CLUTCH Rewards",
+        pillOpen: "T FIX® റിപ്പയർ ലാബ് · {c} വരെ തുറന്നിരിക്കും", pillClosed: "T FIX® റിപ്പയർ ലാബ് · അടച്ചിരിക്കുന്നു · {when} തുറക്കും", today: "ഇന്ന്", tomorrow: "നാളെ",
+        docEyebrow: "T FIX® ഫോൺ ഡോക്ടർ · ബീറ്റ", docTitle: "ഈ ഫോണിൽ സ്വയം പരിശോധന",
+        docSub: "പരിശോധിക്കേണ്ട ഫോണിൽ ഈ പേജ് തുറക്കൂ. ഓരോ ടെസ്റ്റും ടാപ്പ് ചെയ്യൂ. ബുക്ക് ചെയ്യുന്നത് വരെ ഒന്നും അപ്‌ലോഡ് ചെയ്യില്ല — ക്യാമറയും മൈക്കും അവയുടെ ടെസ്റ്റിൽ മാത്രം.",
+        start: "തുടങ്ങൂ", again: "വീണ്ടും", yes: "അതെ", no: "ഇല്ല", skip: "ഒഴിവാക്കൂ", done: "കഴിഞ്ഞു", next: "അടുത്തത്", bad: "പാടുകൾ / വരകൾ കാണുന്നു",
+        notAvail: "ഈ ഫോണിൽ/ബ്രൗസറിൽ ലഭ്യമല്ല", score: "{p} ശരി · {f} പ്രശ്നം · {s} ഒഴിവാക്കി",
+        tDisplay: "ഡിസ്‌പ്ലേ", tDisplayD: "മുഴുവൻ സ്ക്രീൻ നിറങ്ങൾ — ഡെഡ് പിക്സൽ, വരകൾ, പാടുകൾ നോക്കൂ.",
+        tTouch: "ടച്ച് സ്ക്രീൻ", tTouchD: "എല്ലാ ബോക്സും പച്ചയാകുന്നത് വരെ വിരൽ ഓടിക്കൂ.",
+        tMulti: "മൾട്ടി-ടച്ച്", tMultiD: "5 വിരൽ വരെ സ്ക്രീനിൽ വയ്ക്കൂ.",
+        tSpeaker: "സ്പീക്കർ", tSpeakerD: "ചെറിയ ശബ്ദം കേൾപ്പിക്കും. വ്യക്തമായി കേട്ടോ?",
+        tMic: "മൈക്രോഫോൺ", tMicD: "3 സെക്കൻഡ് \"hello T FIX\" എന്ന് പറയൂ.",
+        tCamBack: "പിൻ ക്യാമറ", tCamFront: "മുൻ ക്യാമറ", tCamD: "ചിത്രം വ്യക്തമാണോ (മങ്ങൽ, പാട്, കറുപ്പ് ഇല്ലാതെ)?",
+        tCharge: "ചാർജിംഗ് പോർട്ട്", tChargeD: "30 സെക്കൻഡിനുള്ളിൽ ചാർജർ കുത്തൂ.",
+        tBattery: "ബാറ്ററി", tBatteryD: "ഫോൺ കാണിക്കുന്ന ബാറ്ററി നില വായിക്കും.",
+        tVibra: "വൈബ്രേഷൻ", tVibraD: "ഫോൺ വൈബ്രേറ്റ് ചെയ്തോ?",
+        tMotion: "മോഷൻ സെൻസറുകൾ", tMotionD: "3 സെക്കൻഡ് ഫോൺ ചരിച്ചും തിരിച്ചും നോക്കൂ.",
+        touchHint: "എല്ലാ ബോക്സിലും വിരൽ ഓടിക്കൂ · {n} ബാക്കി", colorHint: "സ്ക്രീൻ മുഴുവൻ ശ്രദ്ധിച്ച് നോക്കൂ ({i}/{n})", multiHint: "പറ്റുന്നത്ര വിരലുകൾ വയ്ക്കൂ (5 വരെ)",
+        heard: "കേട്ടു", notHeard: "ശബ്ദമില്ല", clear: "വ്യക്തം", notClear: "പ്രശ്നം", vibrated: "വൈബ്രേറ്റ് ചെയ്തു", noVibra: "ഇല്ല",
+        listening: "കേൾക്കുന്നു…", waitingPlug: "ചാർജറിനായി കാത്തിരിക്കുന്നു… {s}s", level: "നില {l}% · {c}", charging: "ചാർജ് ആകുന്നു", notCharging: "ചാർജ് ആകുന്നില്ല",
+        allGood: "നടത്തിയ ടെസ്റ്റുകളിൽ പ്രശ്നമൊന്നുമില്ല.", someBad: "{n} പ്രശ്നം(ങ്ങൾ) കണ്ടെത്തി:",
+        fx_display: "ഡിസ്‌പ്ലേ: ഡെഡ് പിക്സൽ / വരകൾ → സ്ക്രീൻ പരിശോധന", fx_touch: "ടച്ച്: പ്രവർത്തിക്കാത്ത ഭാഗങ്ങൾ → ടച്ച് സ്ക്രീൻ പരിശോധന",
+        fx_multi: "മൾട്ടി-ടച്ച്: 2-ൽ കുറവ് വിരലുകൾ → ടച്ച് സ്ക്രീൻ പരിശോധന", fx_speaker: "സ്പീക്കർ: ശബ്ദമില്ല → സ്പീക്കർ പരിശോധന",
+        fx_mic: "മൈക്ക്: ശബ്ദം കിട്ടുന്നില്ല → മൈക്ക് പരിശോധന", fx_cam_back: "പിൻ ക്യാമറ പ്രവർത്തിക്കുന്നില്ല → ക്യാമറ പരിശോധന",
+        fx_cam_front: "മുൻ ക്യാമറ പ്രവർത്തിക്കുന്നില്ല → ക്യാമറ പരിശോധന", fx_charge: "ചാർജ് ആയില്ല → ചാർജിംഗ് പോർട്ട് / കേബിൾ പരിശോധന",
+        fx_battery: "ബാറ്ററി വളരെ കുറവ് → ബാറ്ററി / ചാർജിംഗ് പരിശോധന", fx_vibra: "വൈബ്രേഷൻ ഇല്ല → വൈബ്രേഷൻ മോട്ടോർ പരിശോധന", fx_motion: "മോഷൻ റീഡിംഗ് ഇല്ല → സെൻസർ പരിശോധന",
+        resEyebrow: "ഫോൺ ഡോക്ടർ റിപ്പോർട്ട്", resBook: "ഈ റിപ്പോർട്ടോടെ റിപ്പയർ ബുക്ക് ചെയ്യൂ",
+        docLimits: "ബാറ്ററി ഹെൽത്ത്, ബട്ടണുകൾ, സിം, Wi-Fi ഹാർഡ്‌വെയർ, ഫിംഗർപ്രിന്റ് എന്നിവ ബ്രൗസറിന് പരിശോധിക്കാനാവില്ല. പണി തുടങ്ങും മുമ്പ് ടെക്നീഷ്യൻ കൗണ്ടറിൽ എല്ലാം ഉറപ്പാക്കും.",
+        bookTitle: "റിപ്പയർ ബുക്ക് ചെയ്യൂ", bookSub: "കൗണ്ടറിൽ സൗജന്യ പരിശോധന. വില നിങ്ങൾ സമ്മതിച്ച ശേഷമേ പണി തുടങ്ങൂ.",
+        fDevice: "ഉപകരണം", dev_phone: "ഫോൺ", dev_laptop: "ലാപ്‌ടോപ്പ്", dev_tablet: "ടാബ്‌ലെറ്റ്", dev_other: "മറ്റുള്ളവ",
+        fBrand: "ബ്രാൻഡ്", fModel: "മോഡൽ", fIssues: "എന്താണ് പ്രശ്നം? (ബാധകമായവ എല്ലാം)",
+        is_screen: "സ്ക്രീൻ / ഡിസ്‌പ്ലേ", is_battery: "ബാറ്ററി പെട്ടെന്ന് തീരുന്നു", is_charging: "ചാർജ് ആകുന്നില്ല", is_speaker: "സ്പീക്കർ", is_mic: "മൈക്ക്", is_camera: "ക്യാമറ",
+        is_water: "വെള്ളം കയറി", is_buttons: "ബട്ടണുകൾ", is_software: "സോഫ്റ്റ്‌വെയർ / സ്ലോ / വൈറസ്", is_network: "നെറ്റ്‌വർക്ക് / സിം", is_other: "മറ്റുള്ളവ",
+        fDesc: "വിവരിക്കൂ (ഐച്ഛികം)", descPh: "ഉദാ: ബൈക്കിൽ നിന്ന് വീണു, സ്ക്രീനിൽ വരകൾ",
+        fVisit: "എപ്പോൾ വരും?", v_today: "ഇന്ന്", v_tomorrow: "നാളെ", v_pick: "തീയതി തിരഞ്ഞെടുക്കൂ", v_later: "ഉറപ്പില്ല",
+        fName: "നിങ്ങളുടെ പേര്", fPhone: "മൊബൈൽ നമ്പർ", attach: "എന്റെ ഫോൺ ഡോക്ടർ റിപ്പോർട്ട് ചേർക്കൂ (ടെക്നീഷ്യന് സഹായകം)",
+        bookBtn: "റിപ്പയർ ബുക്ക് ചെയ്യൂ", booking: "ബുക്ക് ചെയ്യുന്നു…", privacy: "നിങ്ങളുടെ പേര്, മൊബൈൽ നമ്പർ, റിപ്പയർ വിവരങ്ങൾ റിപ്പയറിനും CLUTCH Rewards-നും മാത്രം സൂക്ഷിക്കുന്നു. ഫോൺ നൽകും മുമ്പ് ബാക്കപ്പ് എടുക്കൂ.",
+        errName: "പേര് നൽകൂ.", errPhone: "ശരിയായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകൂ.", errIssue: "ഒരു പ്രശ്നം തിരഞ്ഞെടുക്കൂ അല്ലെങ്കിൽ ചെറുതായി എഴുതൂ.", errNet: "നെറ്റ്‌വർക്ക് പ്രശ്നം. വീണ്ടും ശ്രമിക്കൂ.",
+        mineTitle: "T FIX® റിപ്പയർ പാസ്", mineEmpty: "റിപ്പയർ ബുക്ക് ചെയ്താൽ #RP ടോക്കൺ ഇവിടെ കാണാം. കൗണ്ടറിൽ കാണിക്കൂ.",
+        booked: "ബുക്ക് ചെയ്തു! T FIX® കൗണ്ടറിൽ {c} കാണിക്കൂ.",
+        st_requested: "ബുക്ക് ചെയ്തു — ഉപകരണം കൊണ്ടുവരൂ", st_received: "കടയിൽ — പരിശോധിക്കുന്നു", st_repairing: "റിപ്പയർ ചെയ്യുന്നു", st_waiting_parts: "പാർട്സിനായി കാത്തിരിക്കുന്നു",
+        st_ready: "റെഡി — വന്ന് വാങ്ങിക്കോളൂ", st_collected: "വാങ്ങി. നന്ദി!", st_cancelled: "റദ്ദാക്കി",
+        quote: "എസ്റ്റിമേറ്റ് {a}", final: "അന്തിമം {a}", paid: "അടച്ചു", earned: "+₹{r} റിവാർഡ്", copyLink: "ലിങ്ക് കോപ്പി", linkCopied: "ലിങ്ക് കോപ്പി ചെയ്തു — ഏത് ഫോണിലും തുറന്ന് റിപ്പയർ നോക്കാം",
+        rwAvail: "ലഭ്യം", rwHow: "പ്രിന്റിനോ റിപ്പയറിനോ ചെലവാക്കുന്ന ഓരോ ₹100-നും ₹5. T FIX® കൗണ്ടറിൽ ഉപയോഗിക്കാം.",
+        visitH: "പൈപ്പ്‌ലൈൻ റോഡ്, കളമശ്ശേരി", visitP: "സൗത്ത് പൈപ്പ്‌ലൈൻ റോഡ്, CUSAT PO, കളമശ്ശേരി 682022 · ദിവസവും രാത്രി 9:30 വരെ", directions: "വഴി",
+        waMsg: "ഹായ് T FIX® CUSAT, ഒരു റിപ്പയറിനെ കുറിച്ച് ചോദിക്കാനുണ്ട്."
+      }
+    };
+    let lang = "en";
+    try { const s = localStorage.getItem("tfix-print-lang"); if (s === "ml" || s === "en") lang = s; } catch (e) {}
+    const t = (k, v) => { let s = (T[lang] && T[lang][k]) || T.en[k] || k; if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b); return s; };
+
+    const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const el = (tag, props = {}, ...kids) => { const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) { if (v == null) continue; if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v); }
+      kids.flat().forEach(c => c != null && n.append(c)); return n; };
+    const rupee = n => "₹" + (Math.round(n * 100) / 100).toLocaleString("en-IN");
+    const ls = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+    let toastTimer;
+    function toast(m) { const x = $("#toast"); x.textContent = m; x.classList.remove("opacity-0", "translate-y-4"); clearTimeout(toastTimer); toastTimer = setTimeout(() => x.classList.add("opacity-0", "translate-y-4"), 2600); }
+
+    /* ---------------- shop hours (India time) ---------------- */
+    function nowIST() { const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+      const g = x => p.find(q => q.type === x).value; return { day: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(g("weekday")), mins: (+g("hour") % 24) * 60 + +g("minute") }; }
+    const toM = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+    const f12 = s => { let [h, m] = s.split(":").map(Number); const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + String(m).padStart(2, "0") + " " + ap; };
+    function hours() { const { day, mins } = nowIST(), [o, c] = SHOP.hours[day], open = mins >= toM(o) && mins < toM(c);
+      let when = ""; if (!open) { const before = mins < toM(o); when = t(before ? "today" : "tomorrow") + " " + f12(SHOP.hours[before ? day : (day + 1) % 7][0]); }
+      const s = open ? t("pillOpen", { c: f12(c) }) : t("pillClosed", { when }); $("#shop-pill").textContent = lang === "en" ? s.toUpperCase() : s;
+      $("#shop-dot").className = "h-2 w-2 rounded-full " + (open ? "bg-[#34d399] shadow-[0_0_8px_#34d399]" : "bg-zinc-500"); }
+
+    /* ---------------- Phone Doctor ---------------- */
+    const results = ls.get(DOC_KEY, {});           // {key: {result, detail}}
+    const saveResults = () => ls.set(DOC_KEY, results);
+    const media = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    const TESTS = [
+      { key: "display", title: "tDisplay", desc: "tDisplayD", run: testDisplay },
+      { key: "touch", title: "tTouch", desc: "tTouchD", run: testTouch, need: () => "ontouchstart" in window || navigator.maxTouchPoints > 0 },
+      { key: "multi", title: "tMulti", desc: "tMultiD", run: testMulti, need: () => navigator.maxTouchPoints > 1 || "ontouchstart" in window },
+      { key: "speaker", title: "tSpeaker", desc: "tSpeakerD", run: testSpeaker, need: () => !!(window.AudioContext || window.webkitAudioContext) },
+      { key: "mic", title: "tMic", desc: "tMicD", run: testMic, need: () => !!media },
+      { key: "cam_back", title: "tCamBack", desc: "tCamD", run: c => testCam(c, "environment"), need: () => !!media },
+      { key: "cam_front", title: "tCamFront", desc: "tCamD", run: c => testCam(c, "user"), need: () => !!media },
+      { key: "charge", title: "tCharge", desc: "tChargeD", run: testCharge, need: () => !!navigator.getBattery },
+      { key: "battery", title: "tBattery", desc: "tBatteryD", run: testBattery, need: () => !!navigator.getBattery },
+      { key: "vibra", title: "tVibra", desc: "tVibraD", run: testVibra, need: () => !!navigator.vibrate },
+      { key: "motion", title: "tMotion", desc: "tMotionD", run: testMotion, need: () => "DeviceMotionEvent" in window }
+    ];
+    const ICON = { pass: "✓", fail: "✕", skip: "–" };
+
+    function setResult(key, result, detail) { results[key] = { result, detail: detail || "" }; saveResults(); renderDoctor(); }
+
+    function card(test) {
+      const r = results[test.key], ok = !test.need || test.need();
+      const body = el("div", { class: "mt-2 space-y-2", "data-body": test.key });
+      const status = el("span", { class: "font-mono-tech text-[11px] " + (r ? "t-" + r.result : "text-zinc-500"), text: r ? ICON[r.result] + " " + (r.detail || r.result) : (ok ? "" : t("notAvail")) });
+      const btn = el("button", { type: "button", class: "rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-1.5 text-xs font-bold text-[#f3d97d] hover:bg-[#d4af37]/25 disabled:opacity-40", text: r ? t("again") : t("start") });
+      if (!ok) { btn.disabled = true; if (!r) results[test.key] = undefined; }
+      btn.addEventListener("click", () => { body.replaceChildren(); test.run(body); });
+      return el("div", { class: "glass rounded-xl p-3.5" },
+        el("div", { class: "flex items-start justify-between gap-3" },
+          el("div", { class: "min-w-0" }, el("p", { class: "text-sm font-bold text-white", text: t(test.title) }), el("p", { class: "text-[11px] leading-relaxed text-zinc-400", text: t(test.desc) })),
+          btn),
+        el("div", { class: "mt-1" }, status), body);
+    }
+    function renderDoctor() {
+      $("#tests").replaceChildren(...TESTS.map(card));
+      const vals = TESTS.map(x => results[x.key]).filter(Boolean);
+      const p = vals.filter(v => v.result === "pass").length, f = vals.filter(v => v.result === "fail").length, s = vals.filter(v => v.result === "skip").length;
+      $("#doc-score").textContent = vals.length ? t("score", { p, f, s }) : "";
+      $("#doc-result").hidden = !vals.length;
+      const bad = TESTS.filter(x => results[x.key] && results[x.key].result === "fail");
+      $("#doc-summary").textContent = bad.length ? t("someBad", { n: bad.length }) : t("allGood");
+      $("#doc-findings").replaceChildren(...bad.map(x => el("li", { class: "flex gap-2" }, el("span", { class: "t-fail", text: "✕" }), el("span", { text: t("fx_" + x.key) }))));
+      $("#attach-wrap").hidden = !vals.length;
+    }
+    const askSimple = (body, key, yesKey, noKey, okDetail, badDetail, after) => body.append(el("div", { class: "flex flex-wrap gap-2" },
+      el("button", { type: "button", class: "chip", text: t(yesKey), onclick: () => { after && after(); setResult(key, "pass", okDetail); } }),
+      el("button", { type: "button", class: "chip", text: t(noKey), onclick: () => { after && after(); setResult(key, "fail", badDetail); } }),
+      el("button", { type: "button", class: "chip", text: t("skip"), onclick: () => { after && after(); setResult(key, "skip", "skipped"); } })));
+
+    function overlay(id, onKey) { const o = $(id); o.hidden = false; document.body.style.overflow = "hidden";
+      try { o.requestFullscreen && o.requestFullscreen().catch(() => {}); } catch (e) {}
+      const close = () => { o.hidden = true; document.body.style.overflow = ""; try { document.fullscreenElement && document.exitFullscreen(); } catch (e) {} o.onclick = null; };
+      o.onclick = e => { const b = e.target.closest("[data-ov]"); if (b) onKey(b.dataset.ov, close); };
+      return close; }
+
+    function testDisplay() {
+      const colours = ["#ff0000", "#00ff00", "#0000ff", "#ffffff", "#000000", "#808080"]; let i = 0;
+      const o = $("#ov-color"), hint = $("#color-hint");
+      $('[data-ov="bad"]', o).textContent = t("bad"); $('[data-ov="next"]', o).textContent = t("next");
+      const paint = () => { o.style.background = colours[i]; hint.textContent = t("colorHint", { i: i + 1, n: colours.length }); hint.style.color = i === 3 ? "#000" : "#fff"; };
+      paint();
+      overlay("#ov-color", (k, close) => {
+        if (k === "bad") { close(); o.style.background = "#000"; setResult("display", "fail", "spots/lines on " + colours[i]); }
+        else if (++i >= colours.length) { close(); o.style.background = "#000"; setResult("display", "pass", colours.length + " colours OK"); }
+        else paint();
+      });
+    }
+    function testTouch() {
+      const cols = 6, rows = Math.max(8, Math.round(cols * (innerHeight - 64) / innerWidth)), grid = $("#touch-grid");
+      grid.style.gridTemplateColumns = "repeat(" + cols + ",1fr)"; grid.style.gridTemplateRows = "repeat(" + rows + ",1fr)";
+      grid.replaceChildren(...Array.from({ length: cols * rows }, () => el("div")));
+      let left = cols * rows; const hint = $("#touch-hint"), upd = () => { hint.textContent = t("touchHint", { n: left }); };
+      upd(); $('#ov-touch [data-ov="done"]').textContent = t("done");
+      const hit = (x, y) => { const c = document.elementFromPoint(x, y); if (c && c.parentNode === grid && !c.classList.contains("on")) { c.classList.add("on"); left--; upd(); if (!left) finish(); } };
+      const onMove = e => { if (e.cancelable) e.preventDefault(); for (const p of e.changedTouches || [e]) hit(p.clientX, p.clientY); };
+      grid.addEventListener("touchstart", onMove, { passive: false }); grid.addEventListener("touchmove", onMove, { passive: false });
+      grid.addEventListener("pointerdown", onMove); grid.addEventListener("pointermove", e => { if (e.buttons) onMove(e); });
+      let close;
+      const finish = () => { close && close(); const total = cols * rows, dead = left;
+        setResult("touch", dead ? "fail" : "pass", dead ? dead + "/" + total + " zones not touched" : "all " + total + " zones OK"); };
+      close = overlay("#ov-touch", (k, c) => { if (k === "cancel") { c(); } else finish(); });
+    }
+    function testMulti() {
+      let max = 0; const cnt = $("#multi-count"); cnt.textContent = "0"; $("#multi-hint").textContent = t("multiHint");
+      $('#ov-multi [data-ov="done"]').textContent = t("done");
+      const o = $("#ov-multi"), on = e => { if (e.cancelable) e.preventDefault(); max = Math.max(max, e.touches.length); cnt.textContent = String(e.touches.length); };
+      o.addEventListener("touchstart", on, { passive: false }); o.addEventListener("touchmove", on, { passive: false });
+      overlay("#ov-multi", (k, close) => { close(); if (k === "cancel") return; setResult("multi", max >= 2 ? "pass" : "fail", max + " fingers detected"); });
+    }
+    function testSpeaker(body) {
+      const AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(), osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.frequency.value = 880; g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + 0.05);
+      g.gain.setValueAtTime(0.4, ctx.currentTime + 1.2); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
+      osc.connect(g).connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 1.6);
+      askSimple(body, "speaker", "heard", "notHeard", "tone heard", "no sound", () => ctx.close());
+    }
+    async function testMic(body) {
+      const m = el("div", { class: "meter" }, el("div")), label = el("p", { class: "font-mono-tech text-[11px] text-zinc-400", text: t("listening") }); body.append(m, label);
+      let stream; try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) { setResult("mic", "skip", "permission not given"); return; }
+      const AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(), an = ctx.createAnalyser(); an.fftSize = 512;
+      ctx.createMediaStreamSource(stream).connect(an); const buf = new Uint8Array(an.fftSize); let peak = 0; const t0 = performance.now();
+      const loop = () => { an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s = Math.max(s, Math.abs(v - 128)); peak = Math.max(peak, s);
+        m.firstChild.style.width = Math.min(100, s / 64 * 100) + "%";
+        if (performance.now() - t0 < 3000) requestAnimationFrame(loop);
+        else { stream.getTracks().forEach(x => x.stop()); ctx.close(); setResult("mic", peak >= 12 ? "pass" : "fail", "peak level " + peak + "/128"); } };
+      loop();
+    }
+    async function testCam(body, facing) {
+      const key = facing === "user" ? "cam_front" : "cam_back";
+      let stream; try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: facing } }, audio: false }); }
+      catch (e) { try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: false }); } catch (e2) { setResult(key, e2 && e2.name === "NotAllowedError" ? "skip" : "fail", e2 && e2.name === "NotAllowedError" ? "permission not given" : "camera did not open"); return; } }
+      const v = el("video", { class: "cam", autoplay: "", playsinline: "", muted: "" }); v.muted = true; v.srcObject = stream; body.append(v);
+      const tr = stream.getVideoTracks()[0], s = tr && tr.getSettings ? tr.getSettings() : {};
+      const res = s.width ? s.width + "×" + s.height : "";
+      askSimple(body, key, "clear", "notClear", ("clear " + res).trim(), ("problem " + res).trim(), () => stream.getTracks().forEach(x => x.stop()));
+    }
+    async function testBattery() {
+      try { const b = await navigator.getBattery(), l = Math.round(b.level * 100);
+        setResult("battery", l <= 5 && !b.charging ? "fail" : "pass", t("level", { l, c: b.charging ? t("charging") : t("notCharging") })); }
+      catch (e) { setResult("battery", "skip", "not available"); }
+    }
+    async function testCharge(body) {
+      let b; try { b = await navigator.getBattery(); } catch (e) { setResult("charge", "skip", "not available"); return; }
+      if (b.charging) { setResult("charge", "pass", "already charging"); return; }
+      const label = el("p", { class: "font-mono-tech text-[11px] text-zinc-300" }); body.append(label);
+      let s = 30; label.textContent = t("waitingPlug", { s });
+      const done = ok => { clearInterval(iv); b.removeEventListener("chargingchange", on); setResult("charge", ok ? "pass" : "fail", ok ? "started charging" : "no charging in 30s"); };
+      const on = () => { if (b.charging) done(true); }; b.addEventListener("chargingchange", on);
+      const iv = setInterval(() => { s--; label.textContent = t("waitingPlug", { s }); if (s <= 0) done(false); }, 1000);
+    }
+    function testVibra(body) { navigator.vibrate([400, 150, 400]); askSimple(body, "vibra", "vibrated", "noVibra", "vibrated", "no vibration"); }
+    async function testMotion(body) {
+      if (typeof DeviceMotionEvent.requestPermission === "function") { try { if (await DeviceMotionEvent.requestPermission() !== "granted") { setResult("motion", "skip", "permission not given"); return; } } catch (e) { setResult("motion", "skip", "permission not given"); return; } }
+      const label = el("p", { class: "font-mono-tech text-[11px] text-zinc-300", text: "…" }); body.append(label);
+      let n = 0, min = Infinity, max = -Infinity;
+      const on = e => { const a = e.accelerationIncludingGravity || e.acceleration; if (!a || a.x == null) return; n++; const v = a.x + a.y + a.z; min = Math.min(min, v); max = Math.max(max, v); label.textContent = n + " readings"; };
+      addEventListener("devicemotion", on);
+      setTimeout(() => { removeEventListener("devicemotion", on); const moved = n > 5 && max - min > 0.5;
+        setResult("motion", n === 0 ? "fail" : moved ? "pass" : "fail", n === 0 ? "no readings" : moved ? n + " readings, movement seen" : "no movement seen"); }, 3000);
+    }
+
+    async function deviceInfo() {
+      const d = { screen: screen.width + "×" + screen.height + " @" + (devicePixelRatio || 1) + "x", cores: navigator.hardwareConcurrency || "", memory: navigator.deviceMemory ? navigator.deviceMemory + " GB+" : "",
+        network: navigator.connection && navigator.connection.effectiveType ? navigator.connection.effectiveType : "", touch_points: navigator.maxTouchPoints || 0, platform: "" , model: "" };
+      try { if (navigator.userAgentData) { const h = await navigator.userAgentData.getHighEntropyValues(["model", "platform", "platformVersion"]); d.model = h.model || ""; d.platform = (h.platform || "") + " " + (h.platformVersion || ""); } } catch (e) {}
+      if (!d.platform) { const ua = navigator.userAgent; d.platform = /iPhone|iPad/.test(ua) ? "iOS" : /Android [\d.]+/.test(ua) ? ua.match(/Android [\d.]+/)[0] : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : ""; }
+      return d;
+    }
+    let DEVICE = {};
+
+    /* ---------------- booking ---------------- */
+    const DEVICES = ["phone", "laptop", "tablet", "other"];
+    const ISSUES = ["screen", "battery", "charging", "speaker", "mic", "camera", "water", "buttons", "software", "network", "other"];
+    const FAIL_TO_ISSUE = { display: "screen", touch: "screen", multi: "screen", speaker: "speaker", mic: "mic", cam_back: "camera", cam_front: "camera", charge: "charging", battery: "battery", vibra: "other", motion: "other" };
+    const form = { device: "phone", issues: new Set(), visit: "" };
+    function chips() {
+      $("#device-chips").replaceChildren(...DEVICES.map(d => el("button", { type: "button", class: "chip", "aria-pressed": String(form.device === d), text: t("dev_" + d), onclick: () => { form.device = d; chips(); } })));
+      $("#issue-chips").replaceChildren(...ISSUES.map(i => el("button", { type: "button", class: "chip", "aria-pressed": String(form.issues.has(i)), text: t("is_" + i), onclick: () => { form.issues.has(i) ? form.issues.delete(i) : form.issues.add(i); chips(); } })));
+      const day = n => { const d = new Date(Date.now() + 5.5 * 3600e3 + n * 864e5); return d.toISOString().slice(0, 10); };
+      const opts = [["v_today", day(0)], ["v_tomorrow", day(1)], ["v_pick", "pick"], ["v_later", ""]];
+      $("#visit-chips").replaceChildren(...opts.map(([k, v]) => el("button", { type: "button", class: "chip", "aria-pressed": String(v === "pick" ? form.visit === "pick" : form.visit === v && form.visit !== "pick"), text: t(k),
+        onclick: () => { form.visit = v; $("#visit-date").hidden = v !== "pick"; if (v === "pick") { const i = $("#visit-date"); i.min = day(0); i.max = day(30); i.focus(); } chips(); } })));
+    }
+    function fromDoctor() {
+      for (const [k, r] of Object.entries(results)) if (r && r.result === "fail" && FAIL_TO_ISSUE[k]) form.issues.add(FAIL_TO_ISSUE[k]);
+      form.device = "phone";
+      if (DEVICE.model && !$("#model").value) $("#model").value = DEVICE.model;
+      chips();
+    }
+    const validPhone = raw => { let d = raw.replace(/\D+/g, ""); if (d.length === 12 && d.startsWith("91")) d = d.slice(2); else if (d.length === 11 && d.startsWith("0")) d = d.slice(1); return /^[6-9]\d{9}$/.test(d) ? d : null; };
+    function err(m) { const e = $("#book-err"); e.textContent = m; e.hidden = !m; }
+    async function book() {
+      err("");
+      const name = $("#name").value.trim(), phone = validPhone($("#phone").value), desc = $("#desc").value.trim();
+      if (!name) { err(t("errName")); $("#name").focus(); return; }
+      if (!phone) { err(t("errPhone")); $("#phone").focus(); return; }
+      if (!form.issues.size && !desc) { err(t("errIssue")); return; }
+      const visit = form.visit === "pick" ? $("#visit-date").value : form.visit;
+      const tests = Object.fromEntries(Object.entries(results).filter(([, v]) => v));
+      const payload = { name, phone, device_type: form.device, brand: $("#brand").value.trim(), model: $("#model").value.trim(), issues: [...form.issues], description: desc, visit_date: visit || "",
+        diagnosis: $("#attach").checked && Object.keys(tests).length ? { tests, device: DEVICE } : null };
+      const btn = $("#book-btn"); btn.disabled = true; btn.textContent = t("booking");
+      try {
+        const r = await fetch(API + "book.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status !== 201 || !d.code) { err(d.error || t("errNet")); return; }
+        const list = ls.get(STORE, []); list.unshift({ code: d.code, token: d.token, at: Date.now() }); ls.set(STORE, list.slice(0, 20));
+        ls.set(ME_KEY, { name, phone });
+        $("#desc").value = ""; form.issues.clear(); chips();
+        toast(t("booked", { c: "#" + d.code })); await refresh(); $("#mine").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (e) { err(t("errNet")); }
+      finally { btn.disabled = false; btn.textContent = t("bookBtn"); }
+    }
+
+    /* ---------------- my repairs ---------------- */
+    const cache = {};
+    const link = o => location.origin + location.pathname + "?repair=" + encodeURIComponent(o.code) + "&t=" + o.token;
+    async function refresh() {
+      const list = ls.get(STORE, []);
+      await Promise.all(list.map(async o => { try { const r = await fetch(API + "status.php?code=" + encodeURIComponent(o.code) + "&t=" + o.token, { cache: "no-store" }); if (r.ok) cache[o.code] = await r.json(); } catch (e) {} }));
+      renderMine();
+    }
+    function renderMine() {
+      const list = ls.get(STORE, []);
+      $("#mine-empty").hidden = list.length > 0;
+      $("#mine-list").replaceChildren(...list.slice(0, 6).map(o => {
+        const s = cache[o.code], st = s ? s.status : "requested", good = st === "ready" || st === "collected";
+        const money = s ? [s.quote != null && s.final_amount == null ? t("quote", { a: rupee(s.quote) }) : "", s.final_amount != null ? t("final", { a: rupee(s.final_amount) }) + (s.paid ? " · " + t("paid") : "") : "",
+          s.rewards && s.rewards.order_reward > 0 ? t("earned", { r: s.rewards.order_reward }) : ""].filter(Boolean).join(" · ") : "";
+        return el("div", { class: "rounded-xl border border-[#d4af37]/25 bg-black/30 p-3" },
+          el("div", { class: "flex items-center justify-between gap-2" },
+            el("span", { class: "font-mono-tech text-xl font-bold text-white", text: "#" + o.code }),
+            el("span", { class: "rounded px-2 py-0.5 font-mono-tech text-[10px] font-semibold " + (good ? "bg-emerald-500/20 text-emerald-300" : st === "cancelled" ? "bg-red-500/20 text-red-300" : "bg-[#d4af37]/20 text-[#f3d97d]"), text: t("st_" + st) })),
+          s ? el("p", { class: "mt-1 text-xs text-zinc-300", text: [s.brand, s.model].filter(Boolean).join(" ") + (s.issues.length ? " · " + s.issues.map(i => t("is_" + i)).join(", ") : "") }) : null,
+          money ? el("p", { class: "mt-1 font-mono-tech text-[11px] text-[#f3d97d]", text: money }) : null,
+          s && s.note ? el("p", { class: "mt-1 text-[11px] text-zinc-400", text: s.note }) : null,
+          el("button", { type: "button", class: "mt-2 rounded border border-white/15 px-2 py-0.5 font-mono-tech text-[11px] text-zinc-300 hover:bg-white/10", text: t("copyLink"),
+            onclick: async () => { try { await navigator.clipboard.writeText(link(o)); toast(t("linkCopied")); } catch (e) { prompt("Copy:", link(o)); } } }));
+      }));
+      const withR = list.map(o => cache[o.code]).find(s => s && s.rewards);
+      $("#rw").hidden = !withR;
+      if (withR) { $("#rw-balance").textContent = rupee(withR.rewards.balance); $("#rw-phone").textContent = withR.rewards.phone; }
+    }
+
+    /* ---------------- language + wiring ---------------- */
+    function applyLang() {
+      document.documentElement.lang = lang;
+      $$("[data-i18n]").forEach(n => { n.textContent = t(n.dataset.i18n); });
+      $$("[data-i18n-ph]").forEach(n => { n.placeholder = t(n.dataset.i18nPh); });
+      $("#lang-btn").textContent = t("langBtn"); $("#lang-btn").setAttribute("aria-label", lang === "en" ? "മലയാളം" : "English");
+      $("#wa-link").href = "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(t("waMsg"));
+      hours(); renderDoctor(); chips(); renderMine();
+      $("#device-info").textContent = Object.entries(DEVICE).filter(([, v]) => v !== "" && v != null).map(([k, v]) => k.replace("_", " ") + ": " + v).join(" · ") || "…";
+    }
+    $("#lang-btn").addEventListener("click", () => { lang = lang === "en" ? "ml" : "en"; try { localStorage.setItem("tfix-print-lang", lang); } catch (e) {} applyLang(); });
+    $("#book-btn").addEventListener("click", book);
+    $("#doc-book").addEventListener("click", fromDoctor);
+    $("#map-link").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(SHOP.mapQuery);
+    $("#year").textContent = String(new Date().getFullYear());
+    { const me = ls.get(ME_KEY, null); if (me && me.phone) { $("#phone").value = me.phone; if (me.name) $("#name").value = me.name; } }
+    const q = new URLSearchParams(location.search), qc = (q.get("repair") || "").toUpperCase(), qt = q.get("t") || "";
+    if (/^RP-\d{3,9}$/.test(qc) && /^[a-f0-9]{32}$/.test(qt)) {
+      const list = ls.get(STORE, []); if (!list.some(o => o.code === qc)) { list.unshift({ code: qc, token: qt, at: Date.now() }); ls.set(STORE, list.slice(0, 20)); }
+      history.replaceState(null, "", location.pathname + "#mine");
+    }
+    deviceInfo().then(d => { DEVICE = d; applyLang(); });
+    applyLang(); refresh();
+    setInterval(hours, 60000);
+    setInterval(() => { if (!document.hidden && ls.get(STORE, []).length) refresh(); }, 30000);
+  })();
+  </script>
+</body>
+</html>

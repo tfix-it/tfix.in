@@ -222,6 +222,19 @@
         <div id="pricingForms"></div>
       </section>
     </div>
+    <!-- Repairs booked on repair.tfix.in (with the customer's Phone Doctor report) -->
+    <section class="panel" id="repairsPanel" style="grid-column:1 / -1;">
+      <h2 style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span>Repairs (repair.tfix.in)</span>
+        <span style="text-transform:none; letter-spacing:0; font-weight:400; font-size:12px;">
+          <label><input type="checkbox" id="repShowAll"> show finished</label>
+          <button type="button" id="repRefresh" style="margin-left:8px; font-size:12px; padding:4px 10px; border-radius:4px; border:1px solid var(--border); background:#fff; cursor:pointer;">Refresh</button>
+        </span>
+      </h2>
+      <p style="font-size:12px; color:#666; margin:0 0 10px;">Customers book online and bring the device. Set the status as you work, enter the estimate, and on handover enter the final amount, tick Paid and choose Collected — that adds their CLUTCH Rewards (₹5 per ₹100).</p>
+      <div id="repList" style="display:grid; gap:12px;"></div>
+      <div class="empty" id="repEmpty">No open repairs.</div>
+    </section>
   </main>
 </div>
 
@@ -299,6 +312,7 @@ async function showDashboard() {
   el('loginScreen').classList.add('hidden');
   el('dashboard').classList.remove('hidden');
   await Promise.all([loadJobs(), loadPrinters(), loadPricing(), loadSystemSettings()]);
+  loadRepairs();
   await loadAutoPrint(); // needs printerCache, populated by loadPrinters above
   connectWs();
 }
@@ -429,6 +443,62 @@ function renderJobRow(job) {
 function truncate(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
 // File names and customer names come from the internet (online orders): always escape.
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+// ---------- Repairs (repair.tfix.in) ----------
+const REP_STATUSES = [['requested', 'Booked (not here yet)'], ['received', 'Received'], ['repairing', 'Repairing'], ['waiting_parts', 'Waiting for parts'], ['ready', 'Ready for pickup'], ['collected', 'Collected'], ['cancelled', 'Cancelled']];
+const REP_TESTS = { display: 'Display', touch: 'Touch', multi: 'Multi-touch', speaker: 'Speaker', mic: 'Mic', cam_back: 'Back camera', cam_front: 'Front camera', charge: 'Charging port', battery: 'Battery', vibra: 'Vibration', motion: 'Motion sensors' };
+async function loadRepairs() {
+  const list = el('repList'), empty = el('repEmpty');
+  let data;
+  try {
+    const res = await fetch('/api/admin/cloud/repairs?all=' + (el('repShowAll').checked ? 1 : 0), { credentials: 'include' });
+    data = await res.json().catch(() => ({}));
+    if (!res.ok) { list.innerHTML = ''; empty.textContent = data.detail || 'Could not load repairs.'; empty.classList.remove('hidden'); return; }
+  } catch (e) { empty.textContent = 'Could not reach print.tfix.in.'; empty.classList.remove('hidden'); return; }
+  const reps = data.repairs || [];
+  empty.textContent = 'No open repairs.'; empty.classList.toggle('hidden', reps.length > 0);
+  list.innerHTML = reps.map(r => {
+    const d = r.diagnosis && r.diagnosis.tests ? r.diagnosis.tests : null;
+    const diag = d ? Object.entries(d).map(([k, v]) => '<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 7px; border-radius:99px; font-size:11px; '
+        + (v.result === 'fail' ? 'background:#F7DCDC; color:#9B1C1C;' : v.result === 'pass' ? 'background:#DCF0E1; color:#2E7D4F;' : 'background:#eee; color:#666;') + '">'
+        + esc(REP_TESTS[k] || k) + ': ' + esc(v.result) + (v.detail ? ' · ' + esc(v.detail) : '') + '</span>').join('') : '<span style="color:#999; font-size:12px;">No Phone Doctor report</span>';
+    const dev = r.diagnosis && r.diagnosis.device ? Object.entries(r.diagnosis.device).filter(([, v]) => v).map(([k, v]) => esc(k) + ': ' + esc(v)).join(' · ') : '';
+    const done = r.status === 'collected';
+    return '<div style="border:1px solid var(--border); border-radius:8px; padding:12px;" data-rep="' + r.repair_id + '">'
+      + '<div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;"><b style="font-size:15px;">#' + esc(r.code) + '</b>'
+      + '<span style="font-size:12px; color:#666;">' + esc(new Date(r.created_at).toLocaleString('en-IN')) + (r.visit_date ? ' · visit ' + esc(r.visit_date) : '') + '</span></div>'
+      + '<div style="font-size:13px; margin-top:4px;"><b>' + esc(r.name) + '</b> · ' + esc(r.phone) + ' · ' + esc(r.device_type) + ' ' + esc(r.brand) + ' ' + esc(r.model) + '</div>'
+      + '<div style="font-size:13px; margin-top:4px;">Problems: ' + esc((r.issues || []).join(', ') || '—') + (r.description ? ' — ' + esc(r.description) : '') + '</div>'
+      + '<div style="margin-top:6px;">' + diag + '</div>' + (dev ? '<div style="font-size:11px; color:#888; margin-top:2px;">' + dev + '</div>' : '')
+      + '<div class="settings-form" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); margin-top:10px;">'
+      + '<div><label>Status</label><select data-f="status" style="width:100%; padding:6px;"' + (done ? ' disabled' : '') + '>' + REP_STATUSES.map(([v, l]) => '<option value="' + v + '"' + (v === r.status ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></div>'
+      + '<div><label>Estimate ₹</label><input data-f="quote" inputmode="decimal" value="' + (r.quote ?? '') + '"' + (done ? ' disabled' : '') + '></div>'
+      + '<div><label>Final ₹</label><input data-f="final_amount" inputmode="decimal" value="' + (r.final_amount ?? '') + '"' + (done ? ' disabled' : '') + '></div>'
+      + '<div><label>Paid</label><input type="checkbox" data-f="paid"' + (r.paid ? ' checked' : '') + (done ? ' disabled' : '') + '></div>'
+      + '<div class="full"><label>Note for the customer (shown on their pass)</label><input data-f="note" maxlength="300" value="' + esc(r.note || '') + '"' + (done ? ' disabled' : '') + '></div>'
+      + '<div class="actions">' + (done ? '<span style="font-size:12px; color:var(--ok);">Collected · rewards +₹' + esc(r.reward) + '</span>' : '<button type="button" data-save="' + r.repair_id + '">Save</button>') + '</div>'
+      + '</div></div>';
+  }).join('');
+}
+el('repRefresh').addEventListener('click', loadRepairs);
+el('repShowAll').addEventListener('change', loadRepairs);
+el('repList').addEventListener('click', async e => {
+  const b = e.target.closest('[data-save]'); if (!b) return;
+  const box = b.closest('[data-rep]'), get = f => box.querySelector('[data-f="' + f + '"]');
+  const fd = new FormData();
+  fd.append('status', get('status').value); fd.append('quote', get('quote').value.trim()); fd.append('final_amount', get('final_amount').value.trim());
+  fd.append('paid', get('paid').checked ? '1' : '0'); fd.append('note', get('note').value.trim());
+  if (get('status').value === 'collected' && !confirm('Mark as collected? This adds the customer\'s CLUTCH Rewards and cannot be undone.')) return;
+  b.disabled = true;
+  try {
+    const res = await fetch('/api/admin/cloud/repairs/' + b.dataset.save, { method: 'POST', body: fd, credentials: 'include' });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { alert(d.detail || 'Could not save.'); return; }
+    if (d.status === 'collected') alert('Collected. Rewards added: ₹' + d.reward);
+    loadRepairs();
+  } finally { b.disabled = false; }
+});
+setInterval(() => { if (!el('dashboard').classList.contains('hidden') && !el('repList').contains(document.activeElement)) loadRepairs(); }, 60000);
 
 // ---------- CLUTCH Rewards: check / use at the counter ----------
 const inr = n => '₹' + (Math.round(Number(n) * 100) / 100);

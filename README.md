@@ -5,7 +5,8 @@ Two parts that work together:
 | Folder | What it is | Runs on |
 |---|---|---|
 | `print/` | **CLUTCHPRINT website** — print.tfix.in. Customer order page (HTML/JS, Tailwind) + PHP API | Hostinger (PHP 8 + MySQL) |
-| `tprint/` | **T Print shop server** — prints, prices, admin, pulls online orders | Shop PC 1 (Windows, Python/FastAPI) |
+| `repair/` | **T FIX® Repair Lab** — repair.tfix.in: Phone Doctor (browser self-check) + repair booking + repair pass. Its PHP uses `print/api/lib.php` (same database, same CLUTCH Rewards) | Hostinger (`public_html/repair/`) |
+| `tprint/` | **T Print shop server** — prints, prices, admin (incl. Repairs panel), pulls online orders | Shop PC 1 (Windows, Python/FastAPI) |
 | `tools/tailwind/` | Build step for the website CSS | Your computer (Node.js) |
 
 ## print/ — website (frontend + backend)
@@ -27,8 +28,20 @@ Two parts that work together:
 ```
 cd tools/tailwind
 npm install
-npm run build        # or: npm run watch  while editing
+npm run build        # both sites (or build:print / build:repair)
 ```
+
+## repair/ — repair.tfix.in
+
+| File | Role |
+|---|---|
+| `index.html` | Phone Doctor tests (display, touch, multi-touch, speaker, mic, cameras, charging, battery, vibration, motion), booking form, repair pass with rewards. English + Malayalam. |
+| `api/book.php` | Customer books a repair (mobile number mandatory; Phone Doctor report attached if chosen). Token `#RP-<n>`. |
+| `api/status.php` | Customer tracks a repair (needs the private link) incl. CLUTCH Rewards. |
+| `.htaccess` | Security headers; camera/mic/motion allowed on this site only (for the Phone Doctor). |
+
+Staff handle repairs in T Print admin → **Repairs** (via `shop.php?action=repairs / repair_update`).
+Marking a repair Collected (final amount + paid) adds CLUTCH Rewards: ₹5 per ₹100, shared with print.
 
 ### Deploy the website
 Upload the changed files into `public_html/print/` (Hostinger File Manager, keep the same folders),

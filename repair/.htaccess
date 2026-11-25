@@ -1,0 +1,21 @@
+Options -Indexes
+
+# Make browsers check for a new page every time (no stale copies after an update).
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html?|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(svg|png|jpe?g|woff2|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+
+# Security headers. The Phone Doctor needs the camera, microphone and motion sensors on this site only.
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(self), microphone=(self), accelerometer=(self), gyroscope=(self), geolocation=(), payment=(), usb=()"
+</IfModule>
