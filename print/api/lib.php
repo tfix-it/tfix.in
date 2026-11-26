@@ -26,6 +26,8 @@ const JOB_STATUSES = ['queued', 'printing', 'ready', 'collected', 'failed'];
 const REWARD_STEP = 100;
 const REWARD_PER_STEP = 5;
 
+const SERVICE_PAUSED = 'Online ordering is paused for a moment. Please try again in a few minutes, or call the shop.';
+
 function cfg(): array
 {
     static $c = null;
@@ -34,7 +36,17 @@ function cfg(): array
         if (!is_file($path)) {
             fail(503, 'Online ordering is not configured yet.');
         }
-        $c = require $path;
+        try {
+            $c = require $path;
+        } catch (Throwable $e) {
+            // Never log $e->getMessage(): for a typo on the password line PHP quotes the password.
+            error_log('[print.tfix.in] _private/config.php cannot be read: ' . get_class($e) . ' on line ' . $e->getLine());
+            $c = null;
+        }
+        if (!is_array($c) || empty($c['db_dsn'])) {
+            $c = null;
+            fail(503, SERVICE_PAUSED);
+        }
     }
     return $c;
 }
@@ -55,11 +67,19 @@ function db(): PDO
     static $pdo = null;
     if ($pdo === null) {
         $c = cfg();
-        $pdo = new PDO($c['db_dsn'], $c['db_user'] ?? null, $c['db_pass'] ?? null, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
+        try {
+            $pdo = new PDO($c['db_dsn'], $c['db_user'] ?? null, $c['db_pass'] ?? null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            // e.g. 1045 = wrong password in _private/config.php (changed in hPanel but not here).
+            error_log('[print.tfix.in] database connection failed: error ' . $e->getCode()
+                . ' - check db_user/db_pass in _private/config.php against hPanel > Databases');
+            $pdo = null;
+            fail(503, SERVICE_PAUSED);
+        }
         ensure_schema($pdo);
     }
     return $pdo;

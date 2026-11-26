@@ -664,3 +664,28 @@ def test_backup_needs_the_shop_key_and_copies_every_table(site, tmp_path):
     assert len(d['tables']['orders']) == 1 and len(d['tables']['order_files']) == 1
     assert {'reward_ledger', 'repairs', 'print_groups', 'push_subs'} <= set(d['tables'])
     assert d['ledger']['ok'] is True
+
+
+def _php_lib(tmp_path, config_text):
+    cfg = tmp_path / 'config.php'
+    cfg.write_text(config_text)
+    code = "require '" + str(SITE / 'api' / 'lib.php') + "'; db(); echo 'CONNECTED';"
+    return subprocess.run(['php', '-d', 'log_errors=1', '-d', f'error_log={tmp_path / "php.log"}', '-r', code],
+                          env={**os.environ, 'TPRINT_CLOUD_CONFIG': str(cfg)}, capture_output=True, text=True)
+
+
+def test_broken_config_gives_a_clear_503_and_never_logs_the_password(tmp_path):
+    # 26 Nov 2026: a typo on the db_pass line made every page a blank HTTP 500, and PHP's
+    # parse error quoted the password. Now: JSON "paused" message, and the log has no secret.
+    r = _php_lib(tmp_path, "<?php return [\n 'db_dsn' => 'sqlite::memory:',\n 'db_pass' 'Secret123abc',\n];")
+    assert 'paused' in r.stdout and 'CONNECTED' not in r.stdout
+    log = (tmp_path / 'php.log').read_text()
+    assert 'cannot be read: ParseError on line 3' in log and 'Secret123abc' not in log + r.stdout
+
+
+def test_wrong_database_password_gives_a_clear_503(tmp_path):
+    r = _php_lib(tmp_path, "<?php return ['db_dsn' => 'mysql:host=127.0.0.1;port=1;dbname=x', "
+                           "'db_user' => 'u', 'db_pass' => 'WrongPass999', 'data_dir' => '" + str(tmp_path) + "'];")
+    assert 'paused' in r.stdout and 'CONNECTED' not in r.stdout
+    log = (tmp_path / 'php.log').read_text()
+    assert 'database connection failed' in log and 'WrongPass999' not in log + r.stdout
